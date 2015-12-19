@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% import 'macros.html' as macros %}
+
+{% block content %}
+<h1>welcome</h1>
+<p><a href="{{ url_for('tables') }}">Tables</a></p>
+<p><a href="{{ url_for('ba_list') }}">Premises by billing authority</a></p>
+<p><a href="{{ url_for('scat_list') }}">Premises by scat code</a></p>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% import 'macros.html' as macros %}
+
+{% block content %}
+{% for data in output %}
+{{ macros.table(data) }}
+{% endfor %}
+{% endblock %}

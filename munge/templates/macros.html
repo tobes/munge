@@ -1,0 +1,38 @@
+{% macro table(data) %}
+<table border="1">
+  <thead>
+    {% if data.title %}
+    <caption>{{ data.title }}</caption>
+    {% endif %}
+    <tr>
+      <th>#</th>
+{% for field in data.fields %}
+  <th>
+    {{ field.name }}
+    {% if field.type %}
+      </br>
+      ({{ field.type }})
+    {% endif %}
+  </th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for row in data.data %}
+<tr>
+  <td>{{ loop.index }}</td>
+  {% for cell in row %}
+  <td>
+  {% if (loop.index - 1) in data.links %}
+  {% set link = data.links[loop.index - 1] %}
+  <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>
+  {% else %}
+  {{ cell }}
+  {% endif %}
+ </td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endmacro %}
