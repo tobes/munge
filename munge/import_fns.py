@@ -44,3 +44,10 @@ def make_date_DD_MON_YYYY(value):
 
 def make_str(value):
     return value
+
+
+def compact_pc(value):
+    if not value:
+        return None
+    else:
+        return value.replace(' ', '').upper()

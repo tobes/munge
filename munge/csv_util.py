@@ -5,7 +5,7 @@ import glob
 import re
 
 import config
-from sa_util import swap_table, run_sql, table_list, get_result_fields
+from sa_util import swap_tables, run_sql, table_list, get_result_fields
 import import_fns
 
 # FIXME add logging of imports
@@ -41,7 +41,7 @@ def insert_rows(table, fields):
     for field in fields:
         if field['type'] is None:
             continue
-        if field['missing'] is True:
+        if field['missing'] is True and field['fn'] is None:
             continue
         sql_fields.append('"%s"' % (
             field['name']
@@ -60,37 +60,52 @@ def process_header(row):
     pk = None
     for col in row:
         # null ignored fields
-        if col == '':
+        if col == '' or col[0] == '-':
             col = {'name': '', 'type': None}
             fields.append(col)
             continue
-
+        # field datatype
         if ':' in col:
             field, type_ = col.split(':')
         else:
             field = col
             type_ = 'text'
-
-        if '~' in type_:
-            type_, fn = type_.split('~')
-        else:
-            fn = None
+        # primary key
         if field[0] == '*':
             field = field[1:]
             pk = True
         else:
             pk = False
+        # index
+        if field[0] == '+':
+            field = field[1:]
+            index = True
+        else:
+            index = False
+        # field not supplied in data
         if field[0] == '@':
             field = field[1:]
             missing = True
         else:
             missing = False
+        # conversion function
+        if '~' in type_:
+            type_, fn = type_.split('~')
+            if '|' in fn:
+                fn, fn_field = fn.split('|')
+            else:
+                fn_field = None
+        else:
+            fn = None
+            fn_field = None
 
         col = {
             'name': field,
             'type': type_,
             'pk': pk,
-            'fn':fn,
+            'index': index,
+            'fn': fn,
+            'fn_field': fn_field,
             'missing': missing,
         }
         fields.append(col)
@@ -107,13 +122,29 @@ def unicode_csv_reader(filename, encoding='utf-8', dialect=csv.excel, **kw):
 def get_fns(fields):
     fns = {}
     for field in fields:
-        if field.get('missing'):
-            continue
         if field.get('fn'):
-            fns[field['name']] = getattr(import_fns, field['fn'])
+            fn_field = field.get('fn_field')
+            fns[field['name']] = (getattr(import_fns, field['fn']), fn_field)
+        elif field.get('missing'):
+            continue
         elif field['type'] in import_fns.AUTO_FNS:
-            fns[field['name']] = getattr(import_fns, import_fns.AUTO_FNS[field['type']])
+            fns[field['name']] = (getattr(import_fns, import_fns.AUTO_FNS[field['type']]), None)
     return fns
+
+
+def build_indexes(table_name, t_fields):
+    index_fields = [f['name'] for f in t_fields if f['index']]
+    sql_list = []
+    for field in index_fields:
+        sql = 'CREATE INDEX "{idx_name}" ON "{table}" ("{field}");'
+        sql = sql.format(
+            idx_name='%s_idx_%s' % (table_name, field),
+            table=table_name,
+            field=field,
+        )
+        sql_list.append(sql)
+    if sql_list:
+        run_sql('\n'.join(sql_list))
 
 
 def import_csv(reader, table_name, fields=None, verbose=False):
@@ -135,8 +166,13 @@ def import_csv(reader, table_name, fields=None, verbose=False):
         if not (has_header_row and count == 0):
             row_data = dict(zip(f, row))
             for fn in t_fns:
+                fn_info = t_fns[fn]
+                if fn_info[1]:
+                    fn_field = fn_info[1]
+                else:
+                    fn_field = fn
                 try:
-                    row_data[fn] = t_fns[fn](row_data[fn])
+                    row_data[fn] = fn_info[0](row_data[fn_field])
                 except Exception as e:
                     # FIXME log error
                     print str(e)
@@ -153,9 +189,8 @@ def import_csv(reader, table_name, fields=None, verbose=False):
                 print(count)
     if data:
         run_sql(insert_sql, data)
-    # FIXME don't always swap table
-    # eg for vao we want to swap all tables at once
-    swap_table(temp_table, table_name)
+    # Add indexes
+    build_indexes(temp_table, t_fields)
 
     if verbose:
         print('%s rows imported' % (count - 1))
@@ -169,6 +204,7 @@ def import_all(verbose=False):
             print 'importing', table_name
         reader = unicode_csv_reader(f)
         import_csv(reader, table_name, verbose=verbose)
+    swap_tables()
 
 
 def make_headers(result, table_name):

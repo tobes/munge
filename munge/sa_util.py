@@ -22,6 +22,11 @@ def run_sql(sql, *args, **kw):
     return conn.execute(sql, *args, **kw)
 
 
+def get_pk_constraint(table_name):
+    insp = reflection.Inspector.from_engine(engine)
+    return insp.get_pk_constraint(table_name)
+
+
 def get_primary_keys(table_name):
     insp = reflection.Inspector.from_engine(engine)
     return insp.get_primary_keys(table_name)
@@ -37,6 +42,43 @@ def table_list():
     return insp.get_table_names()
 
 
+def get_sequence_names():
+    sql = 'SELECT c.relname FROM pg_class c WHERE c.relkind = \'S\';'
+    results = conn.execute(sql)
+    return [row[0] for row in results]
+
+
+def swap_tables():
+    ''' SWAPS our temp tables, including renaming indexes and sequences
+    '''
+    tables = [t for t in table_list() if t.startswith('#')]
+    sql_list = []
+    sql_list.append('BEGIN;')
+    for table in tables:
+        indexes = [i['name'][1:] for i in get_indexes(table)]
+        pk = get_pk_constraint(table)
+        if pk['name']:
+            indexes.append(pk['name'][1:])
+
+        table = table[1:]
+        sql = '''
+        DROP TABLE IF EXISTS "{table}";
+        ALTER TABLE "#{table}" RENAME TO "{table}";
+        '''
+        sql_list.append(sql.format(table=table))
+        for index in indexes:
+            sql = 'ALTER INDEX "#{index}" RENAME TO "{index}";'
+            sql_list.append(sql.format(index=index))
+
+    # sequences
+    for name in [s[1:] for s in get_sequence_names() if s.startswith('#')]:
+        sql = 'ALTER SEQUENCE "#{name}" RENAME TO "{name}";'
+        sql_list.append(sql.format(name=name))
+
+    sql_list.append('COMMIT;')
+    conn.execute('\n'.join(sql_list))
+
+
 def swap_table(old_name, new_name):
     sql = '''
         BEGIN;
@@ -50,10 +92,15 @@ def swap_table(old_name, new_name):
 
 def get_result_fields(result, table):
     types = [OID_TYPE.get(col[1], col[1]) for col in result.cursor.description]
-    pk = get_primary_keys(table)
-    index = get_indexes(table)
+    pks = get_primary_keys(table)
+    indexes = get_indexes(table)
     fields = []
     for i, v in enumerate(result.keys()):
-        col = {'name': v, 'type': types[i], 'pk': v in pk}
+        col = {
+            'name': v,
+            'type': types[i],
+            'pk': v in pks,
+            'indexed': v in indexes,
+        }
         fields.append(col)
     return fields
