@@ -183,4 +183,4 @@ def import_vao_list(verbose=False):
 def import_vao_full(verbose=False):
     import_vao_list(verbose=verbose)
     import_vao_summary(verbose=verbose)
-    swap_tables()
+    swap_tables(verbose=verbose)

@@ -55,13 +55,15 @@ def clear_temp_objects():
         conn.execute(sql)
 
 
-def swap_tables():
+def swap_tables(verbose=False):
     ''' SWAPS our temp tables, including renaming indexes and sequences
     '''
     tables = [t for t in table_list() if t.startswith('#')]
     sql_list = []
     sql_list.append('BEGIN;')
     for table in tables:
+        if verbose:
+            print 'Swap table %s' % table
         indexes = [i['name'][1:] for i in get_indexes(table)]
         pk = get_pk_constraint(table)
         if pk['name']:
@@ -74,11 +76,15 @@ def swap_tables():
         '''
         sql_list.append(sql.format(table=table))
         for index in indexes:
+            if verbose:
+                print '\tSwap index %s' % index
             sql = 'ALTER INDEX "#{index}" RENAME TO "{index}";'
             sql_list.append(sql.format(index=index))
 
     # sequences
     for name in [s[1:] for s in get_sequence_names() if s.startswith('#')]:
+        if verbose:
+            print '\tSwap sequence %s' % name
         sql = 'ALTER SEQUENCE "#{name}" RENAME TO "{name}";'
         sql_list.append(sql.format(name=name))
 

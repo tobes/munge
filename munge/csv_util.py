@@ -132,10 +132,12 @@ def get_fns(fields):
     return fns
 
 
-def build_indexes(table_name, t_fields):
+def build_indexes(table_name, t_fields, verbose=False):
     index_fields = [f['name'] for f in t_fields if f.get('index')]
     sql_list = []
     for field in index_fields:
+        if verbose:
+            print 'creating index of %s' % field
         sql = 'CREATE INDEX "{idx_name}" ON "{table}" ("{field}");'
         sql = sql.format(
             idx_name='%s_idx_%s' % (table_name, field),
@@ -177,6 +179,7 @@ def import_csv(reader, table_name, fields=None, verbose=False):
                     # FIXME log error
                     print str(e)
                     print row
+                    print row_data
                     skip = True
             if not skip:
                 data.append(row_data)
@@ -193,7 +196,7 @@ def import_csv(reader, table_name, fields=None, verbose=False):
     if verbose:
         print('%s rows imported' % (count - 1))
     # Add indexes
-    build_indexes(temp_table, t_fields)
+    build_indexes(temp_table, t_fields, verbose=verbose)
 
 
 def import_all(verbose=False):
@@ -204,7 +207,7 @@ def import_all(verbose=False):
             print 'importing', table_name
         reader = unicode_csv_reader(f)
         import_csv(reader, table_name, verbose=verbose)
-    swap_tables()
+    swap_tables(verbose=verbose)
 
 
 def make_headers(result, table_name):
