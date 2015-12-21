@@ -48,6 +48,13 @@ def get_sequence_names():
     return [row[0] for row in results]
 
 
+def clear_temp_objects():
+    tables = [t for t in table_list() if t.startswith('#')]
+    for table in tables:
+        sql = 'DROP TABLE "{table}";'.format(table=table)
+        conn.execute(sql)
+
+
 def swap_tables():
     ''' SWAPS our temp tables, including renaming indexes and sequences
     '''

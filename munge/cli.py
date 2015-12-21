@@ -25,6 +25,11 @@ def vao(verbose=False):
     import_vao_full(verbose)
 
 
+def clean_db(verbose=False):
+    from sa_util import clear_temp_objects
+    clear_temp_objects()
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Command line interface for munge'
@@ -41,3 +46,5 @@ def main():
         webserver(verbose=args.v)
     elif args.command == 'vao':
         vao(verbose=args.v)
+    elif args.command == 'clean_db':
+        clean_db(verbose=args.v)
