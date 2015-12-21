@@ -16,14 +16,13 @@ def import_all(verbose=False):
 
 
 def webserver(verbose=False):
-    from app import app
+    from munge.app import app
     app.run(debug=True)
 
 
 def vao(verbose=False):
-    from vao_importers import import_vao_list, import_vao_summary
-    import_vao_summary(verbose)
-    import_vao_list(verbose)
+    from vao_importers import import_vao_full
+    import_vao_full(verbose)
 
 
 def main():
