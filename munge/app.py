@@ -2,8 +2,9 @@ import re
 
 from sqlalchemy.engine import reflection
 
-from flask import Flask, render_template, url_for, abort
+from flask import Flask, render_template, url_for, abort, request
 from flask.ext.sqlalchemy import SQLAlchemy
+from werkzeug import url_encode
 
 import sa_common
 import config
@@ -13,6 +14,16 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_STRING
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
+@app.template_global()
+def modify_query(**new_values):
+    args = request.args.copy()
+
+    for key, value in new_values.items():
+        args[key] = value
+
+    return '{}?{}'.format(request.path, url_encode(args))
 
 
 def run_sql(*args, **kw):
