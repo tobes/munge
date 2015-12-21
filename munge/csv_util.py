@@ -133,7 +133,7 @@ def get_fns(fields):
 
 
 def build_indexes(table_name, t_fields):
-    index_fields = [f['name'] for f in t_fields if f['index']]
+    index_fields = [f['name'] for f in t_fields if f.get('index')]
     sql_list = []
     for field in index_fields:
         sql = 'CREATE INDEX "{idx_name}" ON "{table}" ("{field}");'
@@ -184,16 +184,17 @@ def import_csv(reader, table_name, fields=None, verbose=False):
         count += 1
         if count % config.BATCH_SIZE == 0:
             run_sql(insert_sql, data)
+            break
             data = []
             if verbose:
                 print(count)
     if data:
         run_sql(insert_sql, data)
-    # Add indexes
-    build_indexes(temp_table, t_fields)
 
     if verbose:
         print('%s rows imported' % (count - 1))
+    # Add indexes
+    build_indexes(temp_table, t_fields)
 
 
 def import_all(verbose=False):

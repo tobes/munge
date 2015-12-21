@@ -173,6 +173,8 @@ def import_vao_summary(verbose=False):
 
 
 def import_vao_list(verbose=False):
+    if verbose:
+        print 'importing vao_list'
     f = os.path.join(config.DATA_PATH, vao_list_file)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
@@ -180,5 +182,5 @@ def import_vao_list(verbose=False):
 
 def import_vao_full(verbose=False):
     import_vao_list(verbose=verbose)
-    import_vao_summaryverbose=verbose()
+    import_vao_summary(verbose=verbose)
     swap_tables()
