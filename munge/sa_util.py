@@ -39,9 +39,11 @@ def get_sequence_names():
     return [row[0] for row in results]
 
 
-def clear_temp_objects():
+def clear_temp_objects(verbose=False):
     tables = [t for t in table_list() if t.startswith('#')]
     for table in tables:
+        if verbose:
+            print 'Dropping table %s' % table
         sql = 'DROP TABLE "{table}";'.format(table=table)
         conn.execute(sql)
 

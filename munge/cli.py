@@ -27,7 +27,10 @@ def vao(verbose=False):
 
 def clean_db(verbose=False):
     from sa_util import clear_temp_objects
-    clear_temp_objects()
+    from csv_util import import_drop_code_tables, import_drop_lookup_tables
+    import_drop_code_tables(verbose=verbose)
+    import_drop_lookup_tables(verbose=verbose)
+    clear_temp_objects(verbose=verbose)
 
 
 def main():
