@@ -1,4 +1,15 @@
+{% macro offset_paging(offset) %}
+{% if offset != '' %}
+{% if offset >= 1000 %}
+<a href="{{ modify_query(offset=offset - 1000) }}">prev</a>
+{% endif %}
+<a href="{{ modify_query(offset=offset + 1000) }}">next</a>
+{% endif %}
+{% endmacro %}
+
 {% macro table(data) %}
+{% set offset = data.offset or 0 %}
+{{ offset_paging(data.offset) }}
 <table border="1">
   <thead>
     {% if data.title %}
@@ -20,7 +31,7 @@
 <tbody>
 {% for row in data.data %}
 <tr>
-  <td>{{ loop.index }}</td>
+  <td>{{ loop.index + offset }}</td>
   {% for cell in row %}
   <td>
   {% if (loop.index - 1) in data.links %}
@@ -35,4 +46,5 @@
 {% endfor %}
 </tbody>
 </table>
+{{ offset_paging(data.offset) }}
 {% endmacro %}

@@ -42,7 +42,7 @@ def table_list(*args, **kw):
     return sa_common.table_list(db.engine, *args, **kw)
 
 
-def show_result(sql, table, data=None):
+def show_result(sql, table, data=None, offset=0):
     # We need to have a result to get the field types
     if data is None:
         data = {}
@@ -50,14 +50,17 @@ def show_result(sql, table, data=None):
     result = run_sql(sql + ' LIMIT 1', data)
     fields = sa_common.get_result_fields(db.engine, result, table)
     # Now run query
-    result = run_sql(sql, data)
-    return {'fields': fields,
-            'data': result}
+    result = run_sql(sql + (' LIMIT 1000 OFFSET %s' % offset), data)
+    return {
+        'fields': fields,
+        'data': result,
+        'offset': offset,
+    }
 
 
-def show_table(table):
+def show_table(table, offset=0):
     sql = 'SELECT * FROM "%s"' % table
-    return show_result(sql, table)
+    return show_result(sql, table, offset=offset)
 
 
 @app.route('/')
@@ -76,10 +79,11 @@ def tables():
 
 @app.route('/table/<table>')
 def table(table=None):
-    match = '[cl]\_.*'
+    offset = int(request.args.get('offset', 0))
+    match = '[cls]\_.*'
     if not re.match(match, table) or table not in table_list():
         abort(404)
-    data = show_table(table)
+    data = show_table(table, offset)
     data['title'] = 'TABLE %s' % table
 
     return render_template('table_output.html', data=data)
@@ -95,6 +99,7 @@ def ba_list():
     ]
     output = {'fields': fields,
               'data': result,
+              'offset': '',
               'links': {1: ('ba_premises_list', 'ba_code', 0)},
               }
     return render_template('table_output.html', data=output)
@@ -117,6 +122,7 @@ def ba_premises_list(ba_code):
     ]
     output = {'fields': fields,
               'data': result,
+              'offset': '',
               'links': {0: ('premises', 'uarn', 0)},
               }
     return render_template('table_output.html', data=output)
@@ -132,6 +138,7 @@ def scat_list():
     ]
     output = {'fields': fields,
               'data': result,
+              'offset': '',
               'links': {1: ('scat_premises_list', 'scat_code', 0)},
               }
     return render_template('table_output.html', data=output)
@@ -178,7 +185,8 @@ def premises(uarn):
 
     for table in tables:
         sql = 'SELECT * FROM %s WHERE uarn = :uarn' % table
-        out = show_result(sql, table, data)
+        out = show_result(sql, table, data=data)
+        out['offset'] = ''
         out['title'] = table
         output.append(out)
 
