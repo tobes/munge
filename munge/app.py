@@ -1,10 +1,34 @@
 import re
 
+from sqlalchemy.engine import reflection
+
 from flask import Flask, render_template, url_for, abort
+from flask.ext.sqlalchemy import SQLAlchemy
+
+import sa_common
+import config
+
+
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_STRING
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 
-from sa_util import run_sql, get_result_fields, table_list
+def run_sql(*args, **kw):
+    return sa_common.run_sql(db.engine, *args, **kw)
+
+
+def get_indexes(*args, **kw):
+    return sa_common.get_indexes(db.engine, *args, **kw)
+
+
+def get_primary_keys(*args, **kw):
+    return sa_common.get_primary_keys(db.engine, *args, **kw)
+
+
+def table_list(*args, **kw):
+    return sa_common.table_list(db.engine, *args, **kw)
 
 
 def show_result(sql, table, data=None):
