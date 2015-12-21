@@ -184,7 +184,6 @@ def import_csv(reader, table_name, fields=None, verbose=False):
         count += 1
         if count % config.BATCH_SIZE == 0:
             run_sql(insert_sql, data)
-            break
             data = []
             if verbose:
                 print(count)
