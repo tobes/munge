@@ -29,6 +29,8 @@ def table_list(*args, **kw):
     return sa_common.table_list(engine, *args, **kw)
 
 
+def get_result_fields(*args, **kw):
+    return sa_common.get_result_fields(engine, *args, **kw)
 
 
 def get_sequence_names():
@@ -90,19 +92,3 @@ def swap_table(old_name, new_name):
     '''
     sql = sql.format(old_name=old_name, new_name=new_name)
     conn.execute(sql)
-
-
-def get_result_fields(result, table):
-    types = [OID_TYPE.get(col[1], col[1]) for col in result.cursor.description]
-    pks = get_primary_keys(table)
-    indexes = get_indexes(table)
-    fields = []
-    for i, v in enumerate(result.keys()):
-        col = {
-            'name': v,
-            'type': types[i],
-            'pk': v in pks,
-            'indexed': v in indexes,
-        }
-        fields.append(col)
-    return fields

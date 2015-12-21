@@ -37,7 +37,7 @@ def show_result(sql, table, data=None):
         data = {}
     print sql
     result = run_sql(sql + ' LIMIT 1', data)
-    fields = get_result_fields(result, table)
+    fields = sa_common.get_result_fields(db.engine, result, table)
     # Now run query
     result = run_sql(sql, data)
     return {'fields': fields,
