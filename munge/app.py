@@ -70,7 +70,7 @@ def home():
 
 @app.route('/table/')
 def tables():
-    match = '[cl]\_.*'
+    match = '[cls]\_.*'
     out = []
     for table in sorted(table_list()):
         if re.match(match, table):
@@ -161,6 +161,7 @@ def scat_premises_list(scat_code):
     ]
     output = {'fields': fields,
               'data': result,
+              'offset': '',
               'links': {0: ('premises', 'uarn', 0)},
               }
     return render_template('table_output.html', data=output)

@@ -41,7 +41,7 @@ def insert_rows(table, fields):
     for field in fields:
         if field['type'] is None:
             continue
-        if field['missing'] is True and field['fn'] is None:
+        if field.get('missing') is True and field.get('fn') is None:
             continue
         sql_fields.append('"%s"' % (
             field['name']
