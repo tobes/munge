@@ -167,6 +167,100 @@ def scat_premises_list(scat_code):
     return render_template('table_output.html', data=output)
 
 
+@app.route('/ba_areas/')
+def ba_areas_list():
+    sql = 'SELECT code, "desc" FROM c_ba ORDER BY "desc"'
+    result = run_sql(sql)
+    fields = [
+        {'name': 'code'},
+        {'name': 'desc'},
+    ]
+    output = {'fields': fields,
+              'data': result,
+              'offset': '',
+              'links': {1: ('ba_areas', 'ba_code', 0)},
+              }
+    return render_template('table_output.html', data=output)
+
+
+@app.route('/ba_areas/<ba_code>')
+def ba_areas(ba_code):
+    data = {'ba_code': ba_code}
+    sql = '''
+    SELECT
+    s.desc,
+    count,
+    total_m2,
+    total_value,
+    total_area_price
+    FROM s_vao_base_areas t
+    LEFT JOIN c_scat s ON s.code = t.scat_code
+    WHERE ba_code = :ba_code
+    ORDER BY s.desc
+    '''
+    result = run_sql(sql, data)
+    fields = [
+        {'name': 'scat code'},
+        {'name': 'number of premises'},
+        {'name': 'total m2'},
+        {'name': 'total_value'},
+        {'name': 'total_area_price'},
+    ]
+    output = {'fields': fields,
+              'data': result,
+              'offset': '',
+              'links': {},
+              }
+    return render_template('table_output.html', data=output)
+
+
+@app.route('/scat_areas/')
+def scat_areas_list():
+    sql = 'SELECT code, "desc" FROM c_scat ORDER BY "desc"'
+    result = run_sql(sql)
+    fields = [
+        {'name': 'code'},
+        {'name': 'desc'},
+    ]
+    output = {'fields': fields,
+              'data': result,
+              'offset': '',
+              'links': {1: ('scat_areas', 'scat_code', 0)},
+              }
+    return render_template('table_output.html', data=output)
+
+
+@app.route('/scat_areas/<scat_code>')
+def scat_areas(scat_code):
+    data = {'scat_code': scat_code}
+    sql = '''
+    SELECT
+    s.desc,
+    count,
+    total_m2,
+    total_value,
+    total_area_price
+    FROM s_vao_base_areas t
+    LEFT JOIN c_ba s ON s.code = t.ba_code
+    WHERE scat_code = :scat_code
+    ORDER BY s.desc
+    '''
+    result = run_sql(sql, data)
+    fields = [
+        {'name': 'billing authority'},
+        {'name': 'number of premises'},
+        {'name': 'total m2'},
+        {'name': 'total_value'},
+        {'name': 'total_area_price'},
+    ]
+    output = {'fields': fields,
+              'data': result,
+              'offset': '',
+              'links': {},
+              }
+    return render_template('table_output.html', data=output)
+
+
 
 @app.route('/premises/<uarn>')
 def premises(uarn):
