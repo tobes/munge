@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from sqlalchemy.engine import reflection
 
+import sa_common
 import config
 
 
@@ -8,38 +9,26 @@ engine = sa.create_engine(config.CONNECTION_STRING, echo=False)
 conn = engine.connect()
 
 
-OID_TYPE = {
-    20: 'bigint',
-    21: 'smallint',
-    25: 'text',
-    16: 'boolean',
-    701: 'double precision',
-}
+def run_sql(*args, **kw):
+    return sa_common.run_sql(engine, *args, **kw)
 
 
-def run_sql(sql, *args, **kw):
-    sql = sa.sql.text(sql)
-    return conn.execute(sql, *args, **kw)
+def get_indexes(*args, **kw):
+    return sa_common.get_indexes(engine, *args, **kw)
 
 
-def get_pk_constraint(table_name):
-    insp = reflection.Inspector.from_engine(engine)
-    return insp.get_pk_constraint(table_name)
+def get_primary_keys(*args, **kw):
+    return sa_common.get_primary_keys(engine, *args, **kw)
 
 
-def get_primary_keys(table_name):
-    insp = reflection.Inspector.from_engine(engine)
-    return insp.get_primary_keys(table_name)
+def get_pk_constraint(*args, **kw):
+    return sa_common.get_pk_constraint(engine, *args, **kw)
 
 
-def get_indexes(table_name):
-    insp = reflection.Inspector.from_engine(engine)
-    return insp.get_indexes(table_name)
+def table_list(*args, **kw):
+    return sa_common.table_list(engine, *args, **kw)
 
 
-def table_list():
-    insp = reflection.Inspector.from_engine(engine)
-    return insp.get_table_names()
 
 
 def get_sequence_names():
