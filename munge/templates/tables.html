@@ -3,6 +3,7 @@
 {% import 'macros.html' as macros %}
 
 {% block content %}
+<h1>Tables</h1>
 {% for table in data %}
 <p><a href="{{ url_for('table', table=table) }}">{{ table }}</a></p>
 {% endfor %}
