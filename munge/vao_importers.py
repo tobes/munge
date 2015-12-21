@@ -2,18 +2,20 @@ import os.path
 
 import config
 from csv_util import unicode_csv_reader, import_csv
+from sa_util import swap_tables
+
 
 vao_list_file = 'vao/LIST_2010_MERGED.dta.30Sep2015'
 
 vao_list_fields = [
     '*@id:bigserial',
     'inc_entry_no:bigint',
-    'ba_code',
+    '+ba_code',
     'comm_code',
     'ba_ref',
     'prm_desc_code',
     'prm_desc',
-    'uarn:bigint',
+    '+uarn:bigint',
     'fp_id',
     'firm_name',
     'add_no',
@@ -22,6 +24,7 @@ vao_list_fields = [
     'post_district',
     'county',
     'pc',
+    '+@pcc:text~compact_pc|pc',
     'effective_date:date~make_date_DD_MON_YYYY',
     'composite',
     'rateable_value:double precision',
@@ -32,49 +35,50 @@ vao_list_fields = [
     'sub_street_level_3',
     'sub_street_level_2',
     'sub_street_level_1',
-    '',
+    '-extra_column_in_data',
 ]
 
 vao_file = 'vao/SMV_2010_MERGED.dta.30Sep2015'
 
 vao_base_fields = [
     '*@id:bigserial',
-    "",
-    "ass_ref",
-    "uarn:bigint",
-    "ba_code",
-    "firm_name",
-    "add_no",
-    "add_3",
-    "add_2",
-    "add_1",
-    "street",
-    "post_dist",
-    "town",
-    "county",
-    "pc",
-    "scheme_ref",
-    "desc",
-    "total_area:double precision",
-    "subtotal",
-    "total_value:double precision",
-    "adopted_rv",
-    "list_year:int",
-    "ba",
-    "ba_ref",
-    "vo_ref",
-    "from_date:date~make_date_DD_MON_YYYY",
-    "to_date:date~make_date_DD_MON_YYYY",
-    "scat_code:smallint",
-    "measure_unit",
-    "unadjusted_price:double precision",
+    '-record_type',
+    'ass_ref',
+    '+uarn:bigint',
+    'ba_code',
+    'firm_name',
+    'add_no',
+    'add_3',
+    'add_2',
+    'add_1',
+    'street',
+    'post_dist',
+    'town',
+    'county',
+    'pc',
+    '+@pcc:text~compact_pc|pc',
+    'scheme_ref',
+    'desc',
+    'total_area:double precision',
+    'subtotal',
+    'total_value:double precision',
+    'adopted_rv',
+    'list_year:int',
+    'ba',
+    'ba_ref',
+    'vo_ref',
+    'from_date:date~make_date_DD_MON_YYYY',
+    'to_date:date~make_date_DD_MON_YYYY',
+    'scat_code:smallint',
+    'measure_unit',
+    'unadjusted_price:double precision',
 ]
 
 
 vao_base_02_fields = [
     '*@id:bigserial',
-    "uarn:bigint",
-    '',
+    '+uarn:bigint',
+    '-record_type',
     'line:smallint',
     'floor',
     'description',
@@ -85,8 +89,8 @@ vao_base_02_fields = [
 
 vao_base_03_fields = [
     '*@id:bigserial',
-    "uarn:bigint",
-    '',
+    '+uarn:bigint',
+    '-record_type',
     'description',
     'oa_size:double precision',
     'oa_price:double precision',
@@ -97,8 +101,8 @@ vao_base_03_fields = [
 
 vao_base_04_fields = [
     '*@id:bigserial',
-    "uarn:bigint",
-    '',
+    '+uarn:bigint',
+    '-record_type',
     'plant_value',
 ]
 
@@ -106,8 +110,8 @@ vao_base_04_fields = [
 
 vao_base_05_fields = [
     '*@id:bigserial',
-    "uarn:bigint",
-    '',
+    '+uarn:bigint',
+    '-record_type',
     'spaces:double precision',
     'spaces_value:double precision',
     'area:double precision',
@@ -119,8 +123,8 @@ vao_base_05_fields = [
 
 vao_base_06_fields = [
     '*@id:bigserial',
-    "uarn:bigint",
-    '',
+    '+uarn:bigint',
+    '-record_type',
     'adj_desc',
     'adj_percent',
 
@@ -129,8 +133,8 @@ vao_base_06_fields = [
 
 vao_base_07_fields = [
     '*@id:bigserial',
-    "uarn:bigint",
-    '',
+    '+uarn:bigint',
+    '-record_type',
     'total_before_adj:double precision',
     'total_adj:double precision',
 ]
@@ -177,3 +181,4 @@ def import_vao_list(verbose=False):
 def import_vao_full(verbose=False):
     import_vao_list(verbose=verbose)
     import_vao_summaryverbose=verbose()
+    swap_tables()
