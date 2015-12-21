@@ -21,6 +21,11 @@ def webserver(verbose=False):
 
 
 def vao(verbose=False):
+    from vao_importers import summary
+    summary(verbose)
+
+
+def vao_full(verbose=False):
     from vao_importers import import_vao_full
     import_vao_full(verbose)
 
@@ -49,5 +54,7 @@ def main():
         webserver(verbose=args.v)
     elif args.command == 'vao':
         vao(verbose=args.v)
+    elif args.command == 'vao_full':
+        vao_full(verbose=args.v)
     elif args.command == 'clean_db':
         clean_db(verbose=args.v)

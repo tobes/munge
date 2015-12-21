@@ -1,8 +1,8 @@
 import os.path
 
 import config
-from csv_util import unicode_csv_reader, import_csv
-from sa_util import swap_tables
+from csv_util import unicode_csv_reader, import_csv, create_table, insert_rows, build_indexes
+from sa_util import swap_tables, run_sql, get_result_fields
 
 
 vao_list_file = 'vao/LIST_2010_MERGED.dta.30Sep2015'
@@ -180,7 +180,49 @@ def import_vao_list(verbose=False):
     import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
 
 
+def summary(verbose=False):
+    table = 's_vao_base_areas'
+    sql = '''
+    SELECT ba_code, scat_code, count(*),
+    sum(total_area) as total_m2,
+    sum(total_value) as total_value,
+    sum(total_area * unadjusted_price) as total_area_price,
+    (sum(total_area * unadjusted_price) - sum(total_value)) as diff
+    FROM vao_base
+    GROUP BY ba_code, scat_code;
+    '''
+    if verbose:
+        print 'creating summary table %s' % table
+    result = run_sql(sql)
+    first = True
+    count = 0
+    data = []
+    for row in result:
+        if first:
+            fields = get_result_fields(result)
+            create_table(table, fields)
+            f = [field['name'] for field in fields if not field.get('missing')]
+            insert_sql = insert_rows(table, fields)
+            first = False
+        data.append(dict(zip(f, row)))
+        count += 1
+        if count % config.BATCH_SIZE == 0:
+            run_sql(insert_sql, data)
+            data = []
+            if verbose:
+                print(count)
+    if data:
+        run_sql(insert_sql, data)
+
+    if verbose:
+        print('%s rows imported' % (count))
+    # Add indexes
+    build_indexes(table, fields, verbose=verbose)
+
+
+
 def import_vao_full(verbose=False):
     import_vao_list(verbose=verbose)
     import_vao_summary(verbose=verbose)
+    #summary(verbose=verbose)
     swap_tables(verbose=verbose)

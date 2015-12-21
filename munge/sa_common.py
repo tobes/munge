@@ -35,10 +35,14 @@ def get_indexes(engine, table_name):
     return insp.get_indexes(table_name)
 
 
-def get_result_fields(engine, result, table):
+def get_result_fields(engine, result, table=None):
     types = [OID_TYPE.get(col[1], col[1]) for col in result.cursor.description]
-    pks = get_primary_keys(engine, table)
-    indexes = get_indexes(engine, table)
+    if table:
+        pks = get_primary_keys(engine, table)
+        indexes = get_indexes(engine, table)
+    else:
+        pks = []
+        indexes = []
     fields = []
     for i, v in enumerate(result.keys()):
         col = {
