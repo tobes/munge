@@ -42,11 +42,18 @@ def table_list(*args, **kw):
     return sa_common.table_list(db.engine, *args, **kw)
 
 
+def auto_links(fields):
+    links = {}
+    for i, field in enumerate(fields):
+        if field.get('name') == 'uarn':
+            links[i] = ('premises', 'uarn', i)
+    return links
+
+
 def show_result(sql, table, data=None, offset=0):
     # We need to have a result to get the field types
     if data is None:
         data = {}
-    print sql
     result = run_sql(sql + ' LIMIT 1', data)
     fields = sa_common.get_result_fields(db.engine, result, table)
     # Now run query
@@ -55,6 +62,7 @@ def show_result(sql, table, data=None, offset=0):
         'fields': fields,
         'data': result,
         'offset': offset,
+        'links': auto_links(fields),
     }
 
 
