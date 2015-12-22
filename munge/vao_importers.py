@@ -174,6 +174,14 @@ summary_data = {
         FROM vao_base
         GROUP BY ba_code, scat_code;
     ''',
+
+    's_vao_base_missing_list':'''
+        SELECT
+        b.uarn
+        FROM vao_list l
+        RIGHT OUTER JOIN vao_base b ON l.uarn = b.uarn
+        WHERE l.uarn is null;
+    ''',
 }
 
 
