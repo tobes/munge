@@ -34,6 +34,9 @@
   <td>{{ loop.index + offset }}</td>
   {% for cell in row %}
   <td>
+  {% if (loop.index - 1) in data.functions %}
+    {% set cell = data.functions[loop.index - 1](cell) %}
+  {% endif %}
   {% if (loop.index - 1) in data.links %}
   {% set link = data.links[loop.index - 1] %}
   <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>

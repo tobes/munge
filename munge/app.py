@@ -105,25 +105,35 @@ def ba_list():
     return render_template('table_output.html', data=output)
 
 
+def add_yes(arg):
+    if arg:
+        return 'YES'
+    return ''
+
+
 @app.route('/ba/<ba_code>')
 def ba_premises_list(ba_code):
     data = {'ba_code': ba_code}
     sql = '''
-    SELECT uarn, s.desc
+    SELECT v.uarn, b.uarn, s.desc
     FROM vao_list v
+    LEFT OUTER JOIN vao_base b
+    ON b.uarn = v.uarn
     LEFT JOIN c_scat s ON s.code = v.scat_code
-    WHERE ba_code = :ba_code
+    WHERE v.ba_code = :ba_code
     ORDER BY s.desc
     '''
     result = run_sql(sql, data)
     fields = [
         {'name': 'uarn'},
+        {'name': 'summary'},
         {'name': 'scat code'},
     ]
     output = {'fields': fields,
               'data': result,
               'offset': '',
               'links': {0: ('premises', 'uarn', 0)},
+              'functions': {1: add_yes},
               }
     return render_template('table_output.html', data=output)
 
@@ -148,21 +158,25 @@ def scat_list():
 def scat_premises_list(scat_code):
     data = {'scat_code': scat_code}
     sql = '''
-    SELECT uarn, b.desc
+    SELECT v.uarn, b.uarn, c.desc
     FROM vao_list v
-    LEFT JOIN c_ba b ON b.code = v.ba_code
-    WHERE scat_code = :scat_code
-    ORDER BY b.desc
+    LEFT OUTER JOIN vao_base b
+    ON b.uarn = v.uarn
+    LEFT JOIN c_ba c ON c.code = v.ba_code
+    WHERE v.scat_code = :scat_code
+    ORDER BY c.desc
     '''
     result = run_sql(sql, data)
     fields = [
         {'name': 'uarn'},
+        {'name': 'summary'},
         {'name': 'billing authouity'},
     ]
     output = {'fields': fields,
               'data': result,
               'offset': '',
               'links': {0: ('premises', 'uarn', 0)},
+              'functions': {1: add_yes},
               }
     return render_template('table_output.html', data=output)
 
