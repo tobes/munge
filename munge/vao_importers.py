@@ -150,6 +150,33 @@ vao_types = [
 ]
 
 
+summary_data = {
+    's_vao_list_base_summary': '''
+         SELECT
+         count(l.uarn) as list_entries,
+         count(b.uarn) as base_entries,
+         count(l.uarn) - count(b.uarn) as difference,
+         c.desc as scat_desc,
+         l.scat_code as scat_code
+         FROM vao_list l
+         LEFT OUTER JOIN vao_base b ON l.uarn = b.uarn
+         LEFT OUTER JOIN c_scat c ON c.code = l.scat_code
+         GROUP BY c.desc, l.scat_code
+         ORDER BY c.desc;
+    ''',
+
+    's_vao_base_areas': '''
+        SELECT ba_code, scat_code, count(*),
+        sum(total_area) as total_m2,
+        sum(total_value) as total_value,
+        sum(total_area * unadjusted_price) as total_area_price,
+        (sum(total_area * unadjusted_price) - sum(total_value)) as diff
+        FROM vao_base
+        GROUP BY ba_code, scat_code;
+    ''',
+}
+
+
 def vao_reader(filename, data_type):
     f = os.path.join(config.DATA_PATH, filename)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
@@ -180,17 +207,7 @@ def import_vao_list(verbose=False):
     import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
 
 
-def summary(verbose=False):
-    table = 's_vao_base_areas'
-    sql = '''
-    SELECT ba_code, scat_code, count(*),
-    sum(total_area) as total_m2,
-    sum(total_value) as total_value,
-    sum(total_area * unadjusted_price) as total_area_price,
-    (sum(total_area * unadjusted_price) - sum(total_value)) as diff
-    FROM vao_base
-    GROUP BY ba_code, scat_code;
-    '''
+def summary(table, sql, verbose=False):
     if verbose:
         print 'creating summary table %s' % table
     result = run_sql(sql)
@@ -220,9 +237,14 @@ def summary(verbose=False):
     build_indexes(table, fields, verbose=verbose)
 
 
+def build_summaries(verbose=False):
+    for table in summary_data:
+        summary('#' + table, summary_data[table], verbose=verbose)
+    swap_tables(verbose=verbose)
+
 
 def import_vao_full(verbose=False):
     import_vao_list(verbose=verbose)
     import_vao_summary(verbose=verbose)
-    #summary(verbose=verbose)
+    #build_summaries(verbose=verbose)
     swap_tables(verbose=verbose)

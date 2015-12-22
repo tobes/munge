@@ -21,8 +21,8 @@ def webserver(verbose=False):
 
 
 def vao(verbose=False):
-    from vao_importers import summary
-    summary(verbose)
+    from vao_importers import build_summaries
+    build_summaries(verbose)
 
 
 def vao_full(verbose=False):
