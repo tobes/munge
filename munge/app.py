@@ -119,12 +119,14 @@ def show_result(sql, table, data=None, offset=0):
     fields = sa_common.get_result_fields(db.engine, result, table)
     # Now run query
     result = run_sql(sql + (' LIMIT 1000 OFFSET %s' % offset), data)
-    return {
+    output = {
         'fields': fields,
         'data': result,
         'offset': offset,
-        'links': auto_links(fields),
     }
+    if not 'raw' in request.args:
+        output['links'] = auto_links(fields)
+    return output
 
 
 def show_table(table, offset=0):
