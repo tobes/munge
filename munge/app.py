@@ -194,19 +194,6 @@ def ba_premises_list(ba_code):
     output['functions'][1] = (add_yes,)
     output['fields'][1]['name'] = 'summary'
     return render_template('table_output.html', data=output)
-    result = run_sql(sql, data)
-    fields = [
-        {'name': 'uarn'},
-        {'name': 'summary'},
-        {'name': 'scat code'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {0: ('premises', 'uarn', 0)},
-              'functions': {1: (add_yes,)},
-              }
-    return render_template('table_output.html', data=output)
 
 
 @app.route('/scat/')
