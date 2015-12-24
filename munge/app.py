@@ -209,7 +209,7 @@ def scat_list():
 def scat_premises_list(scat_code):
     data = {'scat_code': scat_code}
     sql = '''
-    SELECT v.uarn, b.uarn, c.desc
+    SELECT v.uarn, b.uarn, c.code as ba_code
     FROM vao_list v
     LEFT OUTER JOIN vao_base b
     ON b.uarn = v.uarn
@@ -238,7 +238,7 @@ def ba_areas(ba_code):
     data = {'ba_code': ba_code}
     sql = '''
     SELECT
-    s.desc,
+    s.code as scat_code,
     count,
     total_m2,
     total_value,
