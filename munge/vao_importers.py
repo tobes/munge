@@ -215,7 +215,7 @@ def import_vao_list(verbose=False):
     import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
 
 
-def summary(table, sql, verbose=False):
+def summary(table, sql, verbose=False, limit=None):
     if verbose:
         print 'creating summary table %s' % table
     result = run_sql(sql)
@@ -236,6 +236,8 @@ def summary(table, sql, verbose=False):
             data = []
             if verbose:
                 print(count)
+        if limit and count == limit:
+            break
     if data:
         run_sql(insert_sql, data)
 
