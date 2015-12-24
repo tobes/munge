@@ -177,7 +177,7 @@ summary_data = {
 
     's_vao_base_missing_list':'''
         SELECT
-        b.uarn, b.scat_code
+        b.uarn, b.scat_code, b.ba_code
         FROM vao_list l
         RIGHT OUTER JOIN vao_base b ON l.uarn = b.uarn
         WHERE l.uarn is null;
