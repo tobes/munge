@@ -1,6 +1,7 @@
 <!doctype html>
 
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
 
@@ -11,11 +12,71 @@
   <!--[if lt IE 9]>
   <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    table,
+    th,
+    td {
+      border: 1px solid #CCC;
+      margin: 0;
+      padding: 0 5px;
+    }
+    table {
+      margin: 10px 0;
+    }
+    th {
+      background-color: #CCC;
+      border: 1px solid #999;
+    }
+    table.list th {
+      text-align: right;
+    }
+    tr:nth-child(even) {
+      background-color: #F6F6FF;
+    }
+    td.numeric {
+      text-align: right;
+    }
+    .code {
+      font-weight: bold;
+      padding-right: 10px;
+    }
+    .code_desc {
+      font-size: 90%;
+      color: grey;
+    }
+    .code_unknown {
+      font-size: 90%;
+      color: darkred;
+    }
+    .code_missing {
+      color: darkred;
+      font-weight: bold;
+    }
+    .field_type {
+      color: grey;
+      font-size: 80%;
+    }
+    caption {
+      font-size: 120%;
+      text-align: left;
+    }
+    table.list th.table_title, table th.table_title {
+      text-align: center;
+      background-color: #666;
+      color: #CCC;
+      padding: 5px;
+    }
+  </style>
 </head>
 
 <body>
-<p><a href="{{ url_for('home') }}">Pikhaya Home</a></p>
-{% block content %}
-{% endblock %}
+  <p><a href="{{ url_for('home') }}">Pikhaya Home</a>
+  </p>
+  {% block content %} {% endblock %}
 </body>
+
 </html>
