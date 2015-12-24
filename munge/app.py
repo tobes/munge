@@ -1,8 +1,9 @@
 import re
+from numbers import Number
 
 from sqlalchemy.engine import reflection
 
-from flask import Flask, render_template, url_for, abort, request
+from flask import Flask, render_template, url_for, abort, request, escape, Markup
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import url_encode
 
@@ -16,6 +17,35 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
+def html_format(html, *args, **kw):
+    # escape any values
+    args = [escape(arg) for arg in args]
+    kw = {k: escape(v) for k, v in kw.items()}
+    return Markup(unicode(html).format(*args, **kw))
+
+
+def make_html_span(name, cls):
+    return '<span class="{cls}">{{{name}}}</span>'.format(name=name, cls=cls)
+
+
+def code_desc(arg, code_type):
+    codes = codes_data.get(code_type)
+    if not codes:
+        return arg
+    if arg:
+        desc = codes.get(arg)
+        html = make_html_span('code', 'code') + ' '
+        if desc:
+            html += make_html_span('desc', 'code_desc')
+        else:
+            html += make_html_span('desc', 'code_unknown')
+            desc = 'UNKNOWN'
+        return html_format(html, code=arg, desc=desc)
+
+    html = make_html_span('code', 'code_missing')
+    return html_format(html, code='MISSING')
+
+
 @app.template_global()
 def modify_query(**new_values):
     args = request.args.copy()
@@ -24,6 +54,20 @@ def modify_query(**new_values):
         args[key] = value
 
     return '{}?{}'.format(request.path, url_encode(args))
+
+
+@app.template_global()
+def cell_function(info, value):
+    if len(info) == 1:
+        return info[0](value)
+    return info[0](value, *info[1:])
+
+
+@app.template_global()
+def make_td_class(arg):
+    if isinstance(arg, Number):
+        return Markup(' class="numeric"')
+    return ''
 
 
 def run_sql(*args, **kw):
@@ -40,6 +84,17 @@ def get_primary_keys(*args, **kw):
 
 def table_list(*args, **kw):
     return sa_common.table_list(db.engine, *args, **kw)
+
+
+codes_data = {}
+for table in table_list():
+    if table.startswith('c_'):
+        codes = {}
+        sql = 'SELECT code, "desc" FROM "{table}"'.format(table=table)
+        result = run_sql(sql)
+        for row in result:
+            codes[row[0]] = row[1]
+        codes_data[table[2:]] = codes
 
 
 def auto_links(fields):
