@@ -149,15 +149,16 @@ def build_indexes(table_name, t_fields, verbose=False):
         run_sql('\n'.join(sql_list))
 
 
-def import_csv(reader, table_name, fields=None, verbose=False):
+def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
     temp_table = u'#' + table_name
     count = 0
     t_fields = []
     data = []
     has_header_row = fields is None
+    first = True
+    skip = False
     for row in reader:
-        skip = False
-        if count == 0:
+        if first:
             if fields is None:
                 fields = row
             t_fields = process_header(fields)
@@ -165,7 +166,7 @@ def import_csv(reader, table_name, fields=None, verbose=False):
             create_table(temp_table, t_fields)
             f = [field['name'] for field in t_fields if not field.get('missing')]
             insert_sql = insert_rows(temp_table, t_fields)
-        if not (has_header_row and count == 0):
+        if not (has_header_row and first):
             row_data = dict(zip(f, row))
             for fn in t_fns:
                 fn_info = t_fns[fn]
@@ -182,14 +183,16 @@ def import_csv(reader, table_name, fields=None, verbose=False):
                     print row_data
                     skip = True
             if not skip:
+                count += 1
                 data.append(row_data)
-        # FIXME only count imported rows
-        count += 1
-        if count % config.BATCH_SIZE == 0:
+        if count % config.BATCH_SIZE == 0 and count:
             run_sql(insert_sql, data)
             data = []
             if verbose:
                 print(count)
+        if limit and count == limit:
+            break
+        first = False
     if data:
         run_sql(insert_sql, data)
 
