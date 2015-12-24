@@ -10,12 +10,14 @@
 {% macro table(data) %}
 {% set offset = data.offset or 0 %}
 {{ offset_paging(data.offset) }}
-<table border="1">
+<table>
 {% for row in data.data %}
 {% if loop.index == 1 %}
   <thead>
     {% if data.title %}
-    <caption>{{ data.title }}</caption>
+    <tr>
+      <th class="table_title" colspan="{{ data.fields|length + 1 }}">{{ data.title }}</th>
+    </tr>
     {% endif %}
     <tr>
       <th>#</th>
@@ -24,7 +26,7 @@
     {{ field.name }}
     {% if field.type %}
       </br>
-      ({{ field.type }})
+      <span class="field_type">{{ field.type }}</span>
     {% endif %}
   </th>
 {% endfor %}
@@ -35,10 +37,10 @@
 <tr>
   <td>{{ loop.index + offset }}</td>
   {% for cell in row %}
-  <td>
   {% if (loop.index - 1) in data.functions %}
-    {% set cell = data.functions[loop.index - 1](cell) %}
+    {% set cell = cell_function(data.functions[loop.index - 1], cell) %}
   {% endif %}
+  <td{{ make_td_class(cell) }}>
   {% if (loop.index - 1) in data.links %}
   {% set link = data.links[loop.index - 1] %}
   <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>
@@ -52,4 +54,45 @@
 </tbody>
 </table>
 {{ offset_paging(data.offset) }}
+{% endmacro %}
+
+
+{% macro table_list(data) %}
+<table class="list">
+{% for row in data.data %}
+{% if loop.index == 1 %}
+  <thead>
+    {% if data.title %}
+    <tr>
+      <th class="table_title" colspan="{{ data.fields|length + 1 }}">{{ data.title }}</th>
+    </tr>
+    {% endif %}
+    </thead>
+    <tbody>
+{% for cell in row %}
+{% set field = data.fields[loop.index - 1] %}
+<tr>
+  <th>
+    {% if field.type %}
+    <span class="field_type">{{ field.type }}</span>
+    {% endif %}
+    {{ field.name }}
+  </th>
+  <td>
+  {% if (loop.index - 1) in data.functions %}
+    {% set cell = cell_function(data.functions[loop.index - 1], cell) %}
+  {% endif %}
+  {% if (loop.index - 1) in data.links %}
+  {% set link = data.links[loop.index - 1] %}
+  <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>
+  {% else %}
+  {{ cell }}
+  {% endif %}
+ </td>
+  </tr>
+{% endfor %}
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
 {% endmacro %}
