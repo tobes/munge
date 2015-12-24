@@ -24,6 +24,12 @@ def html_format(html, *args, **kw):
     return Markup(unicode(html).format(*args, **kw))
 
 
+def add_yes(arg):
+    if arg:
+        return 'YES'
+    return ''
+
+
 def make_html_span(name, cls):
     return '<span class="{cls}">{{{name}}}</span>'.format(name=name, cls=cls)
 
@@ -166,12 +172,6 @@ def ba_list():
               'links': {1: ('ba_premises_list', 'ba_code', 0)},
               }
     return render_template('table_output.html', data=output)
-
-
-def add_yes(arg):
-    if arg:
-        return 'YES'
-    return ''
 
 
 @app.route('/ba/<ba_code>')
