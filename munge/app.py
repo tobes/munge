@@ -111,6 +111,14 @@ def auto_links(fields):
     return links
 
 
+def auto_functions(fields):
+    functions = {}
+    for i, field in enumerate(fields):
+        if field.get('name').endswith('_code'):
+            functions[i] = (code_desc, field.get('name')[:-5])
+    return functions
+
+
 def show_result(sql, table, data=None, offset=0):
     # We need to have a result to get the field types
     if data is None:
@@ -126,6 +134,7 @@ def show_result(sql, table, data=None, offset=0):
     }
     if not 'raw' in request.args:
         output['links'] = auto_links(fields)
+        output['functions'] = auto_functions(fields)
     return output
 
 
