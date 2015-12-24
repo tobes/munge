@@ -139,9 +139,9 @@ def show_result(sql, table=None, data=None):
     return output
 
 
-def show_table(table, offset=0):
+def show_table(table):
     sql = 'SELECT * FROM "%s"' % table
-    return show_result(sql, table, offset=offset)
+    return show_result(sql, table)
 
 
 @app.route('/')
@@ -163,7 +163,7 @@ def table(table=None):
     match = '[cls]\_.*'
     if not re.match(match, table) or table not in table_list():
         abort(404)
-    data = show_table(table, offset)
+    data = show_table(table)
     data['title'] = table
 
     return render_template('table_output.html', data=data)
