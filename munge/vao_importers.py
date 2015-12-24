@@ -256,5 +256,5 @@ def build_summaries(verbose=False):
 def import_vao_full(verbose=False):
     import_vao_list(verbose=verbose)
     import_vao_summary(verbose=verbose)
-    #build_summaries(verbose=verbose)
+    build_summaries(verbose=verbose)
     swap_tables(verbose=verbose)
