@@ -164,7 +164,7 @@ def table(table=None):
     if not re.match(match, table) or table not in table_list():
         abort(404)
     data = show_table(table, offset)
-    data['title'] = 'TABLE %s' % table
+    data['title'] = table
 
     return render_template('table_output.html', data=data)
 
