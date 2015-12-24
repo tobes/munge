@@ -207,7 +207,7 @@ def ba_premises_list(ba_code):
               'data': result,
               'offset': '',
               'links': {0: ('premises', 'uarn', 0)},
-              'functions': {1: add_yes},
+              'functions': {1: (add_yes,)},
               }
     return render_template('table_output.html', data=output)
 
@@ -250,7 +250,7 @@ def scat_premises_list(scat_code):
               'data': result,
               'offset': '',
               'links': {0: ('premises', 'uarn', 0)},
-              'functions': {1: add_yes},
+              'functions': {1: (add_yes,)},
               }
     return render_template('table_output.html', data=output)
 
