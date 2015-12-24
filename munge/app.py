@@ -119,7 +119,8 @@ def auto_functions(fields):
     return functions
 
 
-def show_result(sql, table=None, data=None, offset=0):
+def show_result(sql, table=None, data=None):
+    offset = int(request.args.get('offset', 0))
     # We need to have a result to get the field types
     if data is None:
         data = {}
@@ -159,7 +160,6 @@ def tables():
 
 @app.route('/table/<table>')
 def table(table=None):
-    offset = int(request.args.get('offset', 0))
     match = '[cls]\_.*'
     if not re.match(match, table) or table not in table_list():
         abort(404)
