@@ -366,12 +366,17 @@ def premises(uarn):
         'vao_adj_totals',
     ]
 
+    single_row_tables = [
+        'vao_list',
+        'vao_base',
+    ]
+
     for table in tables:
         sql = 'SELECT * FROM %s WHERE uarn = :uarn' % table
         out = show_result(sql, table, data=data)
         out['offset'] = ''
         out['title'] = table
-        output.append(out)
+        output.append((out, table in single_row_tables))
 
     return render_template('premises.html', output=output)
 

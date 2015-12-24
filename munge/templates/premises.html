@@ -3,7 +3,11 @@
 {% import 'macros.html' as macros %}
 
 {% block content %}
-{% for data in output %}
-{{ macros.table(data) }}
-{% endfor %}
+  {% for data in output %}
+    {% if data[1] %}
+      {{ macros.table_list(data[0]) }}
+    {% else %}
+      {{ macros.table(data[0]) }}
+    {% endif %}
+  {% endfor %}
 {% endblock %}
