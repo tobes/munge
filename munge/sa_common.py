@@ -4,9 +4,11 @@ from sqlalchemy.engine import reflection
 OID_TYPE = {
     20: 'bigint',
     21: 'smallint',
+    23: 'integer',
     25: 'text',
     16: 'boolean',
     701: 'double precision',
+    1082: 'date'
 }
 
 
