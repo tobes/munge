@@ -27,7 +27,7 @@ vao_list_fields = [
     '+@pcc:text~compact_pc|pc',
     'effective_date:date~make_date_DD_MON_YYYY',
     'composite',
-    'rateable_value:double precision',
+    'rateable_value:bigint',
     'settlement_type',
     'ass_ref',
     'alter_date:date~make_date_DD_MON_YYYY',
@@ -57,21 +57,21 @@ vao_base_fields = [
     'county',
     'pc',
     '+@pcc:text~compact_pc|pc',
-    'scheme_ref',
+    'scheme_ref:bigint',
     'desc',
-    'total_area:double precision',
-    'subtotal',
-    'total_value:double precision',
-    'adopted_rv',
+    'total_area:numeric',
+    'subtotal:bigint',
+    'total_value:bigint',
+    'adopted_rv:bigint',
     'list_year:int',
-    'ba',
+    '-ba',
     'ba_ref',
     'vo_ref',
     'from_date:date~make_date_DD_MON_YYYY',
     'to_date:date~make_date_DD_MON_YYYY',
     '+scat_code:smallint',
     'measure_unit',
-    'unadjusted_price:double precision',
+    'unadjusted_price:numeric',
 ]
 
 
@@ -82,9 +82,9 @@ vao_base_02_fields = [
     'line:smallint',
     'floor',
     'description',
-    'area',
-    'price:double precision',
-    'value:double precision',
+    'area:numeric~make_numeric_na',
+    'price:numeric',
+    'value:bigint',
 ]
 
 vao_base_03_fields = [
@@ -92,9 +92,9 @@ vao_base_03_fields = [
     '+uarn:bigint',
     '-record_type',
     'description',
-    'oa_size:double precision',
-    'oa_price:double precision',
-    'oa_value',
+    'oa_size:numeric',
+    'oa_price:numeric',
+    'oa_value:bigint',
 ]
 
 
@@ -103,7 +103,7 @@ vao_base_04_fields = [
     '*@id:bigserial',
     '+uarn:bigint',
     '-record_type',
-    'plant_value',
+    'plant_value:bigint',
 ]
 
 
@@ -112,11 +112,11 @@ vao_base_05_fields = [
     '*@id:bigserial',
     '+uarn:bigint',
     '-record_type',
-    'spaces:double precision',
-    'spaces_value:double precision',
-    'area:double precision',
-    'area_value:double precision',
-    'total:double precision',
+    'spaces:bigint',
+    'spaces_value:bigint',
+    'area:bigint',
+    'area_value:bigint',
+    'total:bigint',
 ]
 
 
@@ -135,8 +135,8 @@ vao_base_07_fields = [
     '*@id:bigserial',
     '+uarn:bigint',
     '-record_type',
-    'total_before_adj:double precision',
-    'total_adj:double precision',
+    'total_before_adj:bigint',
+    'total_adj:bigint',
 ]
 
 vao_types = [
