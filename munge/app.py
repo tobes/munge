@@ -381,4 +381,31 @@ def premises(uarn):
     return render_template('premises.html', output=output)
 
 
-# select uarn, scat_code from vao_list where ba_code='0335';
+@app.route('/postcode/<postcode>')
+def postcode_premises_list(postcode):
+    postcode = postcode.upper().replace(' ', '') + '%'
+    print postcode
+    data = {'postcode': postcode}
+    sql = '''
+    SELECT v.uarn, v.pc, v.town, b.uarn, v.scat_code
+    FROM vao_list v
+    LEFT OUTER JOIN vao_base b ON b.uarn = v.uarn
+    LEFT JOIN c_scat s ON s.code = v.scat_code
+    WHERE v.pcc like :postcode
+    ORDER BY s.desc, v.pc
+    '''
+    result = run_sql(sql, data)
+    fields = [
+        {'name': 'uarn'},
+        {'name': 'postcode'},
+        {'name': 'town'},
+        {'name': 'summary'},
+        {'name': 'scat_code'},
+    ]
+    output = {'fields': fields,
+              'data': result,
+              'offset': '',
+              'links': {0: ('premises', 'uarn', 0)},
+              'functions': {3: (add_yes,), 4: (code_desc, 'scat')},
+              }
+    return render_template('table_output.html', data=output)
