@@ -119,7 +119,7 @@ def auto_functions(fields):
     return functions
 
 
-def show_result(sql, table, data=None, offset=0):
+def show_result(sql, table=None, data=None, offset=0):
     # We need to have a result to get the field types
     if data is None:
         data = {}
@@ -172,16 +172,8 @@ def table(table=None):
 @app.route('/ba/')
 def ba_list():
     sql = 'SELECT code, "desc" FROM c_ba ORDER BY "desc"'
-    result = run_sql(sql)
-    fields = [
-        {'name': 'code'},
-        {'name': 'desc'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {1: ('ba_premises_list', 'ba_code', 0)},
-              }
+    output = show_result(sql)
+    output['links'][1] = ('ba_premises_list', 'ba_code', 0)
     return render_template('table_output.html', data=output)
 
 
@@ -189,7 +181,7 @@ def ba_list():
 def ba_premises_list(ba_code):
     data = {'ba_code': ba_code}
     sql = '''
-    SELECT v.uarn, b.uarn, s.desc
+    SELECT v.uarn, b.uarn, s.code as scat_code
     FROM vao_list v
     LEFT OUTER JOIN vao_base b
     ON b.uarn = v.uarn
@@ -197,6 +189,11 @@ def ba_premises_list(ba_code):
     WHERE v.ba_code = :ba_code
     ORDER BY s.desc
     '''
+    output = show_result(sql, data=data)
+    del output['links'][1]
+    output['functions'][1] = (add_yes,)
+    output['fields'][1]['name'] = 'summary'
+    return render_template('table_output.html', data=output)
     result = run_sql(sql, data)
     fields = [
         {'name': 'uarn'},
@@ -216,15 +213,8 @@ def ba_premises_list(ba_code):
 def scat_list():
     sql = 'SELECT code, "desc" FROM c_scat ORDER BY "desc"'
     result = run_sql(sql)
-    fields = [
-        {'name': 'code'},
-        {'name': 'desc'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {1: ('scat_premises_list', 'scat_code', 0)},
-              }
+    output = show_result(sql)
+    output['links'][1] = ('scat_premises_list', 'scat_code', 0)
     return render_template('table_output.html', data=output)
 
 
@@ -240,18 +230,10 @@ def scat_premises_list(scat_code):
     WHERE v.scat_code = :scat_code
     ORDER BY c.desc
     '''
-    result = run_sql(sql, data)
-    fields = [
-        {'name': 'uarn'},
-        {'name': 'summary'},
-        {'name': 'billing authouity'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {0: ('premises', 'uarn', 0)},
-              'functions': {1: (add_yes,)},
-              }
+    output = show_result(sql, data=data)
+    del output['links'][1]
+    output['fields'][1]['name'] = 'summary'
+    output['functions'][1] = (add_yes,)
     return render_template('table_output.html', data=output)
 
 
@@ -259,15 +241,8 @@ def scat_premises_list(scat_code):
 def ba_areas_list():
     sql = 'SELECT code, "desc" FROM c_ba ORDER BY "desc"'
     result = run_sql(sql)
-    fields = [
-        {'name': 'code'},
-        {'name': 'desc'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {1: ('ba_areas', 'ba_code', 0)},
-              }
+    output = show_result(sql)
+    output['links'][1] = ('ba_areas', 'ba_code', 0)
     return render_template('table_output.html', data=output)
 
 
@@ -286,37 +261,16 @@ def ba_areas(ba_code):
     WHERE ba_code = :ba_code
     ORDER BY s.desc
     '''
-    result = run_sql(sql, data)
-    fields = [
-        {'name': 'scat code'},
-        {'name': 'number of premises'},
-        {'name': 'total m2'},
-        {'name': 'total_value'},
-        {'name': 'total_area_price'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {},
-              }
+    output = show_result(sql, data=data)
     return render_template('table_output.html', data=output)
 
 
 @app.route('/scat_areas/')
 def scat_areas_list():
     sql = 'SELECT code, "desc" FROM c_scat ORDER BY "desc"'
-    result = run_sql(sql)
-    fields = [
-        {'name': 'code'},
-        {'name': 'desc'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {1: ('scat_areas', 'scat_code', 0)},
-              }
+    output = show_result(sql)
+    output['links'][1] = ('scat_areas', 'scat_code', 0)
     return render_template('table_output.html', data=output)
-
 
 @app.route('/scat_areas/<scat_code>')
 def scat_areas(scat_code):
@@ -333,21 +287,8 @@ def scat_areas(scat_code):
     WHERE scat_code = :scat_code
     ORDER BY s.desc
     '''
-    result = run_sql(sql, data)
-    fields = [
-        {'name': 'billing authority'},
-        {'name': 'number of premises'},
-        {'name': 'total m2'},
-        {'name': 'total_value'},
-        {'name': 'total_area_price'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {},
-              }
+    output = show_result(sql, data=data)
     return render_template('table_output.html', data=output)
-
 
 
 @app.route('/premises/<uarn>')
@@ -394,18 +335,5 @@ def postcode_premises_list(postcode):
     WHERE v.pcc like :postcode
     ORDER BY s.desc, v.pc
     '''
-    result = run_sql(sql, data)
-    fields = [
-        {'name': 'uarn'},
-        {'name': 'postcode'},
-        {'name': 'town'},
-        {'name': 'summary'},
-        {'name': 'scat_code'},
-    ]
-    output = {'fields': fields,
-              'data': result,
-              'offset': '',
-              'links': {0: ('premises', 'uarn', 0)},
-              'functions': {3: (add_yes,), 4: (code_desc, 'scat')},
-              }
+    output = show_result(sql, data=data)
     return render_template('table_output.html', data=output)
