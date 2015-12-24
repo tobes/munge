@@ -156,8 +156,8 @@ def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
     data = []
     has_header_row = fields is None
     first = True
-    skip = False
     for row in reader:
+        skip = False
         if first:
             if fields is None:
                 fields = row
