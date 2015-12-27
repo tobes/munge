@@ -104,12 +104,12 @@ def get_fns(fields):
     return fns
 
 
-def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
+def import_csv(reader, table_name, fields=None, skip_first=False, verbose=False, limit=None):
     temp_table = config.TEMP_TABLE_STR + table_name
     count = 0
     t_fields = []
     data = []
-    has_header_row = fields is None
+    has_header_row = (fields is None) or skip_first
     first = True
     for row in reader:
         skip = False
@@ -141,21 +141,22 @@ def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
                     print(row_data)
                     skip = True
             if not skip:
-                count += 1
                 data.append(row_data)
-        if count % config.BATCH_SIZE == 0 and count:
-            run_sql(insert_sql, data)
-            data = []
-            if verbose:
-                print(count)
-        if limit and count == limit:
-            break
+            if count % config.BATCH_SIZE == 0 and count:
+                run_sql(insert_sql, data)
+                data = []
+                if verbose:
+                    print(count)
+            if not skip:
+                count += 1
+            if limit and count == limit:
+                break
         first = False
     if data:
         run_sql(insert_sql, data)
 
     if verbose:
-        print('%s rows imported' % (count - 1))
+        print('%s rows imported' % (count))
     # Add indexes
     build_indexes(temp_table, t_fields, verbose=verbose)
 
