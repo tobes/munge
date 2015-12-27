@@ -2,7 +2,7 @@ import os.path
 
 import config
 from csv_util import unicode_csv_reader, import_csv, create_table, insert_rows, build_indexes
-from sa_util import swap_tables, run_sql, get_result_fields
+from sa_util import swap_tables, run_sql, get_result_fields, table_list
 
 
 vao_list_file = 'vao/LIST_2010_MERGED.dta.30Sep2015'
@@ -150,39 +150,50 @@ vao_types = [
 ]
 
 
-summary_data = {
-    's_vao_list_base_summary': '''
-         SELECT
-         count(l.uarn) as list_entries,
-         count(b.uarn) as base_entries,
-         count(l.uarn) - count(b.uarn) as difference,
-         c.desc as scat_desc,
-         l.scat_code as scat_code
-         FROM vao_list l
-         LEFT OUTER JOIN vao_base b ON l.uarn = b.uarn
-         LEFT OUTER JOIN c_scat c ON c.code = l.scat_code
-         GROUP BY c.desc, l.scat_code
-         ORDER BY c.desc;
-    ''',
+summary_data = [
+    {
+        'name': 's_vao_list_base_summary',
+        'sql': '''
+             SELECT
+             count(t1.uarn) as list_entries,
+             count(t2.uarn) as base_entries,
+             count(t1.uarn) - count(t2.uarn) as difference,
+             t3.desc as scat_desc,
+             t1.scat_code as scat_code
+             FROM {t1} t1
+             LEFT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
+             LEFT OUTER JOIN {t3} t3 ON t3.code = t1.scat_code
+             GROUP BY t3.desc, t1.scat_code
+             ORDER BY t3.desc
+        ''',
+        'tables': ['vao_list', 'vao_base', 'c_scat'],
+    },
+    {
+        'name': 's_vao_base_areas',
+        'sql': '''
+            SELECT ba_code, scat_code, count(*),
+            sum(total_area) as total_m2,
+            sum(total_value) as total_value,
+            sum(total_area * unadjusted_price) as total_area_price,
+            (sum(total_area * unadjusted_price) - sum(total_value)) as diff
+            FROM {t1}
+            GROUP BY ba_code, scat_code
+        ''',
+        'tables': ['vao_base'],
 
-    's_vao_base_areas': '''
-        SELECT ba_code, scat_code, count(*),
-        sum(total_area) as total_m2,
-        sum(total_value) as total_value,
-        sum(total_area * unadjusted_price) as total_area_price,
-        (sum(total_area * unadjusted_price) - sum(total_value)) as diff
-        FROM vao_base
-        GROUP BY ba_code, scat_code;
-    ''',
-
-    's_vao_base_missing_list':'''
-        SELECT
-        b.uarn, b.scat_code, b.ba_code
-        FROM vao_list l
-        RIGHT OUTER JOIN vao_base b ON l.uarn = b.uarn
-        WHERE l.uarn is null;
-    ''',
-}
+    },
+    {
+        'name': 's_vao_base_missing_list',
+        'sql': '''
+            SELECT
+            t2.uarn, t2.scat_code, t2.ba_code
+            FROM {t1} t1
+            RIGHT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
+            WHERE t1.uarn is null
+        ''',
+        'tables': ['vao_list', 'vao_base'],
+    },
+]
 
 
 def vao_reader(filename, data_type):
@@ -202,32 +213,45 @@ def vao_reader(filename, data_type):
 def import_vao_summary(verbose=False):
     for rec_type, table, fields in vao_types:
         if verbose:
-            print 'importing', table
+            print('importing', table)
         reader = vao_reader(vao_file, rec_type)
         import_csv(reader, table, fields=fields, verbose=verbose)
 
 
 def import_vao_list(verbose=False):
     if verbose:
-        print 'importing vao_list'
+        print('importing vao_list')
     f = os.path.join(config.DATA_PATH, vao_list_file)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
 
 
-def summary(table, sql, verbose=False, limit=None):
+def make_tables_dict(tables):
+    all_tables = table_list()
+    output = {}
+    for i, table in enumerate(tables):
+        if config.TEMP_TABLE_STR + table in all_tables:
+            name = config.TEMP_TABLE_STR + table
+        else:
+            name = table
+        output['t%s' % (i + 1)] = name
+    return output
+
+
+def summary(table_name, sql, tables, verbose=False, limit=None):
     if verbose:
-        print 'creating summary table %s' % table
-    result = run_sql(sql)
+        print('creating summary table %s' % table_name)
+    tables_dict = make_tables_dict(tables)
+    result = run_sql(sql.format(**tables_dict))
     first = True
     count = 0
     data = []
     for row in result:
         if first:
             fields = get_result_fields(result)
-            create_table(table, fields)
+            create_table(table_name, fields)
             f = [field['name'] for field in fields if not field.get('missing')]
-            insert_sql = insert_rows(table, fields)
+            insert_sql = insert_rows(table_name, fields)
             first = False
         data.append(dict(zip(f, row)))
         count += 1
@@ -244,12 +268,17 @@ def summary(table, sql, verbose=False, limit=None):
     if verbose:
         print('%s rows imported' % (count))
     # Add indexes
-    build_indexes(table, fields, verbose=verbose)
+    build_indexes(table_name, fields, verbose=verbose)
 
 
 def build_summaries(verbose=False):
-    for table in summary_data:
-        summary('#' + table, summary_data[table], verbose=verbose)
+    for info in summary_data:
+        summary(
+            config.TEMP_TABLE_STR + info['name'],
+            info['sql'],
+            info['tables'],
+            verbose=verbose
+        )
     swap_tables(verbose=verbose)
 
 
