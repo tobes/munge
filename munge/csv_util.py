@@ -23,7 +23,7 @@ def process_header(row):
     pk = None
     for col in row:
         # null ignored fields
-        if col == '' or col[0] == '-':
+        if col == '':
             col = {'name': '', 'type': None}
             fields.append(col)
             continue
@@ -33,6 +33,10 @@ def process_header(row):
         else:
             field = col
             type_ = 'text'
+        # ignored fields
+        if col[0] == '-':
+            field = field[1:]
+            type_ = None
         # primary key
         if field[0] == '*':
             field = field[1:]
@@ -52,7 +56,7 @@ def process_header(row):
         else:
             missing = False
         # conversion function
-        if '~' in type_:
+        if type_ and '~' in type_:
             type_, fn = type_.split('~')
             if '|' in fn:
                 fn, fn_field = fn.split('|')
