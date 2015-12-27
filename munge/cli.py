@@ -57,7 +57,7 @@ def main():
     subparsers = parser.add_subparsers(help='commands', dest='command')
 
     for command in commands:
-        general_parser = subparsers.add_parser(command)
+        subparsers.add_parser(command)
 
     args = parser.parse_args()
     if args.command == 'export_all':
