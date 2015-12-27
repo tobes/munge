@@ -1,5 +1,4 @@
 import csv
-import pprint
 import os.path
 import glob
 import re
@@ -160,7 +159,7 @@ def import_all(verbose=False):
     for f in files:
         table_name = os.path.splitext(os.path.basename(f))[0]
         if verbose:
-            print('importing', table_name)
+            print('importing %s' % table_name)
         reader = unicode_csv_reader(f)
         import_csv(reader, table_name, verbose=verbose)
     swap_tables(verbose=verbose)
@@ -208,7 +207,7 @@ def make_csv(filename, sql, **kw):
     if not table:
         table = os.path.splitext(os.path.basename(filename))[0]
     if verbose:
-        print('Processing', table)
+        print('Processing %s' % table)
     filename = os.path.join(config.DATA_PATH, 'output', filename)
     with open(filename, 'w') as f:
         a = csv.writer(f, delimiter=',', dialect=csv.excel)
