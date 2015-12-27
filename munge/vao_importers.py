@@ -97,16 +97,12 @@ vao_base_03_fields = [
     'oa_value:bigint',
 ]
 
-
-
 vao_base_04_fields = [
     '*@id:bigserial',
     '+uarn:bigint',
     '-record_type',
     'plant_value:bigint',
 ]
-
-
 
 vao_base_05_fields = [
     '*@id:bigserial',
@@ -119,8 +115,6 @@ vao_base_05_fields = [
     'total:bigint',
 ]
 
-
-
 vao_base_06_fields = [
     '*@id:bigserial',
     '+uarn:bigint',
@@ -129,7 +123,6 @@ vao_base_06_fields = [
     'adj_percent',
 
 ]
-
 
 vao_base_07_fields = [
     '*@id:bigserial',
