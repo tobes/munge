@@ -75,7 +75,7 @@ def copy(value):
 
 
 def la_sub_2_la(value):
-    if not la_sub_2_la:
+    if not la_sub_2_la_dict:
         sql = 'SELECT la_sub_code, la_code FROM l_la_sub_la;'
         result = run_sql(sql)
         for row in result:
