@@ -8,6 +8,12 @@ def export_all(verbose=False):
     dump_all(verbose=verbose)
 
 
+def export_custom(verbose=False):
+    if verbose:
+        print('Importing custom tables')
+    import custom_output
+
+
 def import_all(verbose=False):
     if verbose:
         print('Importing all tables')
@@ -42,6 +48,7 @@ def main():
 
     commands = [
         'export_all',
+        'export_custom',
         'import_all',
         'web',
         'vao',
@@ -64,6 +71,8 @@ def main():
         export_all(verbose=args.v)
     elif args.command == 'import_all':
         import_all(verbose=args.v)
+    elif args.command == 'export_custom':
+        export_custom(verbose=args.v)
     elif args.command == 'web':
         webserver(verbose=args.v)
     elif args.command == 'vao':
