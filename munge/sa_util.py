@@ -1,7 +1,5 @@
 import sqlalchemy as sa
 
-from sqlalchemy.engine import reflection
-
 import sa_common
 import config
 
