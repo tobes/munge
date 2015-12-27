@@ -21,6 +21,19 @@ def import_all(verbose=False):
     import_all(verbose=verbose)
 
 
+def import_csv(args):
+    verbose = args.v
+    delimiter = args.delimiter
+    if delimiter == '\\t':
+        delimiter = '\t'
+    if verbose:
+        print('Importing %s' % args.filename)
+    from csv_util import import_single, swap_tables
+    import_single(args.filename, args.tablename, encoding=args.encoding,
+                  delimiter=delimiter, verbose=verbose)
+    swap_tables(verbose=verbose)
+
+
 def webserver(verbose=False):
     from munge.app import app
     app.run(debug=True)
@@ -66,6 +79,12 @@ def main():
     for command in commands:
         subparsers.add_parser(command)
 
+    import_csv_parser = subparsers.add_parser('import_csv')
+    import_csv_parser.add_argument("--encoding", default='utf-8')
+    import_csv_parser.add_argument("--delimiter", default=',')
+    import_csv_parser.add_argument('tablename')
+    import_csv_parser.add_argument('filename')
+
     args = parser.parse_args()
     if args.command == 'export_all':
         export_all(verbose=args.v)
@@ -73,6 +92,8 @@ def main():
         import_all(verbose=args.v)
     elif args.command == 'export_custom':
         export_custom(verbose=args.v)
+    elif args.command == 'import_csv':
+        import_csv(args)
     elif args.command == 'web':
         webserver(verbose=args.v)
     elif args.command == 'vao':
