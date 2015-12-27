@@ -21,6 +21,13 @@ def import_all(verbose=False):
     import_all(verbose=verbose)
 
 
+def postcode(verbose=False):
+    if verbose:
+        print('Importing postcodes')
+    from postcode_import import import_postcodes
+    import_postcodes(verbose=verbose)
+
+
 def import_csv(args):
     verbose = args.v
     delimiter = args.delimiter
@@ -63,6 +70,7 @@ def main():
         'export_all',
         'export_custom',
         'import_all',
+        'postcode',
         'web',
         'vao',
         'vao_full',
@@ -90,6 +98,8 @@ def main():
         export_all(verbose=args.v)
     elif args.command == 'import_all':
         import_all(verbose=args.v)
+    elif args.command == 'postcode':
+        postcode(verbose=args.v)
     elif args.command == 'export_custom':
         export_custom(verbose=args.v)
     elif args.command == 'import_csv':

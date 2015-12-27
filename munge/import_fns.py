@@ -1,5 +1,6 @@
 import datetime
 
+from sa_util import run_sql
 
 
 AUTO_FNS = {
@@ -10,6 +11,9 @@ AUTO_FNS = {
     'boolean': 'make_bool',
     'numeric': 'make_numeric',
 }
+
+
+la_sub_2_la_dict = {}
 
 
 def make_bool(value):
@@ -64,3 +68,16 @@ def compact_pc(value):
         return None
     else:
         return value.replace(' ', '').upper()
+
+
+def copy(value):
+    return value
+
+
+def la_sub_2_la(value):
+    if not la_sub_2_la:
+        sql = 'SELECT la_sub_code, la_code FROM l_la_sub_la;'
+        result = run_sql(sql)
+        for row in result:
+            la_sub_2_la_dict[row[0]] = row[1]
+    return la_sub_2_la_dict.get(value)
