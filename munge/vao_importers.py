@@ -1,8 +1,8 @@
 import os.path
 
 import config
-from csv_util import unicode_csv_reader, import_csv, create_table, insert_rows, build_indexes
-from sa_util import swap_tables, run_sql, get_result_fields, table_list
+from csv_util import unicode_csv_reader, import_csv
+from sa_util import swap_tables, summary
 
 
 vao_list_file = 'vao/LIST_2010_MERGED.dta.30Sep2015'
@@ -217,51 +217,6 @@ def import_vao_list(verbose=False):
     f = os.path.join(config.DATA_PATH, vao_list_file)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
-
-
-def make_tables_dict(tables):
-    all_tables = table_list()
-    output = {}
-    for i, table in enumerate(tables):
-        if config.TEMP_TABLE_STR + table in all_tables:
-            name = config.TEMP_TABLE_STR + table
-        else:
-            name = table
-        output['t%s' % (i + 1)] = name
-    return output
-
-
-def summary(table_name, sql, tables, verbose=False, limit=None):
-    if verbose:
-        print('creating summary table %s' % table_name)
-    tables_dict = make_tables_dict(tables)
-    result = run_sql(sql.format(**tables_dict))
-    first = True
-    count = 0
-    data = []
-    for row in result:
-        if first:
-            fields = get_result_fields(result)
-            create_table(table_name, fields)
-            f = [field['name'] for field in fields if not field.get('missing')]
-            insert_sql = insert_rows(table_name, fields)
-            first = False
-        data.append(dict(zip(f, row)))
-        count += 1
-        if count % config.BATCH_SIZE == 0:
-            run_sql(insert_sql, data)
-            data = []
-            if verbose:
-                print(count)
-        if limit and count == limit:
-            break
-    if data:
-        run_sql(insert_sql, data)
-
-    if verbose:
-        print('%s rows imported' % (count))
-    # Add indexes
-    build_indexes(table_name, fields, verbose=verbose)
 
 
 def build_summaries(verbose=False):

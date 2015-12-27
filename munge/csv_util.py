@@ -5,54 +5,10 @@ import glob
 import re
 
 import config
-from sa_util import swap_tables, run_sql, table_list, get_result_fields
+from sa_util import swap_tables, run_sql, table_list, get_result_fields, create_table, insert_rows, build_indexes
 import import_fns
 
 # FIXME add logging of imports
-
-
-def create_table(table, fields):
-    sql = 'DROP TABLE IF EXISTS "%s"' % table
-    run_sql(sql)
-    sql = ['CREATE TABLE "%s" (' % table]
-    sql_fields = []
-    for field in fields:
-        # Skipped field
-        if field['type'] is None:
-            continue
-        col = '\t"%s"\t%s' % (
-            field['name'],
-            field['type']
-        )
-        if field['pk']:
-            col += ' PRIMARY KEY'
-
-        sql_fields.append(col)
-    sql.append(',\n'.join(sql_fields))
-    sql.append(')')
-    sql = '\n'.join(sql)
-    run_sql(sql)
-
-
-def insert_rows(table, fields):
-    sql = ['INSERT INTO "%s" (' % table]
-    sql_fields = []
-    data_fields = []
-    for field in fields:
-        if field['type'] is None:
-            continue
-        if field.get('missing') is True and field.get('fn') is None:
-            continue
-        sql_fields.append('"%s"' % (
-            field['name']
-        ))
-        data_fields.append(':%s' % field['name'])
-    sql.append(', '.join(sql_fields))
-    sql.append(') VALUES ({data})')
-    sql = '\n'.join(sql)
-    sql = sql.format(data=', '.join(data_fields))
-    return sql
-
 
 
 def process_header(row):
@@ -130,23 +86,6 @@ def get_fns(fields):
         elif field['type'] in import_fns.AUTO_FNS:
             fns[field['name']] = (getattr(import_fns, import_fns.AUTO_FNS[field['type']]), None)
     return fns
-
-
-def build_indexes(table_name, t_fields, verbose=False):
-    index_fields = [f['name'] for f in t_fields if f.get('index')]
-    sql_list = []
-    for field in index_fields:
-        if verbose:
-            print 'creating index of %s' % field
-        sql = 'CREATE INDEX "{idx_name}" ON "{table}" ("{field}");'
-        sql = sql.format(
-            idx_name='%s_idx_%s' % (table_name, field),
-            table=table_name,
-            field=field,
-        )
-        sql_list.append(sql)
-    if sql_list:
-        run_sql('\n'.join(sql_list))
 
 
 def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
