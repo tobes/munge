@@ -3,14 +3,14 @@ import argparse
 
 def export_all(verbose=False):
     if verbose:
-        print 'Exporting all tables'
+        print('Exporting all tables')
     from csv_util import dump_all
     dump_all(verbose=verbose)
 
 
 def import_all(verbose=False):
     if verbose:
-        print 'Exporting all tables'
+        print('Importing all tables')
     from csv_util import import_all
     import_all(verbose=verbose)
 
@@ -39,12 +39,26 @@ def clean_db(verbose=False):
 
 
 def main():
+
+    commands = [
+        'export_all',
+        'import_all',
+        'web',
+        'vao',
+        'vao_full',
+        'clean_db',
+    ]
+
     parser = argparse.ArgumentParser(
         description='Command line interface for munge'
     )
     parser.add_argument("-v", help="verbose output", action='store_true')
-    parser.add_argument("command", type=str, help="command to run")
-    parser.add_argument('vars', default=None, nargs='*')
+
+    subparsers = parser.add_subparsers(help='commands', dest='command')
+
+    for command in commands:
+        general_parser = subparsers.add_parser(command)
+
     args = parser.parse_args()
     if args.command == 'export_all':
         export_all(verbose=args.v)
