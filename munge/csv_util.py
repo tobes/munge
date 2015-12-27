@@ -75,7 +75,9 @@ def process_header(row):
     return fields
 
 
-def unicode_csv_reader(filename, encoding='utf-8', dialect=csv.excel, **kw):
+def unicode_csv_reader(filename, **kw):
+    encoding = kw.pop('encoding', 'utf-8')
+    dialect = kw.pop('dialect', csv.excel)
     with open(filename, 'rb') as f:
         reader = csv.reader(f, dialect=dialect, **kw)
         for row in reader:
@@ -154,14 +156,18 @@ def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
     build_indexes(temp_table, t_fields, verbose=verbose)
 
 
+def import_single(filename, table_name, verbose=False, **kw):
+    if verbose:
+        print('importing %s' % table_name)
+    reader = unicode_csv_reader(filename, **kw)
+    import_csv(reader, table_name, verbose=verbose)
+
+
 def import_all(verbose=False):
     files = glob.glob(os.path.join(config.DATA_PATH, 'output', '*.csv'))
     for f in files:
         table_name = os.path.splitext(os.path.basename(f))[0]
-        if verbose:
-            print('importing %s' % table_name)
-        reader = unicode_csv_reader(f)
-        import_csv(reader, table_name, verbose=verbose)
+        import_single(f, table_name, verbose=verbose)
     swap_tables(verbose=verbose)
 
 
