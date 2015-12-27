@@ -40,46 +40,64 @@ def get_sequence_names():
 
 
 def clear_temp_objects(verbose=False):
-    tables = [t for t in table_list() if t.startswith('#')]
+    # tables
+    tables = [t for t in table_list() if t.startswith(config.TEMP_TABLE_STR)]
     for table in tables:
         if verbose:
-            print 'Dropping table %s' % table
+            print('Dropping table %s' % table)
         sql = 'DROP TABLE "{table}";'.format(table=table)
         conn.execute(sql)
+    # sequences
+    sequence_names = [
+        s for s in get_sequence_names()
+        if s.startswith(config.TEMP_TABLE_STR)
+    ]
+    for name in sequence_names:
+        if verbose:
+            print('Dropping sequence %s' % name)
+        sql = 'DROP SEQUENCE "{name}";'.format(name=name)
 
 
 def swap_tables(verbose=False):
     ''' SWAPS our temp tables, including renaming indexes and sequences
     '''
-    tables = [t for t in table_list() if t.startswith('#')]
+    temp_table_str = config.TEMP_TABLE_STR
+    tmp_label_len = len(temp_table_str)
+    tables = [t for t in table_list() if t.startswith(temp_table_str)]
     sql_list = []
     sql_list.append('BEGIN;')
     for table in tables:
         if verbose:
-            print 'Swap table %s' % table
-        indexes = [i['name'][1:] for i in get_indexes(table)]
+            print('Swap table %s' % table)
+        indexes = [i['name'][tmp_label_len:] for i in get_indexes(table)]
         pk = get_pk_constraint(table)
         if pk['name']:
-            indexes.append(pk['name'][1:])
+            indexes.append(pk['name'][tmp_label_len:])
 
-        table = table[1:]
+        table = table[tmp_label_len:]
         sql = '''
         DROP TABLE IF EXISTS "{table}";
-        ALTER TABLE "#{table}" RENAME TO "{table}";
+        ALTER TABLE "{TEMP_TABLE_STR}{table}" RENAME TO "{table}";
         '''
-        sql_list.append(sql.format(table=table))
+        sql_list.append(sql.format(table=table, TEMP_TABLE_STR=temp_table_str))
         for index in indexes:
             if verbose:
-                print '\tSwap index %s' % index
-            sql = 'ALTER INDEX "#{index}" RENAME TO "{index}";'
-            sql_list.append(sql.format(index=index))
+                print('\tSwap index %s' % index)
+            sql = 'ALTER INDEX "{TEMP_TABLE_STR}{index}" RENAME TO "{index}";'
+            sql = sql.format(index=index, TEMP_TABLE_STR=temp_table_str)
+            sql_list.append(sql)
 
     # sequences
-    for name in [s[1:] for s in get_sequence_names() if s.startswith('#')]:
+    sequence_names = [
+        s[tmp_label_len:]
+        for s in get_sequence_names()
+        if s.startswith(temp_table_str)
+    ]
+    for name in sequence_names:
         if verbose:
-            print '\tSwap sequence %s' % name
-        sql = 'ALTER SEQUENCE "#{name}" RENAME TO "{name}";'
-        sql_list.append(sql.format(name=name))
+            print('\tSwap sequence %s' % name)
+        sql = 'ALTER SEQUENCE "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";'
+        sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
 
     sql_list.append('COMMIT;')
     conn.execute('\n'.join(sql_list))

@@ -150,7 +150,7 @@ def build_indexes(table_name, t_fields, verbose=False):
 
 
 def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
-    temp_table = u'#' + table_name
+    temp_table = config.TEMP_TABLE_STR + table_name
     count = 0
     t_fields = []
     data = []
