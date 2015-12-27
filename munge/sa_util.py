@@ -144,7 +144,7 @@ def build_indexes(table_name, t_fields, verbose=False):
     sql_list = []
     for field in index_fields:
         if verbose:
-            print 'creating index of %s' % field
+            print('creating index of %s' % field)
         sql = 'CREATE INDEX "{idx_name}" ON "{table}" ("{field}");'
         sql = sql.format(
             idx_name='%s_idx_%s' % (table_name, field),

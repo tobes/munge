@@ -5,8 +5,16 @@ import glob
 import re
 
 import config
-from sa_util import swap_tables, run_sql, table_list, get_result_fields, create_table, insert_rows, build_indexes
 import import_fns
+from sa_util import (
+    swap_tables,
+    run_sql,
+    table_list,
+    get_result_fields,
+    create_table,
+    insert_rows,
+    build_indexes,
+)
 
 # FIXME add logging of imports
 
@@ -84,7 +92,10 @@ def get_fns(fields):
         elif field.get('missing'):
             continue
         elif field['type'] in import_fns.AUTO_FNS:
-            fns[field['name']] = (getattr(import_fns, import_fns.AUTO_FNS[field['type']]), None)
+            fns[field['name']] = (
+                getattr(import_fns, import_fns.AUTO_FNS[field['type']]),
+                None
+            )
     return fns
 
 
@@ -103,7 +114,10 @@ def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
             t_fields = process_header(fields)
             t_fns = get_fns(t_fields)
             create_table(temp_table, t_fields)
-            f = [field['name'] for field in t_fields if not field.get('missing')]
+            f = [
+                field['name'] for field in t_fields
+                if not field.get('missing')
+            ]
             insert_sql = insert_rows(temp_table, t_fields)
         if not (has_header_row and first):
             row_data = dict(zip(f, row))
@@ -117,9 +131,9 @@ def import_csv(reader, table_name, fields=None, verbose=False, limit=None):
                     row_data[fn] = fn_info[0](row_data[fn_field])
                 except Exception as e:
                     # FIXME log error
-                    print str(e)
-                    print row
-                    print row_data
+                    print(str(e))
+                    print(row)
+                    print(row_data)
                     skip = True
             if not skip:
                 count += 1
@@ -146,7 +160,7 @@ def import_all(verbose=False):
     for f in files:
         table_name = os.path.splitext(os.path.basename(f))[0]
         if verbose:
-            print 'importing', table_name
+            print('importing', table_name)
         reader = unicode_csv_reader(f)
         import_csv(reader, table_name, verbose=verbose)
     swap_tables(verbose=verbose)
@@ -159,7 +173,7 @@ def import_drop_code_tables(verbose=False):
     for table in tables:
         if table not in files:
             if verbose:
-                print 'Drop table %s' % table
+                print('Drop table %s' % table)
             sql = 'DROP TABLE "{table}";'.format(table=table)
             run_sql(sql)
 
@@ -171,7 +185,7 @@ def import_drop_lookup_tables(verbose=False):
     for table in tables:
         if table not in files:
             if verbose:
-                print 'Drop table %s' % table
+                print('Drop table %s' % table)
             sql = 'DROP TABLE "{table}";'.format(table=table)
             run_sql(sql)
 
@@ -194,7 +208,7 @@ def make_csv(filename, sql, **kw):
     if not table:
         table = os.path.splitext(os.path.basename(filename))[0]
     if verbose:
-        print 'Processing', table
+        print('Processing', table)
     filename = os.path.join(config.DATA_PATH, 'output', filename)
     with open(filename, 'w') as f:
         a = csv.writer(f, delimiter=',', dialect=csv.excel)
@@ -217,16 +231,16 @@ def make_csv(filename, sql, **kw):
                     headers = make_headers(result, table)
                 a.writerows([headers])
                 if verbose:
-                    print '\nFields:'
+                    print('\nFields:')
                     for h in headers:
 
-                        print '\t%s  \t%s' % tuple(h.split(':'))
+                        print('\t%s  \t%s' % tuple(h.split(':')))
                     print
                 wrote_headers = True
             a.writerows([row])
             count += 1
         if verbose:
-            print '%s rows written' % (count - 1)
+            print('%s rows written' % (count - 1))
             print
 
 
