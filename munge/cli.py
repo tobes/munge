@@ -1,4 +1,7 @@
 import argparse
+import os.path
+
+import config
 
 
 def export_all(verbose=False):
@@ -30,13 +33,18 @@ def postcode(verbose=False):
 
 def import_csv(args):
     verbose = args.v
+    filename = args.filename
+    tablename = args.tablename
     delimiter = args.delimiter
+    filename = os.path.join(config.DATA_PATH, 'import', filename)
     if delimiter == '\\t':
         delimiter = '\t'
+    if not tablename:
+        tablename = os.path.splitext(os.path.basename(filename))[0]
     if verbose:
         print('Importing %s' % args.filename)
     from csv_util import import_single, swap_tables
-    import_single(args.filename, args.tablename, encoding=args.encoding,
+    import_single(filename, tablename, encoding=args.encoding,
                   delimiter=delimiter, verbose=verbose)
     swap_tables(verbose=verbose)
 
@@ -92,7 +100,7 @@ def main():
     import_csv_parser = subparsers.add_parser('import_csv')
     import_csv_parser.add_argument("--encoding", default='utf-8')
     import_csv_parser.add_argument("--delimiter", default=',')
-    import_csv_parser.add_argument('tablename')
+    import_csv_parser.add_argument('--tablename', default=None)
     import_csv_parser.add_argument('filename')
 
     args = parser.parse_args()
