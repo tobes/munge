@@ -263,6 +263,7 @@ def scat_areas_list():
     output['links'][1] = ('scat_areas', 'scat_code', 0)
     return render_template('table_output.html', data=output)
 
+
 @app.route('/scat_areas/<scat_code>')
 def scat_areas(scat_code):
     data = {'scat_code': scat_code}
@@ -274,7 +275,7 @@ def scat_areas(scat_code):
     total_value,
     total_area_price
     FROM s_vao_base_areas t
-    LEFT JOIN c_ba s ON s.code = t.ba_code
+    LEFT JOIN c_la s ON s.code = t.la_code
     WHERE scat_code = :scat_code
     ORDER BY s.desc
     '''
