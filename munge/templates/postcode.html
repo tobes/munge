@@ -1,0 +1,14 @@
+
+{% extends 'base.html' %}
+
+{% import 'macros.html' as macros %}
+
+{% block content %}
+<form>
+  <input name="postcode" value="{{ postcode }}" />
+  <input value="Search" type="submit" />
+</form>
+{% if data %}
+  {{ macros.table(data) }}
+{% endif %}
+{% endblock %}

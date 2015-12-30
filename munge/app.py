@@ -310,19 +310,43 @@ def premises(uarn):
     return render_template('premises.html', output=output)
 
 
-@app.route('/postcode/<postcode>')
-def postcode_premises_list(postcode):
-    postcode = postcode.upper().replace(' ', '') + '%'
-    print postcode
-    data = {'postcode': postcode}
-    sql = '''
-    SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
-    FROM vao_list v
-    LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
-    LEFT JOIN c_scat s ON s.code = v.scat_code
-    WHERE v.pcc like :postcode
-    ORDER BY s.desc, v.pc
-    '''
-    output = show_result(sql, data=data)
-    output['functions'][3] = (add_yes,)
-    return render_template('table_output.html', data=output)
+@app.route('/postcode/')
+def postcode_premises():
+    outcode = None
+    postcode = request.args.get('postcode')
+    sql = None
+    if postcode:
+        postcode = postcode.upper().strip()
+        if re.match('^[A-Z]{1,2}\d{1,2}[A-Z]?$', postcode):
+            outcode = postcode
+        else:
+            outcode = None
+    if outcode:
+        print('outcode %s' % outcode)
+        data = {'outcode': outcode}
+        sql = '''
+        SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
+        FROM vao_list v
+        LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
+        LEFT JOIN c_scat s ON s.code = v.scat_code
+        WHERE v.outcode = :outcode
+        ORDER BY s.desc, v.pc
+        '''
+    elif postcode:
+        print('postcode %s' % postcode)
+        data = {'postcode': postcode.replace(' ', '')}
+        sql = '''
+        SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
+        FROM vao_list v
+        LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
+        LEFT JOIN c_scat s ON s.code = v.scat_code
+        WHERE v.pcc = :postcode
+        ORDER BY s.desc, v.pc
+        '''
+    if sql:
+        output = show_result(sql, data=data)
+        output['functions'][3] = (add_yes,)
+    else:
+        output = None
+        postcode = ''
+    return render_template('postcode.html', data=output, postcode=postcode)
