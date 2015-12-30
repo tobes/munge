@@ -48,6 +48,7 @@ vao_base_fields = [
     'ass_ref',
     '+uarn:bigint',
     '+ba_code',
+    '+@la_code:text~ba_2_la|ba_code',
     'firm_name',
     'add_no',
     'add_3',
@@ -165,16 +166,15 @@ summary_data = [
     {
         'name': 's_vao_base_areas',
         'sql': '''
-            SELECT t2.la_code, t2.scat_code, count(*),
+            SELECT la_code, scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
             sum(total_area * unadjusted_price) as total_area_price,
             (sum(total_area * unadjusted_price) - sum(total_value)) as diff
-            FROM "{t1}" t1
-            LEFT JOIN "{t2}" t2 ON t1.uarn = t2.uarn
-            GROUP BY t2.la_code, t2.scat_code
+            FROM "{t1}"
+            GROUP BY la_code, scat_code
         ''',
-        'tables': ['v_vao_base', 'vao_list'],
+        'tables': ['v_vao_base'],
 
     },
     {
@@ -220,7 +220,7 @@ def vao_reader(filename, data_type):
 def import_vao_summary(verbose=False):
     for rec_type, table, fields in vao_types:
         if verbose:
-            print('importing', table)
+            print('importing %s' % table)
         reader = vao_reader(vao_file, rec_type)
         import_csv(reader, table, fields=fields, verbose=verbose)
 
