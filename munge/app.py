@@ -183,7 +183,7 @@ def ba_premises_list(ba_code):
     sql = '''
     SELECT v.uarn, b.uarn, s.code as scat_code
     FROM vao_list v
-    LEFT OUTER JOIN vao_base b
+    LEFT OUTER JOIN v_vao_base b
     ON b.uarn = v.uarn
     LEFT JOIN c_scat s ON s.code = v.scat_code
     WHERE v.ba_code = :ba_code
@@ -211,7 +211,7 @@ def scat_premises_list(scat_code):
     sql = '''
     SELECT v.uarn, b.uarn, c.code as ba_code
     FROM vao_list v
-    LEFT OUTER JOIN vao_base b
+    LEFT OUTER JOIN v_vao_base b
     ON b.uarn = v.uarn
     LEFT JOIN c_ba c ON c.code = v.ba_code
     WHERE v.scat_code = :scat_code
@@ -285,7 +285,7 @@ def premises(uarn):
 
     tables = [
         'vao_list',
-        'vao_base',
+        'v_vao_base',
         'vao_line',
         'vao_additions',
         'vao_plant',
@@ -296,7 +296,7 @@ def premises(uarn):
 
     single_row_tables = [
         'vao_list',
-        'vao_base',
+        'v_vao_base',
     ]
 
     for table in tables:
@@ -317,7 +317,7 @@ def postcode_premises_list(postcode):
     sql = '''
     SELECT v.uarn, v.pc, v.town, b.uarn, v.scat_code
     FROM vao_list v
-    LEFT OUTER JOIN vao_base b ON b.uarn = v.uarn
+    LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
     LEFT JOIN c_scat s ON s.code = v.scat_code
     WHERE v.pcc like :postcode
     ORDER BY s.desc, v.pc

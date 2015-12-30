@@ -47,8 +47,10 @@ def webserver(verbose=False):
 
 
 def vao(verbose=False):
-    from vao_importers import build_summaries
-    build_summaries(verbose)
+    from vao_importers import build_summaries, build_views, swap_tables
+    build_views(verbose=verbose)
+    build_summaries(verbose=verbose)
+    swap_tables(verbose=verbose)
 
 
 def vao_full(verbose=False):

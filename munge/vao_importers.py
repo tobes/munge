@@ -2,7 +2,7 @@ import os.path
 
 import config
 from csv_util import unicode_csv_reader, import_csv
-from sa_util import swap_tables, summary
+from sa_util import swap_tables, summary, build_view
 
 
 vao_list_file = 'vao/LIST_2010_MERGED.dta.30Sep2015'
@@ -153,13 +153,13 @@ summary_data = [
              count(t1.uarn) - count(t2.uarn) as difference,
              t3.desc as scat_desc,
              t1.scat_code as scat_code
-             FROM {t1} t1
-             LEFT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
-             LEFT OUTER JOIN {t3} t3 ON t3.code = t1.scat_code
+             FROM "{t1}" t1
+             LEFT OUTER JOIN "{t2}" t2 ON t1.uarn = t2.uarn
+             LEFT OUTER JOIN "{t3}" t3 ON t3.code = t1.scat_code
              GROUP BY t3.desc, t1.scat_code
              ORDER BY t3.desc
         ''',
-        'tables': ['vao_list', 'vao_base', 'c_scat'],
+        'tables': ['vao_list', 'v_vao_base', 'c_scat'],
     },
     {
         'name': 's_vao_base_areas',
@@ -169,10 +169,10 @@ summary_data = [
             sum(total_value) as total_value,
             sum(total_area * unadjusted_price) as total_area_price,
             (sum(total_area * unadjusted_price) - sum(total_value)) as diff
-            FROM {t1}
+            FROM "{t1}"
             GROUP BY ba_code, scat_code
         ''',
-        'tables': ['vao_base'],
+        'tables': ['v_vao_base'],
 
     },
     {
@@ -180,11 +180,23 @@ summary_data = [
         'sql': '''
             SELECT
             t2.uarn, t2.scat_code, t2.ba_code
-            FROM {t1} t1
-            RIGHT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
+            FROM "{t1}" t1
+            RIGHT OUTER JOIN "{t2}" t2 ON t1.uarn = t2.uarn
             WHERE t1.uarn is null
         ''',
-        'tables': ['vao_list', 'vao_base'],
+        'tables': ['vao_list', 'v_vao_base'],
+    },
+]
+
+
+views_data = [
+    {
+        'name': 'v_vao_base',
+        'sql': '''
+        CREATE VIEW "{name}" AS
+        SELECT * FROM {t1} WHERE to_date is null;
+        ''',
+        'tables': ['vao_base'],
     },
 ]
 
@@ -227,11 +239,21 @@ def build_summaries(verbose=False):
             info['tables'],
             verbose=verbose
         )
-    swap_tables(verbose=verbose)
+
+
+def build_views(verbose=False):
+    for info in views_data:
+        build_view(
+            info['name'],
+            info['sql'],
+            info['tables'],
+            verbose=verbose
+        )
 
 
 def import_vao_full(verbose=False):
     import_vao_list(verbose=verbose)
     import_vao_summary(verbose=verbose)
+    build_views(verbose=verbose)
     build_summaries(verbose=verbose)
     swap_tables(verbose=verbose)
