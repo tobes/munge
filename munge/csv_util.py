@@ -169,11 +169,11 @@ def import_single(filename, table_name, verbose=False, **kw):
 
 
 def import_all(verbose=False):
-    files = glob.glob(os.path.join(config.DATA_PATH, 'output', 'c_*.csv'))
+    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'c_*.csv'))
     for f in files:
         table_name = os.path.splitext(os.path.basename(f))[0]
         import_single(f, table_name, verbose=verbose)
-    files = glob.glob(os.path.join(config.DATA_PATH, 'output', 'l_*.csv'))
+    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'l_*.csv'))
     for f in files:
         table_name = os.path.splitext(os.path.basename(f))[0]
         import_single(f, table_name, verbose=verbose)
@@ -181,7 +181,7 @@ def import_all(verbose=False):
 
 
 def import_drop_code_tables(verbose=False):
-    files = glob.glob(os.path.join(config.DATA_PATH, 'output', 'c_*.csv'))
+    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'c_*.csv'))
     tables = [t for t in table_list() if t.startswith('c_')]
     files = [os.path.splitext(os.path.basename(f))[0] for f in files]
     for table in tables:
@@ -193,7 +193,7 @@ def import_drop_code_tables(verbose=False):
 
 
 def import_drop_lookup_tables(verbose=False):
-    files = glob.glob(os.path.join(config.DATA_PATH, 'output', 'l_*.csv'))
+    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'l_*.csv'))
     tables = [t for t in table_list() if t.startswith('l_')]
     files = [os.path.splitext(os.path.basename(f))[0] for f in files]
     for table in tables:
