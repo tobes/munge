@@ -282,6 +282,18 @@ def scat_areas(scat_code):
     return render_template('table_output.html', data=output)
 
 
+@app.route('/scat_diff/')
+def scat_diff():
+    sql = '''
+    SELECT l.uarn, l.scat_code, b.scat_code, l.la_code
+    FROM vao_list l
+    LEFT JOIN v_vao_base b ON b.uarn = l.uarn
+    WHERE l.scat_code != b.scat_code
+    '''
+    output = show_result(sql)
+    return render_template('table_output.html', data=output)
+
+
 @app.route('/premises/<uarn>')
 def premises(uarn):
     data = {'uarn': uarn}
