@@ -315,7 +315,7 @@ def postcode_premises_list(postcode):
     print postcode
     data = {'postcode': postcode}
     sql = '''
-    SELECT v.uarn, v.pc, v.town, b.uarn, v.scat_code
+    SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
     FROM vao_list v
     LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
     LEFT JOIN c_scat s ON s.code = v.scat_code
@@ -323,4 +323,5 @@ def postcode_premises_list(postcode):
     ORDER BY s.desc, v.pc
     '''
     output = show_result(sql, data=data)
+    output['functions'][3] = (add_yes,)
     return render_template('table_output.html', data=output)
