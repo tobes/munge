@@ -24,18 +24,28 @@ def get_pk_constraint(*args, **kw):
     return sa_common.get_pk_constraint(engine, *args, **kw)
 
 
+def table_list():
+    return sa_common.table_list(engine)
+
+
+def view_list():
+    return sa_common.view_list(engine)
+
+
+def table_view_list():
+    return sa_common.table_view_list(engine)
+
+
+def get_sequence_names():
+    return sa_common.get_sequence_names(engine)
+
+
 def table_list(*args, **kw):
     return sa_common.table_list(engine, *args, **kw)
 
 
 def get_result_fields(*args, **kw):
     return sa_common.get_result_fields(engine, *args, **kw)
-
-
-def get_sequence_names():
-    sql = 'SELECT c.relname FROM pg_class c WHERE c.relkind = \'S\';'
-    results = conn.execute(sql)
-    return [row[0] for row in results]
 
 
 def clear_temp_objects(verbose=False):

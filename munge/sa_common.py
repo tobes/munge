@@ -18,9 +18,40 @@ def run_sql(engine, sql, *args, **kw):
     return engine.execute(sql, *args, **kw)
 
 
+def get_sequence_names(engine):
+    sql = "SELECT c.relname FROM pg_class c WHERE c.relkind = 'S';"
+    result = engine.execute(sql)
+    return [row[0] for row in result]
+
+
 def table_list(engine):
-    insp = reflection.Inspector.from_engine(engine)
-    return insp.get_table_names()
+    sql = '''
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema='public'
+        AND table_type='BASE TABLE';
+    '''
+    result = engine.execute(sql)
+    return [row[0] for row in result]
+
+
+def view_list(engine):
+    sql = "SELECT c.relname FROM pg_class c WHERE c.relkind = 'v';"
+    result = engine.execute(sql)
+    return [row[0] for row in result]
+
+
+def table_view_list(engine):
+    sql = '''
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema='public'
+        AND table_type='BASE TABLE'
+        UNION
+        SELECT c.relname FROM pg_class c WHERE c.relkind = 'v';
+    '''
+    result = engine.execute(sql)
+    return [row[0] for row in result]
 
 
 def get_pk_constraint(engine, table_name):
