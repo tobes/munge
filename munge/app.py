@@ -167,24 +167,28 @@ def table(table=None):
     return render_template('table_output.html', data=data)
 
 
-@app.route('/ba/')
-def ba_list():
-    sql = 'SELECT code, "desc" FROM c_ba ORDER BY "desc"'
+@app.route('/la/')
+def la_list():
+    sql = '''
+    SELECT code, "desc" FROM c_la
+    WHERE LEFT(code, 1) IN ('E', 'w')
+    ORDER BY "desc"
+    '''
     output = show_result(sql)
-    output['links'][1] = ('ba_premises_list', 'ba_code', 0)
+    output['links'][1] = ('la_premises_list', 'la_code', 0)
     return render_template('table_output.html', data=output)
 
 
-@app.route('/ba/<ba_code>')
-def ba_premises_list(ba_code):
-    data = {'ba_code': ba_code}
+@app.route('/la/<la_code>')
+def la_premises_list(la_code):
+    data = {'la_code': la_code}
     sql = '''
     SELECT v.uarn, b.uarn, s.code as scat_code
     FROM vao_list v
     LEFT OUTER JOIN v_vao_base b
     ON b.uarn = v.uarn
     LEFT JOIN c_scat s ON s.code = v.scat_code
-    WHERE v.ba_code = :ba_code
+    WHERE v.la_code = :la_code
     ORDER BY s.desc
     '''
     output = show_result(sql, data=data)
@@ -221,18 +225,21 @@ def scat_premises_list(scat_code):
     return render_template('table_output.html', data=output)
 
 
-@app.route('/ba_areas/')
-def ba_areas_list():
-    sql = 'SELECT code, "desc" FROM c_ba ORDER BY "desc"'
-    result = run_sql(sql)
+@app.route('/la_areas/')
+def la_areas_list():
+    sql = '''
+    SELECT code, "desc" FROM c_la
+    WHERE LEFT(code, 1) IN ('E', 'w')
+    ORDER BY "desc"
+    '''
     output = show_result(sql)
-    output['links'][1] = ('ba_areas', 'ba_code', 0)
+    output['links'][1] = ('la_areas', 'la_code', 0)
     return render_template('table_output.html', data=output)
 
 
-@app.route('/ba_areas/<ba_code>')
-def ba_areas(ba_code):
-    data = {'ba_code': ba_code}
+@app.route('/la_areas/<la_code>')
+def la_areas(la_code):
+    data = {'la_code': la_code}
     sql = '''
     SELECT
     s.code as scat_code,
