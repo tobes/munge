@@ -75,6 +75,21 @@ def swap_tables(verbose=False):
     tables = [t for t in table_list() if t.startswith(temp_table_str)]
     sql_list = []
     sql_list.append('BEGIN;')
+    # views
+    view_names = [
+        s[tmp_label_len:]
+        for s in view_list()
+        if s.startswith(temp_table_str)
+    ]
+    for name in view_names:
+        if verbose:
+            print('Swap view %s' % name)
+        sql = '''
+            DROP VIEW IF EXISTS "{name}";
+            ALTER VIEW "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";
+        '''
+        sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
+
     for table in tables:
         if verbose:
             print('Swap table %s' % table)
@@ -108,22 +123,9 @@ def swap_tables(verbose=False):
         sql = 'ALTER SEQUENCE "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";'
         sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
 
-    # views
-    view_names = [
-        s[tmp_label_len:]
-        for s in view_list()
-        if s.startswith(temp_table_str)
-    ]
-    for name in view_names:
-        if verbose:
-            print('\tSwap view %s' % name)
-        sql = '''
-            DROP VIEW IF EXISTS "{name}";
-            ALTER VIEW "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";
-        '''
-        sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
-
     sql_list.append('COMMIT;')
+    if verbose:
+        print('\n'.join(sql_list))
     conn.execute('\n'.join(sql_list))
 
 
@@ -139,7 +141,7 @@ def make_tables_dict(tables):
     return output
 
 
-def create_table(table, fields):
+def create_table(table, fields, verbose=False):
     sql = 'DROP TABLE IF EXISTS "%s"' % table
     run_sql(sql)
     sql = ['CREATE TABLE "%s" (' % table]
@@ -159,6 +161,8 @@ def create_table(table, fields):
     sql.append(',\n'.join(sql_fields))
     sql.append(')')
     sql = '\n'.join(sql)
+    if verbose:
+        print sql
     run_sql(sql)
 
 
@@ -203,6 +207,8 @@ def summary(table_name, sql, tables, verbose=False, limit=None):
     if verbose:
         print('creating summary table %s' % table_name)
     tables_dict = make_tables_dict(tables)
+    if verbose:
+        print(sql.format(**tables_dict))
     result = run_sql(sql.format(**tables_dict))
     first = True
     count = 0
@@ -210,7 +216,7 @@ def summary(table_name, sql, tables, verbose=False, limit=None):
     for row in result:
         if first:
             fields = get_result_fields(result)
-            create_table(table_name, fields)
+            create_table(table_name, fields, verbose=verbose)
             f = [field['name'] for field in fields if not field.get('missing')]
             insert_sql = insert_rows(table_name, fields)
             first = False
@@ -240,6 +246,8 @@ def build_view(view_name, sql, tables, verbose=False):
         print('creating view %s' % view_name)
     tables_dict = make_tables_dict(tables)
     tables_dict['name'] = view_name
+    if verbose:
+        print(sql.format(**tables_dict))
     run_sql(sql.format(**tables_dict))
 
 
