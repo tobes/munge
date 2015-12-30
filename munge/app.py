@@ -1,5 +1,6 @@
 import re
 from numbers import Number
+import urllib
 
 from sqlalchemy.engine import reflection
 
@@ -59,7 +60,7 @@ def modify_query(**new_values):
     for key, value in new_values.items():
         args[key] = value
 
-    return '{}?{}'.format(request.path, url_encode(args))
+    return '{}?{}'.format(urllib.quote(request.path), url_encode(args))
 
 
 @app.template_global()
