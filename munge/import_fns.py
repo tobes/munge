@@ -14,6 +14,7 @@ AUTO_FNS = {
 
 
 la_sub_2_la_dict = {}
+ba_2_la_dict = {}
 
 
 def make_bool(value):
@@ -70,6 +71,13 @@ def compact_pc(value):
         return value.replace(' ', '').upper()
 
 
+def outcode(value):
+    if value == '':
+        return None
+    else:
+        return value.split(' ')[0]
+
+
 def copy(value):
     return value
 
@@ -81,3 +89,12 @@ def la_sub_2_la(value):
         for row in result:
             la_sub_2_la_dict[row[0]] = row[1]
     return la_sub_2_la_dict.get(value)
+
+
+def ba_2_la(value):
+    if not ba_2_la_dict:
+        sql = 'SELECT ba_code, la_code FROM l_ba_la;'
+        result = run_sql(sql)
+        for row in result:
+            ba_2_la_dict[row[0]] = row[1]
+    return ba_2_la_dict.get(value)
