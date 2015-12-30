@@ -108,12 +108,27 @@ def swap_tables(verbose=False):
         sql = 'ALTER SEQUENCE "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";'
         sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
 
+    # views
+    view_names = [
+        s[tmp_label_len:]
+        for s in view_list()
+        if s.startswith(temp_table_str)
+    ]
+    for name in view_names:
+        if verbose:
+            print('\tSwap view %s' % name)
+        sql = '''
+            DROP VIEW IF EXISTS "{name}";
+            ALTER VIEW "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";
+        '''
+        sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
+
     sql_list.append('COMMIT;')
     conn.execute('\n'.join(sql_list))
 
 
 def make_tables_dict(tables):
-    all_tables = table_list()
+    all_tables = table_view_list()
     output = {}
     for i, table in enumerate(tables):
         if config.TEMP_TABLE_STR + table in all_tables:
@@ -215,6 +230,17 @@ def summary(table_name, sql, tables, verbose=False, limit=None):
         print('%s rows imported' % (count))
     # Add indexes
     build_indexes(table_name, fields, verbose=verbose)
+
+
+def build_view(view_name, sql, tables, verbose=False):
+    view_name = config.TEMP_TABLE_STR + view_name
+    drop_sql = 'DROP VIEW IF EXISTS "%s"' % view_name
+    run_sql(drop_sql)
+    if verbose:
+        print('creating view %s' % view_name)
+    tables_dict = make_tables_dict(tables)
+    tables_dict['name'] = view_name
+    run_sql(sql.format(**tables_dict))
 
 
 def swap_table(old_name, new_name):
