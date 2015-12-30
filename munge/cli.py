@@ -10,7 +10,7 @@ def export_all(verbose=False):
 
 def export_custom(verbose=False):
     if verbose:
-        print('Importing custom tables')
+        print('Exporting custom tables')
     import custom_output
 
 
