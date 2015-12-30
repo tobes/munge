@@ -153,7 +153,6 @@ summary_data = [
              count(t1.uarn) as list_entries,
              count(t2.uarn) as base_entries,
              count(t1.uarn) - count(t2.uarn) as difference,
-             t3.desc as scat_desc,
              t1.scat_code as scat_code
              FROM "{t1}" t1
              LEFT OUTER JOIN "{t2}" t2 ON t1.uarn = t2.uarn
@@ -166,15 +165,16 @@ summary_data = [
     {
         'name': 's_vao_base_areas',
         'sql': '''
-            SELECT ba_code, scat_code, count(*),
+            SELECT t2.la_code, t2.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
             sum(total_area * unadjusted_price) as total_area_price,
             (sum(total_area * unadjusted_price) - sum(total_value)) as diff
-            FROM "{t1}"
-            GROUP BY ba_code, scat_code
+            FROM "{t1}" t1
+            LEFT JOIN "{t2}" t2 ON t1.uarn = t2.uarn
+            GROUP BY t2.la_code, t2.scat_code
         ''',
-        'tables': ['v_vao_base'],
+        'tables': ['v_vao_base', 'vao_list'],
 
     },
     {
@@ -196,7 +196,7 @@ views_data = [
         'name': 'v_vao_base',
         'sql': '''
         CREATE VIEW "{name}" AS
-        SELECT * FROM {t1} WHERE to_date is null;
+        SELECT * FROM "{t1}" WHERE to_date is null;
         ''',
         'tables': ['vao_base'],
     },
