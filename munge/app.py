@@ -152,17 +152,14 @@ def home():
 
 @app.route('/table/')
 def tables():
-    match = '[cls]\_.*'
     out = []
     for table in sorted(table_list()):
-        if re.match(match, table):
-            out.append(table)
+        out.append(table)
     return render_template('tables.html', data=out)
 
 @app.route('/table/<table>')
 def table(table=None):
-    match = '[cls]\_.*'
-    if not re.match(match, table) or table not in table_list():
+    if table not in table_list():
         abort(404)
     data = show_table(table)
     data['title'] = table
@@ -200,7 +197,6 @@ def ba_premises_list(ba_code):
 @app.route('/scat/')
 def scat_list():
     sql = 'SELECT code, "desc" FROM c_scat ORDER BY "desc"'
-    result = run_sql(sql)
     output = show_result(sql)
     output['links'][1] = ('scat_premises_list', 'scat_code', 0)
     return render_template('table_output.html', data=output)
