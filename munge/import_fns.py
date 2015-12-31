@@ -29,6 +29,13 @@ def make_int(value):
     return int(value)
 
 
+def int_commas(value):
+    value = value.replace(',', '')
+    if value == '':
+        return None
+    return int(value)
+
+
 def make_scat(value):
     if not value:
         return None
