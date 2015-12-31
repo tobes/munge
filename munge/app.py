@@ -249,7 +249,7 @@ def la_areas(la_code):
     total_area_price
     FROM s_vao_base_areas t
     LEFT JOIN c_scat s ON s.code = t.scat_code
-    WHERE ba_code = :ba_code
+    WHERE la_code = :la_code
     ORDER BY s.desc
     '''
     output = show_result(sql, data=data)
