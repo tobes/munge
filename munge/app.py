@@ -2,9 +2,7 @@ import re
 from numbers import Number
 import urllib
 
-from sqlalchemy.engine import reflection
-
-from flask import Flask, render_template, url_for, abort, request, escape, Markup
+from flask import Flask, render_template, abort, request, escape, Markup
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import url_encode
 
@@ -89,8 +87,12 @@ def get_primary_keys(*args, **kw):
     return sa_common.get_primary_keys(db.engine, *args, **kw)
 
 
-def table_list(*args, **kw):
-    return sa_common.table_list(db.engine, *args, **kw)
+def table_list():
+    return sa_common.table_list(db.engine)
+
+
+def table_view_list():
+    return sa_common.table_view_list(db.engine)
 
 
 codes_data = {}
@@ -153,13 +155,13 @@ def home():
 @app.route('/table/')
 def tables():
     out = []
-    for table in sorted(table_list()):
+    for table in sorted(table_view_list()):
         out.append(table)
     return render_template('tables.html', data=out)
 
 @app.route('/table/<table>')
 def table(table=None):
-    if table not in table_list():
+    if table not in table_view_list():
         abort(404)
     data = show_table(table)
     data['title'] = table
