@@ -48,7 +48,9 @@ def table_view_list(engine):
         WHERE table_schema='public'
         AND table_type='BASE TABLE'
         UNION
-        SELECT c.relname FROM pg_class c WHERE c.relkind = 'v';
+        SELECT c.relname
+        FROM pg_class c
+        WHERE c.relkind = 'v' AND relowner != 10;
     '''
     result = engine.execute(sql)
     return [row[0] for row in result]
