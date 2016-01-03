@@ -169,11 +169,7 @@ def import_single(filename, table_name, verbose=False, **kw):
 
 
 def import_all(verbose=False):
-    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'c_*.csv'))
-    for f in files:
-        table_name = os.path.splitext(os.path.basename(f))[0]
-        import_single(f, table_name, verbose=verbose)
-    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'l_*.csv'))
+    files = glob.glob(os.path.join(config.DATA_PATH, 'import', '*.csv'))
     for f in files:
         table_name = os.path.splitext(os.path.basename(f))[0]
         import_single(f, table_name, verbose=verbose)
