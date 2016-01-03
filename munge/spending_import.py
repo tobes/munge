@@ -28,6 +28,24 @@ summary_data = [
     },
 
     {
+        'name': 's_consumer_spend_national',
+        'sql': '''
+        SELECT
+        ct.ct_code,
+        ct.amount nation_spend,
+        (ct.amount / t.population)::numeric(11,2)
+            AS spend_per_capita
+        FROM "{t1}" ct
+        LEFT outer JOIN "{t2}" t ON t.la_code = 'K02000001'
+        WHERE ct.amount is not null
+        ''',
+        'tables': [
+            'v_consumer_trend_latest',
+            'population_by_la',
+        ],
+    },
+
+    {
         'name': 's_consumer_spend_by_nuts1',
         'sql': '''
         SELECT
@@ -35,21 +53,26 @@ summary_data = [
         ct.ct_code,
         ct.amount nation_spend,
         ct.amount * p.percent area_spend,
-        (ct.amount * p.percent * f.factor)::numeric(15,2) adjusted_area_spend,
+        (ct.amount * p.percent * f.factor)::numeric(15,2)
+            AS adj_area_spend,
         (ct.amount * p.percent * f.factor / p.population)::numeric(11,2)
-            AS adjusted_spend_per_capita
+            AS adj_spend_per_capita,
+        (100 * (((ct.amount * p.percent * f.factor / p.population)
+        / n.spend_per_capita) - 1))::numeric(11,2)
+            AS percent_from_national
         FROM "{t1}" ct
         LEFT OUTER JOIN "{t2}" f ON f.ct_code = ct.ct_code
         LEFT OUTER JOIN "{t3}" p ON p.nuts1_code = f.nuts1_code
+        LEFT OUTER JOIN "{t4}" n ON n.ct_code = ct.ct_code
         WHERE ct.amount is not null
         ''',
         'tables': [
             'v_consumer_trend_latest',
             'nuts1_ct_spending_factor',
-            's_population_by_nuts1'
+            's_population_by_nuts1',
+            's_consumer_spend_national',
         ],
     },
-
 ]
 
 views_data = [
