@@ -23,7 +23,7 @@ def import_postcodes(verbose=False):
         '-dointr',
         '-doterm',
         '-oscty',
-        '-oslaua',
+        'la_code',
         '-osward',
         '-usertype',
         '-oseast1m',
@@ -70,7 +70,7 @@ def import_postcodes(verbose=False):
         '-oac11',
         'lat:double precision',
         'long:double precision',
-        '@la_code:text~la_sub_2_la|la_sub_code',
+        '@nuts_sub_code:text~la_sub_2_la|la_sub_code',
     ]
 
     with open(filename, 'rb') as f:
