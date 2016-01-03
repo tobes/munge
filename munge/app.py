@@ -75,6 +75,20 @@ def make_td_class(arg):
     return ''
 
 
+@app.template_global()
+def format_table_value(arg, value):
+    if value is None:
+        return Markup('<span class="null">&lt;Null&gt;</span>')
+    if arg in sa_common.FLOAT_TYPES:
+        return '{:20,.2f}'.format(value)
+    return value
+
+
+@app.template_global()
+def format_number(value):
+    return '{:20,.2f}'.format(value)
+
+
 def run_sql(*args, **kw):
     return sa_common.run_sql(db.engine, *args, **kw)
 
