@@ -111,6 +111,6 @@ def import_spending(verbose=False):
         fields=fields,
         verbose=verbose
     )
-    build_summaries(verbose=verbose)
     build_views(verbose=verbose)
+    build_summaries(verbose=verbose)
     swap_tables(verbose=verbose)
