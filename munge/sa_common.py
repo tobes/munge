@@ -12,6 +12,14 @@ OID_TYPE = {
     1700: 'numeric',
 }
 
+NUMERIC_TYPES = [
+    'bigint',
+    'smallint',
+    'integer',
+    'double precision',
+    'numeric',
+]
+
 
 def run_sql(engine, sql, *args, **kw):
     sql = sa.sql.text(sql)
