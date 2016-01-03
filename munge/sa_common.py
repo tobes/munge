@@ -20,6 +20,11 @@ NUMERIC_TYPES = [
     'numeric',
 ]
 
+FLOAT_TYPES = [
+    'double precision',
+    'numeric',
+]
+
 
 def run_sql(engine, sql, *args, **kw):
     sql = sa.sql.text(sql)
