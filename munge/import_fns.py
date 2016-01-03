@@ -105,3 +105,24 @@ def ba_2_la(value):
         for row in result:
             ba_2_la_dict[row[0]] = row[1]
     return ba_2_la_dict.get(value)
+
+
+def ct_level(value):
+    return len(value.split('.'))
+
+
+def ct_level_1(value):
+    s = str(value).split('.')
+    return int(s[0])
+
+
+def ct_level_2(value):
+    s = str(value).split('.')
+    if len(s) > 1:
+        return int(s[1])
+
+
+def ct_level_3(value):
+    s = str(value).split('.')
+    if len(s) > 2:
+        return int(s[2])
