@@ -311,6 +311,56 @@ def scat_diff():
     return render_template('table_output.html', data=output)
 
 
+@app.route('/spending_nuts1/')
+def spending_nuts1_list():
+    sql = '''
+    SELECT code, "desc" FROM c_nuts1
+    ORDER BY "desc"
+    '''
+    output = show_result(sql)
+    output['links'][1] = ('spending_nuts1', 'nuts1', 0)
+    return render_template('table_output.html', data=output)
+    sql = '''
+    SELECT .desc, c.ct_level, s.ct_code,
+    s.adj_spend_per_capita, s.percent_from_national
+    FROM c_ct c
+    LEFT JOIN s_consumer_spend_by_nuts1 s
+    ON c.code = s.ct_code
+    WHERE nuts1_code = :nuts1
+    ORDER BY
+    c.l1 NULLS FIRST,
+    c.l2 NULLS FIRST,
+    c.l3 NULLS FIRST
+    '''
+    output = run_sql(sql, nuts1=nuts1)
+    return render_template(
+        'ct_spending.html', data=output, nuts1_desc=nuts1_desc
+    )
+
+
+@app.route('/spending_nuts1/<nuts1>')
+def spending_nuts1(nuts1):
+    nuts1_desc = codes_data.get('nuts1').get(nuts1)
+    if not nuts1_desc:
+        abort(404)
+    sql = '''
+    SELECT c.desc, c.ct_level, s.ct_code,
+    s.adj_spend_per_capita, s.percent_from_national
+    FROM c_ct c
+    LEFT JOIN s_consumer_spend_by_nuts1 s
+    ON c.code = s.ct_code
+    WHERE nuts1_code = :nuts1
+    ORDER BY
+    c.l1 NULLS FIRST,
+    c.l2 NULLS FIRST,
+    c.l3 NULLS FIRST
+    '''
+    output = run_sql(sql, nuts1=nuts1)
+    return render_template(
+        'ct_spending.html', data=output, nuts1_desc=nuts1_desc
+    )
+
+
 @app.route('/premises/<uarn>')
 def premises(uarn):
     data = {'uarn': uarn}
