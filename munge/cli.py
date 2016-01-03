@@ -68,7 +68,7 @@ def vao(verbose=False):
 
 def vao_full(verbose=False):
     from vao_importers import import_vao_full
-    import_vao_full(verbose)
+    import_vao_full(verbose=verbose)
 
 
 def clean_db(verbose=False):
