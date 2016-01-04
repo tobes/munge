@@ -41,7 +41,8 @@
     {% set cell = cell_function(data.functions[loop.index - 1], cell) %}
   {% endif %}
   {% set type = data.fields[loop.index -1].type %}
-  <td{{ make_td_class(type, data.title) }}>
+  {% set name = data.fields[loop.index -1].name %}
+  <td{{ make_td_class(type, name) }}>
   {% if (loop.index - 1) in data.links %}
     {% set link = data.links[loop.index - 1] %}
     <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>
