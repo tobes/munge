@@ -104,7 +104,8 @@ def get_fns(fields):
     return fns
 
 
-def import_csv(reader, table_name, fields=None, skip_first=False, verbose=False, limit=None):
+def import_csv(reader, table_name, fields=None, skip_first=False,
+               verbose=False, limit=None):
     temp_table = config.TEMP_TABLE_STR + table_name
     count = 0
     t_fields = []

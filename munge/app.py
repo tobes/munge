@@ -1,5 +1,4 @@
 import re
-from numbers import Number
 import urllib
 
 from flask import Flask, render_template, abort, request, escape, Markup
@@ -155,7 +154,7 @@ def show_result(sql, table=None, data=None):
         'data': result,
         'offset': offset,
     }
-    if not 'raw' in request.args:
+    if 'raw' not in request.args:
         output['links'] = auto_links(fields)
         output['functions'] = auto_functions(fields)
     return output
@@ -177,6 +176,7 @@ def tables():
     for table in sorted(table_view_list()):
         out.append(table)
     return render_template('tables.html', data=out)
+
 
 @app.route('/table/<table>')
 def table(table=None):
