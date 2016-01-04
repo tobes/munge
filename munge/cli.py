@@ -17,6 +17,12 @@ def export_custom(verbose=False):
     import custom_output
 
 
+def db_functions(verbose=False):
+    if verbose:
+        print('Creating db functions')
+    import postgres_functions
+
+
 def import_all(verbose=False):
     if verbose:
         print('Importing all tables')
@@ -91,6 +97,7 @@ def main():
         'vao_full',
         'clean_db',
         'spending',
+        'db_functions',
     ]
 
     parser = argparse.ArgumentParser(
@@ -130,3 +137,5 @@ def main():
         vao_full(verbose=args.v)
     elif args.command == 'clean_db':
         clean_db(verbose=args.v)
+    elif args.command == 'db_functions':
+        db_functions(verbose=args.v)
