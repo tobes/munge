@@ -10,7 +10,7 @@
 <div class="spending_row_{{ level }}">
   <span class="spending_desc">{{ desc }}</span>
   <span class="spending_capita">{{ format_number(per_capita) }}</span>
-  <span class="spending_percent">{{ percent_from_national }}%</span>
+  <span class="spending_percent">{{ format_number(percent_from_national) }}%</span>
 </div>
 {% endfor %}
 {% endblock %}

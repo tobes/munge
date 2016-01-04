@@ -81,13 +81,17 @@ def format_table_value(arg, value):
     if value is None:
         return Markup('<span class="null">&lt;Null&gt;</span>')
     if arg in sa_common.FLOAT_TYPES:
-        return '{:20,.2f}'.format(value)
+        return format_number(value)
     return value
 
 
 @app.template_global()
 def format_number(value):
-    return '{:20,.2f}'.format(value)
+    formatted = '{:20,.2f}'.format(value)
+    if value < 0:
+        html = make_html_span('value', 'negative')
+        return html_format(html, value=formatted)
+    return formatted
 
 
 def run_sql(*args, **kw):
