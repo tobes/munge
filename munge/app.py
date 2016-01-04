@@ -69,8 +69,8 @@ def cell_function(info, value):
 
 
 @app.template_global()
-def make_td_class(arg):
-    if arg in sa_common.NUMERIC_TYPES:
+def make_td_class(arg, title):
+    if title.endswith('_code') and arg in sa_common.NUMERIC_TYPES:
         return Markup(' class="numeric"')
     return ''
 

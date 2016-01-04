@@ -40,13 +40,13 @@
   {% if (loop.index - 1) in data.functions %}
     {% set cell = cell_function(data.functions[loop.index - 1], cell) %}
   {% endif %}
-  <td{{ make_td_class(data.fields[loop.index -1].type) }}>
+  {% set type = data.fields[loop.index -1].type %}
+  <td{{ make_td_class(type, data.title) }}>
   {% if (loop.index - 1) in data.links %}
-  {% set link = data.links[loop.index - 1] %}
-  <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>
+    {% set link = data.links[loop.index - 1] %}
+    <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>
   {% else %}
-  {{ format_table_value(data.fields[loop.index -1].type, cell) }}
-
+    {{ format_table_value(type, cell) }}
   {% endif %}
  </td>
 {% endfor %}
