@@ -421,13 +421,13 @@ def postcode_premises():
         '''
     elif postcode:
         print('postcode %s' % postcode)
-        data = {'postcode': postcode.replace(' ', '')}
+        data = {'postcode': postcode + '%'}
         sql = '''
         SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
         FROM vao_list v
         LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
         LEFT JOIN c_scat s ON s.code = v.scat_code
-        WHERE v.pcc = :postcode
+        WHERE v.pc LIKE :postcode
         ORDER BY s.desc, v.pc
         '''
     if sql:
