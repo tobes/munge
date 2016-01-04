@@ -293,6 +293,9 @@ def scat_areas(scat_code):
     s.desc,
     count,
     total_m2,
+    mean_m2,
+    median_m2,
+    mode_m2,
     total_value,
     total_area_price
     FROM s_vao_base_areas t

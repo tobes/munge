@@ -169,13 +169,66 @@ summary_data = [
             SELECT la_code, scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
+            avg(total_area) as mean_m2,
+            usr_median(total_area) as median_m2,
+            usr_mode(total_area) as mode_m2,
             sum(total_area * unadjusted_price) as total_area_price,
             (sum(total_area * unadjusted_price) - sum(total_value)) as diff
             FROM "{t1}"
             GROUP BY la_code, scat_code
         ''',
         'tables': ['v_vao_base'],
-
+    },
+    {
+        'name': 's_vao_scat_median_areas',
+        'sql': '''
+        SELECT code as scat_code,
+        (
+            WITH y AS (
+               SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
+               FROM   "{t1}"
+               WHERE  total_area IS NOT NULL
+               AND scat_code = code
+               )
+            , c AS (SELECT count(*) AS ct FROM y)
+            SELECT CASE WHEN c.ct%2 = 0 THEN
+                      round((SELECT avg(total_area) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
+                   ELSE
+                            (SELECT     total_area  FROM y WHERE y.rn = (c.ct+1)/2)
+                   END AS median_m2
+            FROM c
+        )
+        FROM "{t2}"
+        ''',
+        'tables': ['v_vao_base', 'c_scat'],
+    },
+    {
+        'name': 's_vao_base_areas_min_max',
+        'sql': '''
+            SELECT scat_code,
+            max(median_m2) as max_med_m2,
+            min(median_m2) as min_med_m2
+            FROM "{t1}"
+            GROUP BY scat_code
+        ''',
+        'tables': ['s_vao_base_areas'],
+    },
+    {
+        'name': 's_vao_base_areas_national',
+        'sql': '''
+            SELECT v.scat_code, count(v.*),
+            sum(v.total_area) as total_m2,
+            sum(v.total_value) as total_value,
+            avg(v.total_area) as mean_m2,
+            m.median_m2,
+            la.min_med_m2,
+            la.max_med_m2
+            FROM "{t1}" v
+            LEFT OUTER JOIN "{t2}" m On v.scat_code = m.scat_code
+            LEFT OUTER JOIN "{t3}" la On v.scat_code = la.scat_code
+            GROUP BY v.scat_code, m.median_m2, la.min_med_m2, la.max_med_m2
+        ''',
+        'tables': ['v_vao_base', 's_vao_scat_median_areas', 's_vao_base_areas_min_max'],
     },
     {
         'name': 's_vao_base_missing_list',
