@@ -40,8 +40,8 @@ def get_sequence_names():
     return sa_common.get_sequence_names(engine)
 
 
-def table_list(*args, **kw):
-    return sa_common.table_list(engine, *args, **kw)
+def table_list():
+    return sa_common.table_list(engine)
 
 
 def get_result_fields(*args, **kw):
