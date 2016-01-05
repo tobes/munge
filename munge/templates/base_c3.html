@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <!-- Load c3.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.css" rel="stylesheet" type="text/css">
+
+    <!-- Load d3.js and c3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+
+{% for sg in output %}
+{% set data = output[sg] %}
+<h1>{{ data['desc'] }} - Nation wide median<br/>
+    ( {{ data['area'] or 0 }} m2 )<br/>
+[ sample size: {{ data['count'] }} ]</h1>
+
+<p>Graph of la count / scat group median</p>
+<div id="chart_{{ sg }}"></div>
+
+<h2>Components - Nation wide median</h2>
+{% for scat in data['scat_info'] %}
+<p>{{ scat[0] }}: ( {{ scat[1] }} m2 ) [ sample size: {{ scat[2] }} ]</p>
+{% endfor %}
+
+<script>
+var chart_{{ sg }} = c3.generate({
+    data: {
+        columns: [
+        {{ data['counts']|safe }}
+        ],
+        type: 'bar'
+    },
+        axis: {
+        x: {
+            type: 'category',
+            categories: {{ data['values']|safe }}
+        }
+    },
+bindto: '#chart_{{ sg }}'
+});
+</script>
+
+<hr>
+{% endfor %}
+
+{% endblock %}

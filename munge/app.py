@@ -424,3 +424,57 @@ def postcode_premises():
         output = None
         postcode = ''
     return render_template('postcode.html', data=output, postcode=postcode)
+
+
+@app.route('/scat_group_area_graph/')
+def scat_group_area_graph():
+    output = {}
+
+    sql = '''
+    SELECT code, "desc", median_m2, m.count
+    FROM c_scat_group sg
+    LEFT JOIN s_vao_scat_group_median_areas m on m.scat_group_code = sg.code
+    '''
+
+    scat_groups = run_sql(sql)
+
+    for scat_group, desc, area, sg_count in scat_groups:
+        sql = '''
+        SELECT s.desc, m.median_m2, m.count
+        FROM s_vao_scat_median_areas m
+        LEFT JOIN c_scat s ON s.code = m.scat_code
+        WHERE m.median_m2 > 0 and s.scat_group_code = :scat_group
+        ORDER BY m.median_m2
+        '''
+        scat_info = []
+        results = run_sql(sql, scat_group=scat_group)
+        for row in results:
+            scat_info.append([row[0], row[1], row[2]])
+
+
+        sql = '''
+        SELECT round(s.median_m2/5)*5, count(*)
+        FROM s_vao_base_areas_scat_group s
+        WHERE scat_group_code = :scat_group
+        GROUP BY round(s.median_m2/5)*5
+        ORDER BY round(s.median_m2/5)*5
+        '''
+
+        results = run_sql(sql, scat_group=scat_group)
+        counts = ['count']
+        values = []
+        for value, count in results:
+            values.append(value)
+            counts.append(int(count))
+        output[scat_group] = {
+            'values': values,
+            'counts': counts,
+            'desc': desc,
+            'area': area,
+            'count': sg_count,
+            'scat_info': scat_info,
+        }
+        print scat_info
+
+
+    return render_template('base_c3.html', output=output)
