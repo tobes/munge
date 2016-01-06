@@ -1,17 +1,16 @@
 import csv
 import os.path
 
-import config
-from csv_util import import_csv
-from sa_util import swap_tables
+from munge import config
+from munge.csv_util import import_csv
+from munge.sa_util import swap_tables
 
 
-filename = 'pc/ONSPD_MAY_2015_UK.csv'
+FILENAME = 'pc/ONSPD_MAY_2015_UK.csv'
 
 
-def import_postcodes(verbose=False):
-    global filename
-    filename = os.path.join(config.DATA_PATH, filename)
+def import_postcodes(verbose=0):
+    filename = os.path.join(config.DATA_PATH, FILENAME)
 
     table_name = 'postcode'
 
@@ -75,7 +74,6 @@ def import_postcodes(verbose=False):
 
     with open(filename, 'rb') as f:
         reader = csv.reader(f, dialect=csv.excel)
-
         import_csv(reader, table_name, fields=fields,
                    skip_first=True, verbose=verbose)
         swap_tables()

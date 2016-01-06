@@ -33,7 +33,7 @@ def import_all(verbose=False):
 def postcode(verbose=False):
     if verbose:
         print('Importing postcodes')
-    from postcode_import import import_postcodes
+    from importers.postcode import import_postcodes
     import_postcodes(verbose=verbose)
 
 
