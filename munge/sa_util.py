@@ -160,7 +160,8 @@ def create_table(table, fields, verbose=False):
     for field in fields:
         if field['pk']:
             pk.append('"%s"' % field['name'])
-    sql_fields.append('\tPRIMARY KEY (%s)' % ', '.join(pk))
+    if pk:
+        sql_fields.append('\tPRIMARY KEY (%s)' % ', '.join(pk))
     sql.append(',\n'.join(sql_fields))
     sql.append(')')
     sql = '\n'.join(sql)
