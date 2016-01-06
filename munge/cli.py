@@ -26,8 +26,8 @@ def db_functions(verbose=False):
 def import_all(verbose=False):
     if verbose:
         print('Importing all tables')
-    from csv_util import import_all
-    import_all(verbose=verbose)
+    from importers.codes import importer
+    importer(verbose=verbose)
 
 
 def postcode(verbose=False):

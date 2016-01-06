@@ -107,7 +107,7 @@ def get_fns(fields):
 
 
 def import_csv(reader, table_name, fields=None, skip_first=False,
-               verbose=False, limit=None):
+               verbose=0, limit=None):
     temp_table = config.TEMP_TABLE_STR + table_name
     count = 0
     t_fields = []
@@ -164,15 +164,15 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
     build_indexes(temp_table, t_fields, verbose=verbose)
 
 
-def import_single(filename, table_name, verbose=False, **kw):
+def import_single(filename, table_name, verbose=0, **kw):
     if verbose:
         print('importing %s' % table_name)
     reader = unicode_csv_reader(filename, **kw)
     import_csv(reader, table_name, verbose=verbose)
 
 
-def import_all(verbose=False):
-    files = glob.glob(os.path.join(config.DATA_PATH, 'import', '*.csv'))
+def import_all(directory, verbose=0):
+    files = glob.glob(os.path.join(config.DATA_PATH, directory, '*.csv'))
     for f in files:
         table_name = os.path.splitext(os.path.basename(f))[0]
         import_single(f, table_name, verbose=verbose)

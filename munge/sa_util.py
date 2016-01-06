@@ -141,7 +141,7 @@ def make_tables_dict(tables):
     return output
 
 
-def create_table(table, fields, verbose=False):
+def create_table(table, fields, verbose=0):
     sql = 'DROP TABLE IF EXISTS "%s"' % table
     run_sql(sql)
     sql = ['CREATE TABLE "%s" (' % table]
@@ -166,7 +166,9 @@ def create_table(table, fields, verbose=False):
     sql.append(')')
     sql = '\n'.join(sql)
     if verbose:
-        print sql
+        print('Creating table %s' % table)
+        if verbose > 1:
+            print(sql)
     run_sql(sql)
 
 
