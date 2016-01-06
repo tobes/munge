@@ -38,7 +38,7 @@ def postcode(verbose=False):
 
 
 def import_csv(args):
-    verbose = args.v
+    verbose = args.verbose
     filename = args.filename
     tablename = args.tablename
     delimiter = args.delimiter
@@ -103,8 +103,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Command line interface for munge'
     )
-    parser.add_argument("-v", help="verbose output", action='store_true')
-
+    parser.add_argument('-v', '--verbose', action='count', default=0)
     subparsers = parser.add_subparsers(help='commands', dest='command')
 
     for command in commands:
@@ -118,24 +117,24 @@ def main():
 
     args = parser.parse_args()
     if args.command == 'export_all':
-        export_all(verbose=args.v)
+        export_all(verbose=args.verbose)
     elif args.command == 'import_all':
-        import_all(verbose=args.v)
+        import_all(verbose=args.verbose)
     elif args.command == 'postcode':
-        postcode(verbose=args.v)
+        postcode(verbose=args.verbose)
     elif args.command == 'export_custom':
-        export_custom(verbose=args.v)
+        export_custom(verbose=args.verbose)
     elif args.command == 'import_csv':
         import_csv(args)
     elif args.command == 'web':
-        webserver(verbose=args.v)
+        webserver(verbose=args.verbose)
     elif args.command == 'spending':
-        spending(verbose=args.v)
+        spending(verbose=args.verbose)
     elif args.command == 'vao':
-        vao(verbose=args.v)
+        vao(verbose=args.verbose)
     elif args.command == 'vao_full':
-        vao_full(verbose=args.v)
+        vao_full(verbose=args.verbose)
     elif args.command == 'clean_db':
-        clean_db(verbose=args.v)
+        clean_db(verbose=args.verbose)
     elif args.command == 'db_functions':
-        db_functions(verbose=args.v)
+        db_functions(verbose=args.verbose)
