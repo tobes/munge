@@ -170,18 +170,36 @@ def create_table(table, fields, verbose=False):
 
 
 def build_indexes(table_name, t_fields, verbose=False):
-    index_fields = [f['name'] for f in t_fields if f.get('index')]
+    # get indexed fields
+    index_fields = [
+        (f['index_key'], f['name'])
+        for f in t_fields if f.get('index')
+    ]
+    # group them by index_key
+    index_dict = {}
+    for key, name in index_fields:
+        index_dict.setdefault(key, []).append(name)
+    # unpack into individual indexes
+    indexes = []
+    for k, v in index_dict.iteritems():
+        if k is None:
+            for ind in v:
+                indexes.append([ind])
+        else:
+            indexes.append(v)
     sql_list = []
-    for field in index_fields:
-        if verbose:
-            print('creating index of %s' % field)
-        sql = 'CREATE INDEX "{idx_name}" ON "{table}" ("{field}");'
+    for index in indexes:
+        quoted_index_fields = ['"%s"' % i for i in index]
+        sql = 'CREATE INDEX "{idx_name}" ON "{table}" ({index});'
         sql = sql.format(
-            idx_name='%s_idx_%s' % (table_name, field),
+            idx_name='%s_idx_%s' % (table_name, '_'.join(index)),
             table=table_name,
-            field=field,
+            index=', '.join(quoted_index_fields),
         )
         sql_list.append(sql)
+        if verbose:
+            print('creating index of %s' % index)
+            print sql
     if sql_list:
         run_sql('\n'.join(sql_list))
 
