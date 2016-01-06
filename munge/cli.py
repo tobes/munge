@@ -48,14 +48,20 @@ def defined_tables():
 
 def clean_db(args):
     delete_list = []
-    for table in sorted(list(
-            set(sa_util.table_view_list())
-            - set(defined_tables())
-            - set(sa_util.dependent_objects())
-        )):
-        response = raw_input('Delete table `%s` [N/y]:' % table)
+    tables = sorted(list(
+        set(sa_util.table_view_list())
+        - set(defined_tables())
+        - set(sa_util.dependent_objects())
+    ))
+    print 'Unknown tables'
+    for table in tables:
+        print '\t%s' % table
+    for table in tables:
+        response = raw_input('Delete table `%s` [No/yes/quit]:' % table)
         if response and response.upper()[0] == 'Y':
             delete_list.append(table)
+        if response and response.upper()[0] == 'Q':
+            return
     for table in delete_list:
         sa_util.drop_table(table, verbose=args.verbose)
     sa_util.clear_temp_objects(verbose=args.verbose)
