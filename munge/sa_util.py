@@ -154,10 +154,13 @@ def create_table(table, fields, verbose=False):
             field['name'],
             field['type']
         )
-        if field['pk']:
-            col += ' PRIMARY KEY'
-
         sql_fields.append(col)
+    # Primary Key
+    pk = []
+    for field in fields:
+        if field['pk']:
+            pk.append('"%s"' % field['name'])
+    sql_fields.append('\tPRIMARY KEY (%s)' % ', '.join(pk))
     sql.append(',\n'.join(sql_fields))
     sql.append(')')
     sql = '\n'.join(sql)
