@@ -227,11 +227,18 @@ def insert_rows(table, fields):
     return sql
 
 
-def summary(table_name, sql, tables, verbose=False, limit=None):
+def build_summary(data, verbose=False, limit=None):
+    if data.get('disabled'):
+        return
+    table_name = data['name']
+    sql = data['sql']
+    tables = data['tables']
+
+    table_name = config.TEMP_TABLE_STR + table_name
     if verbose:
         print('creating summary table %s' % table_name)
     tables_dict = make_tables_dict(tables)
-    if verbose:
+    if verbose > 1:
         print(sql.format(**tables_dict))
     result = run_sql(sql.format(**tables_dict))
     first = True
@@ -263,7 +270,15 @@ def summary(table_name, sql, tables, verbose=False, limit=None):
         build_indexes(table_name, fields, verbose=verbose)
 
 
-def build_view(view_name, sql, tables, verbose=False):
+def build_summaries(data, verbose=False):
+    for info in data:
+        build_summary(info, verbose=verbose)
+
+
+def build_view(data, verbose=0):
+    view_name = data['name']
+    sql = data['sql']
+    tables = data['tables']
     view_name = config.TEMP_TABLE_STR + view_name
     drop_sql = 'DROP VIEW IF EXISTS "%s"' % view_name
     run_sql(drop_sql)
@@ -271,9 +286,14 @@ def build_view(view_name, sql, tables, verbose=False):
         print('creating view %s' % view_name)
     tables_dict = make_tables_dict(tables)
     tables_dict['name'] = view_name
-    if verbose:
+    if verbose > 1:
         print(sql.format(**tables_dict))
     run_sql(sql.format(**tables_dict))
+
+
+def build_views(data, verbose=0):
+    for info in data:
+        build_view(info, verbose=verbose)
 
 
 def swap_table(old_name, new_name):

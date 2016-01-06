@@ -2,7 +2,7 @@ import os.path
 
 from munge import config
 from munge.csv_util import import_csv, unicode_csv_reader
-from munge.sa_util import swap_tables, summary, build_view
+from munge.sa_util import build_summaries, build_views
 
 
 DIRECTORY = 'spending'
@@ -11,13 +11,13 @@ HEI1_FILE = 'spending_by_nuts1.csv'
 
 TABLE_NAME = 'nuts1_ct_spending_factor'
 
-fields = [
+TABLE_FIELDS = [
     'ct_code',
     'nuts1_code',
     'factor:double precision',
 ]
 
-summary_data = [
+SUMMARIES_DATA = [
     {
         'name': 's_population_by_nuts1',
         'sql': '''
@@ -47,6 +47,7 @@ summary_data = [
             'v_consumer_trend_latest',
             'population_by_la',
         ],
+        'disabled': False,
     },
 
     {
@@ -76,10 +77,11 @@ summary_data = [
             's_population_by_nuts1',
             's_consumer_spend_national',
         ],
+        'disabled': False,
     },
 ]
 
-views_data = [
+VIEWS_DATA = [
     {
         'name': 'v_consumer_trend_latest',
         'sql': '''
@@ -91,26 +93,6 @@ views_data = [
         'tables': ['consumer_trend_yearly'],
     },
 ]
-
-
-def build_summaries(verbose=False):
-    for info in summary_data:
-        summary(
-            config.TEMP_TABLE_STR + info['name'],
-            info['sql'],
-            info['tables'],
-            verbose=verbose
-        )
-
-
-def build_views(verbose=False):
-    for info in views_data:
-        build_view(
-            info['name'],
-            info['sql'],
-            info['tables'],
-            verbose=verbose
-        )
 
 
 def hei1_reader():
@@ -135,9 +117,8 @@ def importer(verbose=0):
     import_csv(
         reader,
         TABLE_NAME,
-        fields=fields,
+        fields=TABLE_FIELDS,
         verbose=verbose
     )
-    build_views(verbose=verbose)
-    build_summaries(verbose=verbose)
-    swap_tables(verbose=verbose)
+    build_views(VIEWS_DATA, verbose=verbose)
+    build_summaries(SUMMARIES_DATA, verbose=verbose)
