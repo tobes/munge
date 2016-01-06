@@ -143,13 +143,13 @@ vao_base_07_fields = [
 ]
 
 vao_types = [
-    ('01', 'vao_base', vao_base_fields),
-    ('02', 'vao_line', vao_base_02_fields),
-    ('03', 'vao_additions', vao_base_03_fields),
-    ('04', 'vao_plant', vao_base_04_fields),
-    ('05', 'vao_parking', vao_base_05_fields),
-    ('06', 'vao_adj', vao_base_06_fields),
-    ('07', 'vao_adj_totals', vao_base_07_fields),
+    ('01', 'vao_base_raw', vao_base_fields),
+    ('02', 'vao_line_raw', vao_base_02_fields),
+    ('03', 'vao_additions_raw', vao_base_03_fields),
+    ('04', 'vao_plant_raw', vao_base_04_fields),
+    ('05', 'vao_parking_raw', vao_base_05_fields),
+    ('06', 'vao_adj_raw', vao_base_06_fields),
+    ('07', 'vao_adj_totals_raw', vao_base_07_fields),
 ]
 
 
