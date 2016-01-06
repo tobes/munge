@@ -67,7 +67,7 @@ def clear_temp_objects(verbose=False):
         sql = 'DROP SEQUENCE "{name}";'.format(name=name)
 
 
-def swap_tables(verbose=False):
+def swap_tables(verbose=0):
     ''' SWAPS our temp tables, including renaming indexes and sequences
     '''
     temp_table_str = config.TEMP_TABLE_STR
@@ -124,7 +124,7 @@ def swap_tables(verbose=False):
         sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
 
     sql_list.append('COMMIT;')
-    if verbose:
+    if verbose > 1:
         print('\n'.join(sql_list))
     conn.execute('\n'.join(sql_list))
 
