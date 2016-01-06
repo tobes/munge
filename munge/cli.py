@@ -40,7 +40,7 @@ def defined_tables():
 
 
 def clean_db(args):
-    delete_list = []
+    sa_util.clear_temp_objects(verbose=args.verbose)
     tables = sorted(list(
         set(sa_util.table_view_list())
         - set(defined_tables())
@@ -52,12 +52,9 @@ def clean_db(args):
     for table in tables:
         response = raw_input('Delete table `%s` [No/yes/quit]:' % table)
         if response and response.upper()[0] == 'Y':
-            delete_list.append(table)
+            sa_util.drop_table_or_view(table, verbose=args.verbose)
         if response and response.upper()[0] == 'Q':
             return
-    for table in delete_list:
-        sa_util.drop_table(table, verbose=args.verbose)
-    sa_util.clear_temp_objects(verbose=args.verbose)
 
 
 def export_all(verbose=False):

@@ -53,10 +53,12 @@ def get_result_fields(*args, **kw):
 
 
 def clear_temp_objects(verbose=False):
+    dependents = dependent_objects()
     # tables
-    tables = [t for t in table_list() if t.startswith(config.TEMP_TABLE_STR)]
+    tables = [t for t in table_view_list() if t.startswith(config.TEMP_TABLE_STR)]
     for table in tables:
-        drop_table(table, verbose=verbose)
+        if table not in dependents:
+            drop_table_or_view(table, verbose=verbose)
     # sequences
     sequence_names = [
         s for s in get_sequence_names()
@@ -68,13 +70,21 @@ def clear_temp_objects(verbose=False):
         sql = 'DROP SEQUENCE "{name}";'.format(name=name)
 
 
-def drop_table(table, verbose=0):
-    if verbose:
-        print('Dropping table %s' % table)
-    sql = 'DROP TABLE "{table}";'.format(table=table)
-    if verbose < 1:
-        print(sql)
-    run_sql(sql)
+def drop_table_or_view(table, verbose=0):
+    sql = None
+    if table in table_list():
+        if verbose:
+            print('Dropping table %s' % table)
+        sql = 'DROP TABLE "{table}";'
+    elif table in view_list():
+        if verbose:
+            print('Dropping view %s' % table)
+        sql = 'DROP VIEW "{table}";'
+    if sql:
+        sql = sql.format(table=table)
+        if verbose < 1:
+            print(sql)
+        run_sql(sql)
 
 
 def swap_tables(verbose=0):
