@@ -258,8 +258,9 @@ def summary(table_name, sql, tables, verbose=False, limit=None):
 
     if verbose:
         print('%s rows imported' % (count))
-    # Add indexes
-    build_indexes(table_name, fields, verbose=verbose)
+    if count:
+        # Add indexes
+        build_indexes(table_name, fields, verbose=verbose)
 
 
 def build_view(view_name, sql, tables, verbose=False):
