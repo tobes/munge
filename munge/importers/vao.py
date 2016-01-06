@@ -1,11 +1,13 @@
 import os.path
 
-import config
-from csv_util import unicode_csv_reader, import_csv
-from sa_util import swap_tables, summary, build_view
+from munge import config
+from munge.csv_util import import_csv, unicode_csv_reader
+
+DIRECTORY = 'spending'
 
 
-vao_list_file = 'vao/LIST_2010_MERGED.dta.30Sep2015'
+VAO_LIST_FILE = 'LIST_2010_MERGED.dta.30Sep2015'
+VAO_FILE = 'SMV_2010_MERGED.dta.30Sep2015'
 
 vao_list_fields = [
     '*@id:bigserial',
@@ -39,8 +41,6 @@ vao_list_fields = [
     'sub_street_level_1',
     '-extra_column_in_data',
 ]
-
-vao_file = 'vao/SMV_2010_MERGED.dta.30Sep2015'
 
 vao_base_fields = [
     '*@id:bigserial',
@@ -153,7 +153,7 @@ vao_types = [
 ]
 
 
-summary_data = [
+SUMMARIES_DATA = [
     {
         'name': 's_vao_scat_group_median_areas',
         'sql': '''
@@ -304,7 +304,7 @@ summary_data = [
 ]
 
 
-views_data = [
+VIEWS_DATA = [
     {
         'name': 'v_vao_base',
         'sql': '''
@@ -318,8 +318,8 @@ views_data = [
 ]
 
 
-def vao_reader(filename, data_type):
-    f = os.path.join(config.DATA_PATH, filename)
+def vao_reader(data_type):
+    f = os.path.join(config.DATA_PATH, DIRECTORY, VAO_FILE)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     uarn = None
     for row in reader:
@@ -336,41 +336,18 @@ def import_vao_summary(verbose=False):
     for rec_type, table, fields in vao_types:
         if verbose:
             print('importing %s' % table)
-        reader = vao_reader(vao_file, rec_type)
+        reader = vao_reader(rec_type)
         import_csv(reader, table, fields=fields, verbose=verbose)
 
 
 def import_vao_list(verbose=False):
     if verbose:
         print('importing vao_list')
-    f = os.path.join(config.DATA_PATH, vao_list_file)
+    f = os.path.join(config.DATA_PATH, DIRECTORY, VAO_LIST_FILE)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
 
 
-def build_summaries(verbose=False):
-    for info in summary_data:
-        summary(
-            config.TEMP_TABLE_STR + info['name'],
-            info['sql'],
-            info['tables'],
-            verbose=verbose
-        )
-
-
-def build_views(verbose=False):
-    for info in views_data:
-        build_view(
-            info['name'],
-            info['sql'],
-            info['tables'],
-            verbose=verbose
-        )
-
-
-def import_vao_full(verbose=False):
+def importer(verbose=False):
     import_vao_list(verbose=verbose)
     import_vao_summary(verbose=verbose)
-    build_views(verbose=verbose)
-    build_summaries(verbose=verbose)
-    swap_tables(verbose=verbose)

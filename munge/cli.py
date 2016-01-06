@@ -2,14 +2,33 @@ import argparse
 import os.path
 
 import config
+import importers
+from sa_util import swap_tables, build_views, build_summaries
 
 
 def import_module(args):
-    verbose = args.verbose
-    modules = args.module
-    import importers
-    from csv_util import swap_tables
-    for module in modules:
+    for module in args.module:
+        m = getattr(importers, module)
+        m.importer(verbose=args.verbose)
+    views(args)
+    summeries(args)
+    swap_tables(verbose=args.verbose)
+
+
+def views(args):
+    for module in args.module:
+        m = getattr(importers, module)
+        data = getattr(m, 'VIEWS_DATA')
+        if data:
+            build_views(data, verbose=args.verbose)
+
+
+def summeries(args):
+    for module in args.module:
+        m = getattr(importers, module)
+        data = getattr(m, 'SUMMARIES_DATA')
+        if data:
+            build_summaries(data, verbose=args.verbose)
         m = getattr(importers, module)
         m.importer(verbose=verbose)
     swap_tables()
@@ -57,18 +76,6 @@ def webserver(verbose=False):
     app.run(debug=True)
 
 
-def vao(verbose=False):
-    from vao_importers import build_summaries, build_views, swap_tables
-    build_views(verbose=verbose)
-    build_summaries(verbose=verbose)
-    swap_tables(verbose=verbose)
-
-
-def vao_full(verbose=False):
-    from vao_importers import import_vao_full
-    import_vao_full(verbose=verbose)
-
-
 def clean_db(verbose=False):
     from sa_util import clear_temp_objects
     from csv_util import import_drop_code_tables, import_drop_lookup_tables
@@ -83,8 +90,6 @@ def main():
         'export_all',
         'export_custom',
         'web',
-        'vao',
-        'vao_full',
         'clean_db',
         'db_functions',
     ]
@@ -104,24 +109,33 @@ def main():
     import_csv_parser.add_argument('--tablename', default=None)
     import_csv_parser.add_argument('filename')
 
-    import_parser = subparsers.add_parser('import')
-    import_parser.add_argument('module', nargs='*')
+    module_commands = [
+        'import',
+        'views',
+        'summeries',
+    ]
+
+    for command in module_commands:
+        module_parser = subparsers.add_parser(command)
+        module_parser.add_argument('module', nargs='*')
 
     args = parser.parse_args()
     if args.command == 'export_all':
         export_all(verbose=args.verbose)
     elif args.command == 'import':
         import_module(args)
+    elif args.command == 'views':
+        views(args)
+        swap_tables(verbose=args.verbose)
+    elif args.command == 'summeries':
+        summeries(args)
+        swap_tables(verbose=args.verbose)
     elif args.command == 'export_custom':
         export_custom(verbose=args.verbose)
     elif args.command == 'import_csv':
         import_csv(args)
     elif args.command == 'web':
         webserver(verbose=args.verbose)
-    elif args.command == 'vao':
-        vao(verbose=args.verbose)
-    elif args.command == 'vao_full':
-        vao_full(verbose=args.verbose)
     elif args.command == 'clean_db':
         clean_db(verbose=args.verbose)
     elif args.command == 'db_functions':

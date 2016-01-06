@@ -3,7 +3,6 @@ import os.path
 
 from munge import config
 from munge.csv_util import import_csv
-from munge.sa_util import swap_tables
 
 
 DIRECTORY = 'pc'
@@ -82,4 +81,3 @@ def importer(verbose=0):
         reader = csv.reader(f, dialect=csv.excel)
         import_csv(reader, TABLE_NAME, fields=fields,
                    skip_first=True, verbose=verbose)
-        swap_tables()

@@ -120,5 +120,3 @@ def importer(verbose=0):
         fields=TABLE_FIELDS,
         verbose=verbose
     )
-    build_views(VIEWS_DATA, verbose=verbose)
-    build_summaries(SUMMARIES_DATA, verbose=verbose)
