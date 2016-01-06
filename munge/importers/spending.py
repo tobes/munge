@@ -1,11 +1,15 @@
 import os.path
 
-import config
-from csv_util import unicode_csv_reader, import_csv
-from sa_util import swap_tables, summary, build_view
+from munge import config
+from munge.csv_util import import_csv, unicode_csv_reader
+from munge.sa_util import swap_tables, summary, build_view
 
 
-f = 'spending/spending_by_nuts1.csv'
+DIRECTORY = 'spending'
+
+HEI1_FILE = 'spending_by_nuts1.csv'
+
+TABLE_NAME = 'nuts1_ct_spending_factor'
 
 fields = [
     'ct_code',
@@ -109,8 +113,8 @@ def build_views(verbose=False):
         )
 
 
-def hei1_reader(filename):
-    f = os.path.join(config.DATA_PATH, filename)
+def hei1_reader():
+    f = os.path.join(config.DATA_PATH, DIRECTORY, HEI1_FILE)
     reader = unicode_csv_reader(f)
     first = True
     for row in reader:
@@ -124,13 +128,13 @@ def hei1_reader(filename):
             yield out
 
 
-def import_spending(verbose=False):
+def importer(verbose=0):
     if verbose:
         print('importing spending')
-    reader = hei1_reader(f)
+    reader = hei1_reader()
     import_csv(
         reader,
-        'nuts1_ct_spending_factor',
+        TABLE_NAME,
         fields=fields,
         verbose=verbose
     )

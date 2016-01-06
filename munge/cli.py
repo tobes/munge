@@ -57,11 +57,6 @@ def webserver(verbose=False):
     app.run(debug=True)
 
 
-def spending(verbose=False):
-    from spending_import import import_spending
-    import_spending(verbose=verbose)
-
-
 def vao(verbose=False):
     from vao_importers import build_summaries, build_views, swap_tables
     build_views(verbose=verbose)
@@ -91,7 +86,6 @@ def main():
         'vao',
         'vao_full',
         'clean_db',
-        'spending',
         'db_functions',
     ]
 
@@ -124,8 +118,6 @@ def main():
         import_csv(args)
     elif args.command == 'web':
         webserver(verbose=args.verbose)
-    elif args.command == 'spending':
-        spending(verbose=args.verbose)
     elif args.command == 'vao':
         vao(verbose=args.verbose)
     elif args.command == 'vao_full':
