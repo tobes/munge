@@ -171,12 +171,22 @@ def import_single(filename, table_name, verbose=0, **kw):
     import_csv(reader, table_name, verbose=verbose)
 
 
+def get_csv_files(directory):
+    return glob.glob(os.path.join(config.DATA_PATH, directory, '*.csv'))
+
+
+def table_name_from_path(p):
+    return os.path.splitext(os.path.basename(p))[0]
+
+
+def csv_table_list(directory):
+    return [table_name_from_path(f) for f in get_csv_files(directory)]
+
+
 def import_all(directory, verbose=0):
-    files = glob.glob(os.path.join(config.DATA_PATH, directory, '*.csv'))
-    for f in files:
-        table_name = os.path.splitext(os.path.basename(f))[0]
+    for f in get_csv_files(directory):
+        table_name = table_name_from_path(f)
         import_single(f, table_name, verbose=verbose)
-    swap_tables(verbose=verbose)
 
 
 def import_drop_code_tables(verbose=False):

@@ -6,13 +6,17 @@ from munge.csv_util import import_csv
 from munge.sa_util import swap_tables
 
 
-FILENAME = 'pc/ONSPD_MAY_2015_UK.csv'
+DIRECTORY = 'pc'
+FILENAME = 'ONSPD_MAY_2015_UK.csv'
+TABLE_NAME = 'postcode'
 
 
-def import_postcodes(verbose=0):
-    filename = os.path.join(config.DATA_PATH, FILENAME)
+def tables():
+    return [TABLE_NAME]
 
-    table_name = 'postcode'
+
+def importer(verbose=0):
+    filename = os.path.join(config.DATA_PATH, DIRECTORY, FILENAME)
 
     fields = [
         '*pcd',
@@ -72,8 +76,10 @@ def import_postcodes(verbose=0):
         '@nuts_sub_code:text~la_sub_2_la|la_sub_code',
     ]
 
+    if verbose:
+        print('Importing postcodes')
     with open(filename, 'rb') as f:
         reader = csv.reader(f, dialect=csv.excel)
-        import_csv(reader, table_name, fields=fields,
+        import_csv(reader, TABLE_NAME, fields=fields,
                    skip_first=True, verbose=verbose)
         swap_tables()

@@ -4,6 +4,17 @@ import os.path
 import config
 
 
+def import_module(args):
+    verbose = args.verbose
+    modules = args.module
+    import importers
+    from csv_util import swap_tables
+    for module in modules:
+        m = getattr(importers, module)
+        m.importer(verbose=verbose)
+    swap_tables()
+
+
 def export_all(verbose=False):
     if verbose:
         print('Exporting all tables')
@@ -115,9 +126,14 @@ def main():
     import_csv_parser.add_argument('--tablename', default=None)
     import_csv_parser.add_argument('filename')
 
+    import_parser = subparsers.add_parser('import')
+    import_parser.add_argument('module', nargs='*')
+
     args = parser.parse_args()
     if args.command == 'export_all':
         export_all(verbose=args.verbose)
+    elif args.command == 'import':
+        import_module(args)
     elif args.command == 'import_all':
         import_all(verbose=args.verbose)
     elif args.command == 'postcode':
