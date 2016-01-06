@@ -189,30 +189,6 @@ def import_all(directory, verbose=0):
         import_single(f, table_name, verbose=verbose)
 
 
-def import_drop_code_tables(verbose=False):
-    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'c_*.csv'))
-    tables = [t for t in table_list() if t.startswith('c_')]
-    files = [os.path.splitext(os.path.basename(f))[0] for f in files]
-    for table in tables:
-        if table not in files:
-            if verbose:
-                print('Drop table %s' % table)
-            sql = 'DROP TABLE "{table}";'.format(table=table)
-            run_sql(sql)
-
-
-def import_drop_lookup_tables(verbose=False):
-    files = glob.glob(os.path.join(config.DATA_PATH, 'import', 'l_*.csv'))
-    tables = [t for t in table_list() if t.startswith('l_')]
-    files = [os.path.splitext(os.path.basename(f))[0] for f in files]
-    for table in tables:
-        if table not in files:
-            if verbose:
-                print('Drop table %s' % table)
-            sql = 'DROP TABLE "{table}";'.format(table=table)
-            run_sql(sql)
-
-
 def make_headers(result, table_name):
     fields = get_result_fields(result, table_name)
     headers = []

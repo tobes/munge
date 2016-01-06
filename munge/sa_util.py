@@ -52,10 +52,7 @@ def clear_temp_objects(verbose=False):
     # tables
     tables = [t for t in table_list() if t.startswith(config.TEMP_TABLE_STR)]
     for table in tables:
-        if verbose:
-            print('Dropping table %s' % table)
-        sql = 'DROP TABLE "{table}";'.format(table=table)
-        conn.execute(sql)
+        drop_table(table, verbose=verbose)
     # sequences
     sequence_names = [
         s for s in get_sequence_names()
@@ -65,6 +62,15 @@ def clear_temp_objects(verbose=False):
         if verbose:
             print('Dropping sequence %s' % name)
         sql = 'DROP SEQUENCE "{name}";'.format(name=name)
+
+
+def drop_table(table, verbose=0):
+    if verbose:
+        print('Dropping table %s' % table)
+    sql = 'DROP TABLE "{table}";'.format(table=table)
+    if verbose < 1:
+        print(sql)
+    run_sql(sql)
 
 
 def swap_tables(verbose=0):
