@@ -69,6 +69,23 @@ def table_view_list(engine):
     return [row[0] for row in result]
 
 
+def dependent_objects(engine):
+    ''' Returns list of objects that are depended on in the database '''
+    sql = '''
+        SELECT distinct dependent.relname
+        FROM pg_depend
+        JOIN pg_rewrite ON pg_depend.objid = pg_rewrite.oid
+        JOIN pg_class as dependee ON pg_rewrite.ev_class = dependee.oid
+        JOIN pg_class as dependent ON pg_depend.refobjid = dependent.oid
+        JOIN pg_attribute ON pg_depend.refobjid = pg_attribute.attrelid
+            AND pg_depend.refobjsubid = pg_attribute.attnum
+        WHERE dependent.relowner != 10
+        AND pg_attribute.attnum > 0
+    '''
+    result = engine.execute(sql)
+    return [row[0] for row in result]
+
+
 def get_pk_constraint(engine, table_name):
     insp = reflection.Inspector.from_engine(engine)
     return insp.get_pk_constraint(table_name)

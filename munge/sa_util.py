@@ -36,6 +36,10 @@ def table_view_list():
     return sa_common.table_view_list(engine)
 
 
+def dependent_objects():
+    return sa_common.dependent_objects(engine)
+
+
 def get_sequence_names():
     return sa_common.get_sequence_names(engine)
 
