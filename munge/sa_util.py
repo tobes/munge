@@ -156,7 +156,7 @@ def make_tables_dict(tables):
     return output
 
 
-def create_table(table, fields, verbose=0):
+def create_table(table, fields, primary_key=None, verbose=0):
     sql = 'DROP TABLE IF EXISTS "%s"' % table
     run_sql(sql)
     sql = ['CREATE TABLE "%s" (' % table]
@@ -172,6 +172,10 @@ def create_table(table, fields, verbose=0):
         sql_fields.append(col)
     # Primary Key
     pk = []
+    if primary_key:
+        if isinstance(primary_key, basestring):
+            primary_key = [primary_key]
+        pk = primary_key
     for field in fields:
         if field['pk']:
             pk.append('"%s"' % field['name'])
@@ -248,6 +252,7 @@ def build_summary(data, verbose=False, limit=None):
     table_name = data['name']
     sql = data['sql']
     tables = data['tables']
+    primary_key = data.get('primary_key')
 
     table_name = config.TEMP_TABLE_STR + table_name
     if verbose:
@@ -262,7 +267,7 @@ def build_summary(data, verbose=False, limit=None):
     for row in result:
         if first:
             fields = get_result_fields(result)
-            create_table(table_name, fields, verbose=verbose)
+            create_table(table_name, fields, primary_key=primary_key, verbose=verbose)
             f = [field['name'] for field in fields if not field.get('missing')]
             insert_sql = insert_rows(table_name, fields)
             first = False
@@ -285,30 +290,29 @@ def build_summary(data, verbose=False, limit=None):
         build_indexes(table_name, fields, verbose=verbose)
 
 
-def build_summaries(data, verbose=False):
-    for info in data:
-        build_summary(info, verbose=verbose)
-
-
 def build_view(data, verbose=0):
     view_name = data['name']
-    sql = data['sql']
-    tables = data['tables']
     view_name = config.TEMP_TABLE_STR + view_name
+    sql = 'CREATE VIEW {name} AS\n'.format(name=quote(view_name))
+    sql += data['sql']
+    tables = data['tables']
     drop_sql = 'DROP VIEW IF EXISTS "%s"' % view_name
     run_sql(drop_sql)
     if verbose:
         print('creating view %s' % view_name)
     tables_dict = make_tables_dict(tables)
-    tables_dict['name'] = quote(view_name)
     if verbose > 1:
         print(sql.format(**tables_dict))
     run_sql(sql.format(**tables_dict))
 
 
-def build_views(data, verbose=0):
+def build_views_and_summaries(data, verbose=0, just_views=False):
     for info in data:
-        build_view(info, verbose=verbose)
+        if info.get('as_view'):
+            build_view(info, verbose=verbose)
+        else:
+            if not just_views:
+                build_summary(info, verbose=verbose)
 
 
 def swap_table(old_name, new_name):

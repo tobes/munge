@@ -154,7 +154,37 @@ vao_types = [
 ]
 
 
-SUMMARIES_DATA = [
+AUTO_SQL = [
+    {
+        'name': 'vao_index',
+        'sql': '''
+             SELECT DISTINCT ON (uarn)
+                 first_value(uarn) OVER wnd AS uarn,
+                 first_value(version) OVER wnd AS version
+             FROM {t1}
+             WINDOW wnd AS (
+                 PARTITION BY uarn, version ORDER BY version DESC
+                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+             )
+        ''',
+        'tables': ['vao_base_raw'],
+        'primary_key': ['uarn', 'version'],
+        'disabled': False,
+        'early': True,
+        'summary': '',
+    },
+    {
+        'name': 'vao_base',
+        'sql': '''
+        SELECT b.*, l.scat_code AS scat_code_list, l.outcode
+        FROM {t1} b
+        LEFT JOIN {t2} i ON i.uarn = b.uarn AND i.version = b.uarn
+        LEFT JOIN {t3} l ON l.uarn = b.uarn
+        WHERE to_date IS NOT null;
+        ''',
+        'tables': ['vao_base', 'vao_index', 'vao_list'],
+        'as_view': True,
+    },
     {
         'name': 's_vao_scat_group_median_areas',
         'sql': '''
@@ -317,20 +347,6 @@ SUMMARIES_DATA = [
         'tables': ['vao_list', 'v_vao_base'],
         'disabled': True,
         'summary': '',
-    },
-]
-
-
-VIEWS_DATA = [
-    {
-        'name': 'v_vao_base',
-        'sql': '''
-        CREATE VIEW {name} AS
-        SELECT b.*, l.scat_code as scat_code_list, l.outcode FROM {t1} b
-        LEFT JOIN {t2} l on l.uarn=b.uarn
-        WHERE to_date is not null;
-        ''',
-        'tables': ['vao_base', 'vao_list'],
     },
 ]
 

@@ -16,7 +16,17 @@ TABLE_FIELDS = [
     'factor:double precision',
 ]
 
-SUMMARIES_DATA = [
+AUTO_SQL = [
+    {
+        'name': 'v_consumer_trend_latest',
+        'sql': '''
+        SELECT ct_code, amount * 1000000 as amount
+        FROM {t1}
+        WHERE date = '2014';
+        ''',
+        'tables': ['consumer_trend_yearly'],
+        'as_view': True,
+    },
     {
         'name': 's_population_by_nuts1',
         'sql': '''
@@ -77,19 +87,6 @@ SUMMARIES_DATA = [
             's_consumer_spend_national',
         ],
         'disabled': False,
-    },
-]
-
-VIEWS_DATA = [
-    {
-        'name': 'v_consumer_trend_latest',
-        'sql': '''
-        CREATE VIEW {name} AS
-        SELECT ct_code, amount * 1000000 as amount
-        FROM {t1}
-        WHERE date = '2014';
-        ''',
-        'tables': ['consumer_trend_yearly'],
     },
 ]
 
