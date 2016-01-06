@@ -2,7 +2,6 @@ import os.path
 
 from munge import config
 from munge.csv_util import import_csv, unicode_csv_reader
-from munge.sa_util import build_summaries, build_views
 
 
 DIRECTORY = 'spending'
@@ -24,9 +23,9 @@ SUMMARIES_DATA = [
              SELECT
              l.nuts1_code, p.population,
               p.population::float / t.population::float AS percent
-             FROM "{t1}" p
-             RIGHT JOIN "{t2}" l ON l.nuts1_ons_code = la_code
-             LEFT outer JOIN "{t1}" t ON t.la_code = 'K02000001';
+             FROM {t1} p
+             RIGHT JOIN {t2} l ON l.nuts1_ons_code = la_code
+             LEFT outer JOIN {t1} t ON t.la_code = 'K02000001';
         ''',
         'tables': ['population_by_la', 'l_nuts1_ons'],
     },
@@ -39,8 +38,8 @@ SUMMARIES_DATA = [
         ct.amount nation_spend,
         (ct.amount / t.population)::numeric(11,2)
             AS spend_per_capita
-        FROM "{t1}" ct
-        LEFT outer JOIN "{t2}" t ON t.la_code = 'K02000001'
+        FROM {t1} ct
+        LEFT outer JOIN {t2} t ON t.la_code = 'K02000001'
         WHERE ct.amount is not null
         ''',
         'tables': [
@@ -65,10 +64,10 @@ SUMMARIES_DATA = [
         (100 * (((ct.amount * p.percent * f.factor / p.population)
         / n.spend_per_capita) - 1))::numeric(11,2)
             AS percent_from_national
-        FROM "{t1}" ct
-        LEFT OUTER JOIN "{t2}" f ON f.ct_code = ct.ct_code
-        LEFT OUTER JOIN "{t3}" p ON p.nuts1_code = f.nuts1_code
-        LEFT OUTER JOIN "{t4}" n ON n.ct_code = ct.ct_code
+        FROM {t1} ct
+        LEFT OUTER JOIN {t2} f ON f.ct_code = ct.ct_code
+        LEFT OUTER JOIN {t3} p ON p.nuts1_code = f.nuts1_code
+        LEFT OUTER JOIN {t4} n ON n.ct_code = ct.ct_code
         WHERE ct.amount is not null
         ''',
         'tables': [
@@ -85,9 +84,9 @@ VIEWS_DATA = [
     {
         'name': 'v_consumer_trend_latest',
         'sql': '''
-        CREATE VIEW "{name}" AS
+        CREATE VIEW {name} AS
         SELECT ct_code, amount * 1000000 as amount
-        FROM "{t1}"
+        FROM {t1}
         WHERE date = '2014';
         ''',
         'tables': ['consumer_trend_yearly'],

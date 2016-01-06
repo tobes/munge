@@ -129,6 +129,11 @@ def swap_tables(verbose=0):
     conn.execute('\n'.join(sql_list))
 
 
+def quote(arg):
+    ''' Double quote the arg '''
+    return '"%s"' % arg
+
+
 def make_tables_dict(tables):
     all_tables = table_view_list()
     output = {}
@@ -137,7 +142,7 @@ def make_tables_dict(tables):
             name = config.TEMP_TABLE_STR + table
         else:
             name = table
-        output['t%s' % (i + 1)] = name
+        output['t%s' % (i + 1)] = quote(name)
     return output
 
 
@@ -285,7 +290,7 @@ def build_view(data, verbose=0):
     if verbose:
         print('creating view %s' % view_name)
     tables_dict = make_tables_dict(tables)
-    tables_dict['name'] = view_name
+    tables_dict['name'] = quote(view_name)
     if verbose > 1:
         print(sql.format(**tables_dict))
     run_sql(sql.format(**tables_dict))

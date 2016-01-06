@@ -5,6 +5,7 @@ from munge.csv_util import import_csv, unicode_csv_reader
 
 DIRECTORY = 'spending'
 
+VAO_LIST_TABLE = 'vao_list'
 
 VAO_LIST_FILE = 'LIST_2010_MERGED.dta.30Sep2015'
 VAO_FILE = 'SMV_2010_MERGED.dta.30Sep2015'
@@ -161,8 +162,8 @@ SUMMARIES_DATA = [
         (
             WITH y AS (
                SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
-               FROM   "{t1}" v
-               LEFT JOIN "{t2}" s ON s.code = v.scat_code
+               FROM   {t1} v
+               LEFT JOIN {t2} s ON s.code = v.scat_code
                WHERE  total_area IS NOT NULL
                AND s.scat_group_code = sg.code
                )
@@ -175,15 +176,17 @@ SUMMARIES_DATA = [
             FROM c
         ), (
                SELECT count(*)
-               FROM   "{t1}" v
-               LEFT JOIN "{t2}" s ON s.code = v.scat_code
+               FROM   {t1} v
+               LEFT JOIN {t2} s ON s.code = v.scat_code
                WHERE  total_area IS NOT NULL
                AND s.scat_group_code = sg.code
 
         ) count
-        FROM "{t3}" sg
+        FROM {t3} sg
         ''',
         'tables': ['v_vao_base', 'c_scat', 'c_scat_group'],
+        'disabled': True,
+        'summary': '',
     },
     {
         'name': 's_vao_base_areas_scat_group',
@@ -196,11 +199,13 @@ SUMMARIES_DATA = [
             usr_mode(v.total_area) as mode_m2,
             sum(v.total_area * v.unadjusted_price) as total_area_price,
             (sum(v.total_area * v.unadjusted_price) - sum(v.total_value)) as diff
-            FROM "{t1}" v
-            LEFT JOIN "{t2}" s ON s.code = v.scat_code
+            FROM {t1} v
+            LEFT JOIN {t2} s ON s.code = v.scat_code
             GROUP BY v.la_code, s.scat_group_code
         ''',
         'tables': ['v_vao_base', 'c_scat'],
+        'disabled': True,
+        'summary': '',
     },
     {
         'name': 's_vao_list_base_summary',
@@ -210,13 +215,15 @@ SUMMARIES_DATA = [
              count(t2.uarn) as base_entries,
              count(t1.uarn) - count(t2.uarn) as difference,
              t1.scat_code as scat_code
-             FROM "{t1}" t1
-             LEFT OUTER JOIN "{t2}" t2 ON t1.uarn = t2.uarn
-             LEFT OUTER JOIN "{t3}" t3 ON t3.code = t1.scat_code
+             FROM {t1} t1
+             LEFT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
+             LEFT OUTER JOIN {t3} t3 ON t3.code = t1.scat_code
              GROUP BY t3.desc, t1.scat_code
              ORDER BY t3.desc
         ''',
         'tables': ['vao_list', 'v_vao_base', 'c_scat'],
+        'disabled': True,
+        'summary': '',
     },
     {
         'name': 's_vao_base_areas',
@@ -229,10 +236,12 @@ SUMMARIES_DATA = [
             usr_mode(total_area) as mode_m2,
             sum(total_area * unadjusted_price) as total_area_price,
             (sum(total_area * unadjusted_price) - sum(total_value)) as diff
-            FROM "{t1}"
+            FROM {t1}
             GROUP BY la_code, scat_code
         ''',
         'tables': ['v_vao_base'],
+        'disabled': True,
+        'summary': '',
     },
     {
         'name': 's_vao_scat_median_areas',
@@ -241,7 +250,7 @@ SUMMARIES_DATA = [
         (
             WITH y AS (
                SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
-               FROM   "{t1}"
+               FROM   {t1}
                WHERE  total_area IS NOT NULL
                AND scat_code = code
                )
@@ -254,13 +263,15 @@ SUMMARIES_DATA = [
             FROM c
         ), (
                SELECT count(*)
-               FROM   "{t1}"
+               FROM   {t1}
                WHERE  total_area IS NOT NULL
                AND scat_code = code
         ) count
-        FROM "{t2}"
+        FROM {t2}
         ''',
         'tables': ['v_vao_base', 'c_scat'],
+        'disabled': True,
+        'summary': '',
     },
     {
         'name': 's_vao_base_areas_min_max',
@@ -268,10 +279,12 @@ SUMMARIES_DATA = [
             SELECT scat_code,
             max(median_m2) as max_med_m2,
             min(median_m2) as min_med_m2
-            FROM "{t1}"
+            FROM {t1}
             GROUP BY scat_code
         ''',
         'tables': ['s_vao_base_areas'],
+        'disabled': True,
+        'summary': '',
     },
     {
         'name': 's_vao_base_areas_national',
@@ -283,23 +296,27 @@ SUMMARIES_DATA = [
             m.median_m2,
             la.min_med_m2,
             la.max_med_m2
-            FROM "{t1}" v
-            LEFT OUTER JOIN "{t2}" m On v.scat_code = m.scat_code
-            LEFT OUTER JOIN "{t3}" la On v.scat_code = la.scat_code
+            FROM {t1} v
+            LEFT OUTER JOIN {t2} m On v.scat_code = m.scat_code
+            LEFT OUTER JOIN {t3} la On v.scat_code = la.scat_code
             GROUP BY v.scat_code, m.median_m2, la.min_med_m2, la.max_med_m2
         ''',
         'tables': ['v_vao_base', 's_vao_scat_median_areas', 's_vao_base_areas_min_max'],
+        'disabled': True,
+        'summary': '',
     },
     {
         'name': 's_vao_base_missing_list',
         'sql': '''
             SELECT
             t2.uarn, t2.scat_code, t2.ba_code
-            FROM "{t1}" t1
-            RIGHT OUTER JOIN "{t2}" t2 ON t1.uarn = t2.uarn
+            FROM {t1} t1
+            RIGHT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
             WHERE t1.uarn is null
         ''',
         'tables': ['vao_list', 'v_vao_base'],
+        'disabled': True,
+        'summary': '',
     },
 ]
 
@@ -308,14 +325,20 @@ VIEWS_DATA = [
     {
         'name': 'v_vao_base',
         'sql': '''
-        CREATE VIEW "{name}" AS
-        SELECT b.*, l.scat_code as scat_code_list, l.outcode FROM "{t1}" b
-        LEFT JOIN "{t2}" l on l.uarn=b.uarn
-        WHERE to_date is null;
+        CREATE VIEW {name} AS
+        SELECT b.*, l.scat_code as scat_code_list, l.outcode FROM {t1} b
+        LEFT JOIN {t2} l on l.uarn=b.uarn
+        WHERE to_date is not null;
         ''',
         'tables': ['vao_base', 'vao_list'],
     },
 ]
+
+
+def tables():
+    t = [t[1] for t in vao_types]
+    t.append(VAO_LIST_TABLE)
+    return t
 
 
 def vao_reader(data_type):
@@ -345,7 +368,7 @@ def import_vao_list(verbose=False):
         print('importing vao_list')
     f = os.path.join(config.DATA_PATH, DIRECTORY, VAO_LIST_FILE)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
-    import_csv(reader, 'vao_list', fields=vao_list_fields, verbose=verbose)
+    import_csv(reader, VAO_LIST_TABLE, fields=vao_list_fields, verbose=verbose)
 
 
 def importer(verbose=False):
