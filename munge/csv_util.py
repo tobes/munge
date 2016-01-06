@@ -121,7 +121,7 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
                 fields = row
             t_fields = process_header(fields)
             t_fns = get_fns(t_fields)
-            create_table(temp_table, t_fields)
+            create_table(temp_table, t_fields, verbose=verbose)
             f = [
                 field['name'] for field in t_fields
                 if not field.get('missing')
