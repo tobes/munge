@@ -34,20 +34,6 @@ def db_functions(verbose=False):
     import postgres_functions
 
 
-def import_all(verbose=False):
-    if verbose:
-        print('Importing all tables')
-    from importers.codes import importer
-    importer(verbose=verbose)
-
-
-def postcode(verbose=False):
-    if verbose:
-        print('Importing postcodes')
-    from importers.postcode import import_postcodes
-    import_postcodes(verbose=verbose)
-
-
 def import_csv(args):
     verbose = args.verbose
     filename = args.filename
@@ -101,8 +87,6 @@ def main():
     commands = [
         'export_all',
         'export_custom',
-        'import_all',
-        'postcode',
         'web',
         'vao',
         'vao_full',
@@ -134,10 +118,6 @@ def main():
         export_all(verbose=args.verbose)
     elif args.command == 'import':
         import_module(args)
-    elif args.command == 'import_all':
-        import_all(verbose=args.verbose)
-    elif args.command == 'postcode':
-        postcode(verbose=args.verbose)
     elif args.command == 'export_custom':
         export_custom(verbose=args.verbose)
     elif args.command == 'import_csv':
