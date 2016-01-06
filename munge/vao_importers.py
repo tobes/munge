@@ -46,7 +46,8 @@ vao_base_fields = [
     '*@id:bigserial',
     '-record_type',
     'ass_ref',
-    '+uarn:bigint',
+    '+{1}uarn:bigint',
+    '+{1}version:smallint',
     '+ba_code',
     '+@la_code:text~ba_2_la|ba_code',
     'firm_name',
@@ -80,7 +81,8 @@ vao_base_fields = [
 
 vao_base_02_fields = [
     '*@id:bigserial',
-    '+uarn:bigint',
+    '+{1}uarn:bigint',
+    '+{1}version:smallint',
     '-record_type',
     'line:smallint',
     'floor',
@@ -92,7 +94,8 @@ vao_base_02_fields = [
 
 vao_base_03_fields = [
     '*@id:bigserial',
-    '+uarn:bigint',
+    '+{1}uarn:bigint',
+    '+{1}version:smallint',
     '-record_type',
     'description',
     'oa_size:numeric',
@@ -102,14 +105,16 @@ vao_base_03_fields = [
 
 vao_base_04_fields = [
     '*@id:bigserial',
-    '+uarn:bigint',
+    '+{1}uarn:bigint',
+    '+{1}version:smallint',
     '-record_type',
     'plant_value:bigint',
 ]
 
 vao_base_05_fields = [
     '*@id:bigserial',
-    '+uarn:bigint',
+    '+{1}uarn:bigint',
+    '+{1}version:smallint',
     '-record_type',
     'spaces:bigint',
     'spaces_value:bigint',
@@ -120,7 +125,8 @@ vao_base_05_fields = [
 
 vao_base_06_fields = [
     '*@id:bigserial',
-    '+uarn:bigint',
+    '+{1}uarn:bigint',
+    '+{1}version:smallint',
     '-record_type',
     'adj_desc',
     'adj_percent',
@@ -129,7 +135,8 @@ vao_base_06_fields = [
 
 vao_base_07_fields = [
     '*@id:bigserial',
-    '+uarn:bigint',
+    '+{1}uarn:bigint',
+    '+{1}version:smallint',
     '-record_type',
     'total_before_adj:bigint',
     'total_adj:bigint',
