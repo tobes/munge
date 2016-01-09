@@ -149,7 +149,9 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
                 run_sql(insert_sql, data)
                 data = []
                 if verbose:
-                    print(count)
+                    print('{table}: {count:,}'.format(
+                        table=table_name, count=count
+                    ))
             if not skip:
                 count += 1
             if limit and count == limit:
@@ -159,7 +161,9 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
         run_sql(insert_sql, data)
 
     if verbose:
-        print('%s rows imported' % (count))
+        print('{table}: {count:,} rows imported'.format(
+            table=table_name, count=count
+        ))
     # Add indexes
     build_indexes(temp_table, t_fields, verbose=verbose)
 
