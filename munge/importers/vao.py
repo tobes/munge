@@ -3,9 +3,9 @@ import os.path
 from munge import config
 from munge.csv_util import import_csv, unicode_csv_reader
 
-DIRECTORY = 'spending'
+DIRECTORY = 'vao'
 
-VAO_LIST_TABLE = 'vao_list'
+VAO_LIST_TABLE = 'vao_list_raw'
 
 VAO_LIST_FILE = 'LIST_2010_MERGED.dta.30Sep2015'
 VAO_FILE = 'SMV_2010_MERGED.dta.30Sep2015'
@@ -158,33 +158,106 @@ AUTO_SQL = [
     {
         'name': 'vao_index',
         'sql': '''
-             SELECT DISTINCT ON (uarn)
-                 first_value(uarn) OVER wnd AS uarn,
-                 first_value(version) OVER wnd AS version
-             FROM {t1}
+             SELECT DISTINCT ON (b.uarn)
+                 first_value(b.uarn) OVER wnd AS uarn,
+                 first_value(b.version) OVER wnd AS version
+             FROM {t1} b
+             LEFT JOIN {t2} l ON l.uarn = b.uarn
+             WHERE l.rateable_value is not null
              WINDOW wnd AS (
-                 PARTITION BY uarn, version ORDER BY version DESC
-                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+                 PARTITION BY b.uarn, b.version
+                 ORDER BY b.from_date DESC NULLS LAST
+                 ROWS BETWEEN UNBOUNDED PRECEDING
+                 AND UNBOUNDED FOLLOWING
              )
         ''',
-        'tables': ['vao_base_raw'],
+        'tables': ['vao_base_raw', 'vao_list'],
         'primary_key': ['uarn', 'version'],
-        'disabled': False,
-        'early': True,
+        'disabled': True,
         'summary': '',
+    },
+    {
+        'name': 'vao_list',
+        'sql': '''
+        SELECT b.*
+        FROM {t1} b
+        RIGHT JOIN {t2} i ON i.uarn = b.uarn
+        ''',
+        'tables': ['vao_list_raw', 'vao_index'],
+        'as_view': True,
     },
     {
         'name': 'vao_base',
         'sql': '''
-        SELECT b.*, l.scat_code AS scat_code_list, l.outcode
+        SELECT b.*
         FROM {t1} b
-        LEFT JOIN {t2} i ON i.uarn = b.uarn AND i.version = b.uarn
-        LEFT JOIN {t3} l ON l.uarn = b.uarn
-        WHERE to_date IS NOT null;
+        RIGHT JOIN {t2} i ON i.uarn = b.uarn AND i.version = b.version
         ''',
-        'tables': ['vao_base', 'vao_index', 'vao_list'],
+        'tables': ['vao_base_raw', 'vao_index'],
         'as_view': True,
     },
+    {
+        'name': 'vao_line',
+        'sql': '''
+        SELECT t.*
+        FROM {t1} t
+        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        ''',
+        'tables': ['vao_line_raw', 'vao_index'],
+        'as_view': True,
+    },
+    {
+        'name': 'vao_parking',
+        'sql': '''
+        SELECT t.*
+        FROM {t1} t
+        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        ''',
+        'tables': ['vao_parking_raw', 'vao_index'],
+        'as_view': True,
+    },
+    {
+        'name': 'vao_plant',
+        'sql': '''
+        SELECT t.*
+        FROM {t1} t
+        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        ''',
+        'tables': ['vao_plant_raw', 'vao_index'],
+        'as_view': True,
+    },
+    {
+        'name': 'vao_additions',
+        'sql': '''
+        SELECT t.*
+        FROM {t1} t
+        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        ''',
+        'tables': ['vao_additions_raw', 'vao_index'],
+        'as_view': True,
+    },
+    {
+        'name': 'vao_adj',
+        'sql': '''
+        SELECT t.*
+        FROM {t1} t
+        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        ''',
+        'tables': ['vao_adj_raw', 'vao_index'],
+        'as_view': True,
+    },
+    {
+        'name': 'vao_adj_totals',
+        'sql': '''
+        SELECT t.*
+        FROM {t1} t
+        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        ''',
+        'tables': ['vao_adj_totals_raw', 'vao_index'],
+        'as_view': True,
+    },
+
+
     {
         'name': 's_vao_scat_group_median_areas',
         'sql': '''
@@ -214,7 +287,7 @@ AUTO_SQL = [
         ) count
         FROM {t3} sg
         ''',
-        'tables': ['v_vao_base', 'c_scat', 'c_scat_group'],
+        'tables': ['vao_base', 'c_scat', 'c_scat_group'],
         'disabled': True,
         'summary': '',
     },
@@ -233,7 +306,7 @@ AUTO_SQL = [
             LEFT JOIN {t2} s ON s.code = v.scat_code
             GROUP BY v.la_code, s.scat_group_code
         ''',
-        'tables': ['v_vao_base', 'c_scat'],
+        'tables': ['vao_base', 'c_scat'],
         'disabled': True,
         'summary': '',
     },
@@ -251,8 +324,8 @@ AUTO_SQL = [
              GROUP BY t3.desc, t1.scat_code
              ORDER BY t3.desc
         ''',
-        'tables': ['vao_list', 'v_vao_base', 'c_scat'],
-        'disabled': True,
+        'tables': ['vao_list', 'vao_base', 'c_scat'],
+        'disabled': False,
         'summary': '',
     },
     {
@@ -269,8 +342,8 @@ AUTO_SQL = [
             FROM {t1}
             GROUP BY la_code, scat_code
         ''',
-        'tables': ['v_vao_base'],
-        'disabled': True,
+        'tables': ['vao_base'],
+        'disabled': False,
         'summary': '',
     },
     {
@@ -299,8 +372,8 @@ AUTO_SQL = [
         ) count
         FROM {t2}
         ''',
-        'tables': ['v_vao_base', 'c_scat'],
-        'disabled': True,
+        'tables': ['vao_base', 'c_scat'],
+        'disabled': False,
         'summary': '',
     },
     {
@@ -313,7 +386,7 @@ AUTO_SQL = [
             GROUP BY scat_code
         ''',
         'tables': ['s_vao_base_areas'],
-        'disabled': True,
+        'disabled': False,
         'summary': '',
     },
     {
@@ -331,8 +404,8 @@ AUTO_SQL = [
             LEFT OUTER JOIN {t3} la On v.scat_code = la.scat_code
             GROUP BY v.scat_code, m.median_m2, la.min_med_m2, la.max_med_m2
         ''',
-        'tables': ['v_vao_base', 's_vao_scat_median_areas', 's_vao_base_areas_min_max'],
-        'disabled': True,
+        'tables': ['vao_base', 's_vao_scat_median_areas', 's_vao_base_areas_min_max'],
+        'disabled': False,
         'summary': '',
     },
     {
@@ -344,8 +417,8 @@ AUTO_SQL = [
             RIGHT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
             WHERE t1.uarn is null
         ''',
-        'tables': ['vao_list', 'v_vao_base'],
-        'disabled': True,
+        'tables': ['vao_list', 'vao_base'],
+        'disabled': False,
         'summary': '',
     },
 ]
@@ -361,13 +434,18 @@ def vao_reader(data_type):
     f = os.path.join(config.DATA_PATH, DIRECTORY, VAO_FILE)
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     uarn = None
+    versions = {}
     for row in reader:
         r_type = row[0]
         if r_type == '01':
             uarn = row[2]
+            versions[uarn] = versions.get(uarn, 0) + 1
+            base_version = versions[uarn]
         if r_type == data_type:
-            if r_type != '01':
-                row = [uarn] + row
+            if r_type == '01':
+                row = row[:3] + [base_version] + row[3:]
+            else:
+                row = [uarn, base_version] + row
             yield row
 
 
