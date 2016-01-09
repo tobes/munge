@@ -67,24 +67,25 @@ def clear_temp_objects(verbose=False):
     for name in sequence_names:
         if verbose:
             print('Dropping sequence %s' % name)
-        sql = 'DROP SEQUENCE "{name}";'.format(name=name)
+        sql = 'DROP SEQUENCE {name};'.format(name=quote(name))
+
+
+def drop_sql(table):
+    if table in table_list():
+        return 'DROP TABLE {table};'.format(table=quote(table))
+    elif table in view_list():
+        return 'DROP VIEW {table};'.format(table=quote(table))
+    return ''
 
 
 def drop_table_or_view(table, verbose=0):
     sql = None
-    if table in table_list():
-        if verbose:
-            print('Dropping table %s' % table)
-        sql = 'DROP TABLE "{table}";'
-    elif table in view_list():
-        if verbose:
-            print('Dropping view %s' % table)
-        sql = 'DROP VIEW "{table}";'
-    if sql:
-        sql = sql.format(table=table)
-        if verbose < 1:
-            print(sql)
-        run_sql(sql)
+    if verbose:
+        print('Dropping %s' % table)
+    sql = drop_sql(table)
+    if verbose < 1:
+        print(sql)
+    run_sql(sql)
 
 
 def swap_tables(verbose=0):
@@ -104,11 +105,13 @@ def swap_tables(verbose=0):
     for name in view_names:
         if verbose:
             print('Swap view %s' % name)
-        sql = '''
-            DROP VIEW IF EXISTS "{name}";
-            ALTER VIEW "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";
+        sql = drop_sql(name)
+        sql += '''
+            ALTER VIEW {TEMP_TABLE_STR}{name} RENAME TO {name};
         '''
-        sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
+        sql_list.append(sql.format(
+            name=quote(name), TEMP_TABLE_STR=quote(temp_table_str)
+        ))
 
     for table in tables:
         if verbose:
@@ -119,16 +122,22 @@ def swap_tables(verbose=0):
             indexes.append(pk['name'][tmp_label_len:])
 
         table = table[tmp_label_len:]
-        sql = '''
-        DROP TABLE IF EXISTS "{table}";
-        ALTER TABLE "{TEMP_TABLE_STR}{table}" RENAME TO "{table}";
+        sql = drop_sql(table)
+        sql += '''
+        ALTER TABLE {TEMP_TABLE_STR}{table} RENAME TO {table};
         '''
-        sql_list.append(sql.format(table=table, TEMP_TABLE_STR=temp_table_str))
+        sql_list.append(sql.format(
+            table=quote(table),
+            TEMP_TABLE_STR=quote(temp_table_str)
+        ))
         for index in indexes:
             if verbose:
                 print('\tSwap index %s' % index)
-            sql = 'ALTER INDEX "{TEMP_TABLE_STR}{index}" RENAME TO "{index}";'
-            sql = sql.format(index=index, TEMP_TABLE_STR=temp_table_str)
+            sql = 'ALTER INDEX {TEMP_TABLE_STR}{index} RENAME TO {index};'
+            sql = sql.format(
+                index=quote(index),
+                TEMP_TABLE_STR=quote(temp_table_str)
+            )
             sql_list.append(sql)
 
     # sequences
@@ -141,7 +150,10 @@ def swap_tables(verbose=0):
         if verbose:
             print('\tSwap sequence %s' % name)
         sql = 'ALTER SEQUENCE "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";'
-        sql_list.append(sql.format(name=name, TEMP_TABLE_STR=temp_table_str))
+        sql_list.append(sql.format(
+            name=quote(name),
+            TEMP_TABLE_STR=quote(temp_table_str)
+        ))
 
     sql_list.append('COMMIT;')
     if verbose > 1:
@@ -167,9 +179,9 @@ def make_tables_dict(tables):
 
 
 def create_table(table, fields, primary_key=None, verbose=0):
-    sql = 'DROP TABLE IF EXISTS "%s"' % table
+    sql = 'DROP TABLE IF EXISTS %s' % quote(table)
     run_sql(sql)
-    sql = ['CREATE TABLE "%s" (' % table]
+    sql = ['CREATE TABLE %s (' % quote(table)]
     sql_fields = []
     for field in fields:
         # Skipped field
@@ -264,7 +276,7 @@ def build_summary(data, verbose=False, limit=None):
     tables = data['tables']
     primary_key = data.get('primary_key')
 
-    table_name = config.TEMP_TABLE_STR + table_name
+    table_name_temp = config.TEMP_TABLE_STR + table_name
     if verbose:
         print('creating summary table %s' % table_name)
     tables_dict = make_tables_dict(tables)
@@ -277,9 +289,9 @@ def build_summary(data, verbose=False, limit=None):
     for row in result:
         if first:
             fields = get_result_fields(result)
-            create_table(table_name, fields, primary_key=primary_key, verbose=verbose)
+            create_table(table_name_temp, fields, primary_key=primary_key, verbose=verbose)
             f = [field['name'] for field in fields if not field.get('missing')]
-            insert_sql = insert_rows(table_name, fields)
+            insert_sql = insert_rows(table_name_temp, fields)
             first = False
         data.append(dict(zip(f, row)))
         count += 1
@@ -287,17 +299,21 @@ def build_summary(data, verbose=False, limit=None):
             run_sql(insert_sql, data)
             data = []
             if verbose:
-                print(count)
+                print('{table}: {count:,}'.format(
+                    table=table_name, count=count
+                ))
         if limit and count == limit:
             break
     if data:
         run_sql(insert_sql, data)
 
     if verbose:
-        print('%s rows imported' % (count))
+        print('{table}: {count:,} rows imported'.format(
+            table=table_name, count=count
+        ))
     if count:
         # Add indexes
-        build_indexes(table_name, fields, verbose=verbose)
+        build_indexes(table_name_temp, fields, verbose=verbose)
 
 
 def build_view(data, verbose=0):
@@ -328,9 +344,9 @@ def build_views_and_summaries(data, verbose=0, just_views=False):
 def swap_table(old_name, new_name):
     sql = '''
         BEGIN;
-        DROP TABLE IF EXISTS "{new_name}";
-        ALTER TABLE "{old_name}" RENAME TO "{new_name}";
+        DROP TABLE IF EXISTS {new_name};
+        ALTER TABLE {old_name} RENAME TO {new_name};
         COMMIT;
     '''
-    sql = sql.format(old_name=old_name, new_name=new_name)
+    sql = sql.format(old_name=quote(old_name), new_name=quote(new_name))
     conn.execute(sql)
