@@ -206,7 +206,7 @@ def la_premises_list(la_code):
     sql = '''
     SELECT v.uarn, b.uarn, s.code as scat_code
     FROM vao_list v
-    LEFT OUTER JOIN v_vao_base b
+    LEFT OUTER JOIN vao_base b
     ON b.uarn = v.uarn
     LEFT JOIN c_scat s ON s.code = v.scat_code
     WHERE v.la_code = :la_code
@@ -233,7 +233,7 @@ def scat_premises_list(scat_code):
     sql = '''
     SELECT v.uarn, b.uarn, c.code as ba_code
     FROM vao_list v
-    LEFT OUTER JOIN v_vao_base b
+    LEFT OUTER JOIN vao_base b
     ON b.uarn = v.uarn
     LEFT JOIN c_ba c ON c.code = v.ba_code
     WHERE v.scat_code = :scat_code
@@ -312,7 +312,7 @@ def scat_diff():
     sql = '''
     SELECT l.uarn, l.scat_code, b.scat_code, l.la_code
     FROM vao_list l
-    LEFT JOIN v_vao_base b ON b.uarn = l.uarn
+    LEFT JOIN vao_base b ON b.uarn = l.uarn
     WHERE l.scat_code != b.scat_code
     '''
     output = show_result(sql)
@@ -360,7 +360,7 @@ def premises(uarn):
 
     tables = [
         'vao_list',
-        'v_vao_base',
+        'vao_base',
         'vao_line',
         'vao_additions',
         'vao_plant',
@@ -371,7 +371,7 @@ def premises(uarn):
 
     single_row_tables = [
         'vao_list',
-        'v_vao_base',
+        'vao_base',
     ]
 
     for table in tables:
@@ -401,7 +401,7 @@ def postcode_premises():
         sql = '''
         SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
         FROM vao_list v
-        LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
+        LEFT OUTER JOIN vao_base b ON b.uarn = v.uarn
         LEFT JOIN c_scat s ON s.code = v.scat_code
         WHERE v.outcode = :outcode
         ORDER BY s.desc, v.pc
@@ -412,7 +412,7 @@ def postcode_premises():
         sql = '''
         SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
         FROM vao_list v
-        LEFT OUTER JOIN v_vao_base b ON b.uarn = v.uarn
+        LEFT OUTER JOIN vao_base b ON b.uarn = v.uarn
         LEFT JOIN c_scat s ON s.code = v.scat_code
         WHERE v.pc LIKE :postcode
         ORDER BY s.desc, v.pc
