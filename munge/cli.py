@@ -106,6 +106,7 @@ def main():
         'web',
         'clean_db',
         'db_functions',
+        'swap_temp',
     ]
 
     parser = argparse.ArgumentParser(
@@ -140,6 +141,8 @@ def main():
         import_module(args)
     elif args.command == 'views':
         view_summeries(args, just_views=True)
+        sa_util.swap_tables(verbose=args.verbose)
+    elif args.command == 'swap_temp':
         sa_util.swap_tables(verbose=args.verbose)
     elif args.command == 'summeries':
         view_summeries(args)
