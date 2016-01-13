@@ -10,11 +10,11 @@ def import_module(args):
     for module in args.module:
         m = getattr(importers, module)
         m.importer(verbose=args.verbose)
-    view_summeries(args)
+    view_summaries(args)
     sa_util.swap_tables(verbose=args.verbose)
 
 
-def view_summeries(args, just_views=False):
+def view_summaries(args, just_views=False):
     for module in args.module:
         m = getattr(importers, module)
         data = getattr(m, 'AUTO_SQL')
@@ -127,7 +127,7 @@ def main():
     module_commands = [
         'import',
         'views',
-        'summeries',
+        'summaries',
     ]
 
     for command in module_commands:
@@ -140,12 +140,12 @@ def main():
     elif args.command == 'import':
         import_module(args)
     elif args.command == 'views':
-        view_summeries(args, just_views=True)
+        view_summaries(args, just_views=True)
         sa_util.swap_tables(verbose=args.verbose)
     elif args.command == 'swap_temp':
         sa_util.swap_tables(verbose=args.verbose)
-    elif args.command == 'summeries':
-        view_summeries(args)
+    elif args.command == 'summaries':
+        view_summaries(args)
         sa_util.swap_tables(verbose=args.verbose)
     elif args.command == 'export_custom':
         export_custom(verbose=args.verbose)
