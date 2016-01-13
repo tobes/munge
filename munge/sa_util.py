@@ -88,6 +88,10 @@ def drop_table_or_view(table, verbose=0):
     run_sql(sql)
 
 
+def quoted_temp_table_name(name):
+    return quote(config.TEMP_TABLE_STR + name)
+
+
 def swap_tables(verbose=0):
     ''' SWAPS our temp tables, including renaming indexes and sequences
     '''
@@ -107,10 +111,10 @@ def swap_tables(verbose=0):
             print('Swap view %s' % name)
         sql = drop_sql(name)
         sql += '''
-            ALTER VIEW {TEMP_TABLE_STR}{name} RENAME TO {name};
+            ALTER VIEW {old_name} RENAME TO {name};
         '''
         sql_list.append(sql.format(
-            name=quote(name), TEMP_TABLE_STR=quote(temp_table_str)
+            name=quote(name), old_name=quoted_temp_table_name(name)
         ))
 
     for table in tables:
@@ -124,19 +128,19 @@ def swap_tables(verbose=0):
         table = table[tmp_label_len:]
         sql = drop_sql(table)
         sql += '''
-        ALTER TABLE {TEMP_TABLE_STR}{table} RENAME TO {table};
+        ALTER TABLE {old_table} RENAME TO {table};
         '''
         sql_list.append(sql.format(
             table=quote(table),
-            TEMP_TABLE_STR=quote(temp_table_str)
+            old_table=quoted_temp_table_name(table),
         ))
         for index in indexes:
             if verbose:
                 print('\tSwap index %s' % index)
-            sql = 'ALTER INDEX {TEMP_TABLE_STR}{index} RENAME TO {index};'
+            sql = 'ALTER INDEX {old_index} RENAME TO {index};'
             sql = sql.format(
                 index=quote(index),
-                TEMP_TABLE_STR=quote(temp_table_str)
+                old_index=quoted_temp_table_name(index),
             )
             sql_list.append(sql)
 
@@ -149,10 +153,10 @@ def swap_tables(verbose=0):
     for name in sequence_names:
         if verbose:
             print('\tSwap sequence %s' % name)
-        sql = 'ALTER SEQUENCE "{TEMP_TABLE_STR}{name}" RENAME TO "{name}";'
+        sql = 'ALTER SEQUENCE {old_name} RENAME TO {name};'
         sql_list.append(sql.format(
             name=quote(name),
-            TEMP_TABLE_STR=quote(temp_table_str)
+            old_name=quoted_temp_table_name(name),
         ))
 
     sql_list.append('COMMIT;')
