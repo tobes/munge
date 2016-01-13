@@ -6,6 +6,7 @@
 {% block content %}
 <h1>ba_ref search</h1>
 <form>
+  {{ macros.select('la_code', la_codes, la_code) }}
   <input name="ba_ref" value="{{ ba_ref or '' }}" />
   <input value="Search" type="submit" />
 </form>

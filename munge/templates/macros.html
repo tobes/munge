@@ -1,3 +1,11 @@
+{% macro select(name, data, value) %}
+<select name="{{ name }}">
+  {% for name, val in data %}
+  <option value="{{ val }}"{% if val == value %} selected="selected"{% endif %}>{{ name }}</option>
+  {% endfor %}
+</select>
+{% endmacro %}
+
 {% macro offset_paging(offset) %}
 {% if offset != '' %}
 {% if offset >= 1000 %}
