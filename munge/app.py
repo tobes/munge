@@ -1,7 +1,10 @@
 import re
 import urllib
 
-from flask import Flask, render_template, abort, request, escape, Markup
+from flask import (
+        Flask, render_template, abort, request,
+        escape, Markup, redirect, url_for
+)
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import url_encode
 
@@ -382,6 +385,26 @@ def premises(uarn):
         output.append((out, table in single_row_tables))
 
     return render_template('premises.html', output=output)
+
+
+@app.route('/ba_ref/')
+def ba_ref_premises():
+    ba_ref = request.args.get('ba_ref')
+    uarn = None
+    if ba_ref:
+        data = {'ba_ref': ba_ref.strip()}
+        sql = '''
+        SELECT uarn
+        FROM vao_list
+        WHERE ba_ref = :ba_ref
+        '''
+        results = run_sql(sql, data)
+        for result in results:
+            uarn = result[0]
+            break
+        if uarn:
+            return redirect(url_for('premises', uarn=uarn))
+    return render_template('ba_ref.html', ba_ref=ba_ref)
 
 
 @app.route('/postcode/')

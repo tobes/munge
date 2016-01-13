@@ -1,0 +1,15 @@
+
+{% extends 'base.html' %}
+
+{% import 'macros.html' as macros %}
+
+{% block content %}
+<h1>ba_ref search</h1>
+<form>
+  <input name="ba_ref" value="{{ ba_ref or '' }}" />
+  <input value="Search" type="submit" />
+</form>
+{% if ba_ref %}
+<p>{{ ba_ref }} Not found :(</p>
+{% endif %}
+{% endblock %}
