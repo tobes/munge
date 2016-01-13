@@ -390,15 +390,15 @@ def premises(uarn):
 @app.route('/ba_ref/')
 def ba_ref_premises():
     ba_ref = request.args.get('ba_ref')
-    la_code = request.args.get('la_code')
+    ba_code = request.args.get('ba_code')
     uarn = None
     if ba_ref:
-        data = {'ba_ref': ba_ref.strip(), 'la_code': la_code}
+        data = {'ba_ref': ba_ref.strip(), 'ba_code': ba_code}
         sql = '''
         SELECT uarn
         FROM vao_list
         WHERE ba_ref = :ba_ref
-        AND la_code = :la_code
+        AND ba_code = :ba_code
         '''
         results = run_sql(sql, data)
         for result in results:
@@ -407,12 +407,12 @@ def ba_ref_premises():
         if uarn:
             return redirect(url_for('premises', uarn=uarn))
 
-    codes = codes_data.get('la')
-    la_codes = []
+    codes = codes_data.get('ba')
+    ba_codes = []
     for k, v in codes.iteritems():
-        la_codes.append((v, k))
-    la_codes = [('Select LA', None)] + sorted(la_codes)
-    return render_template('ba_ref.html', ba_ref=ba_ref, la_codes=la_codes, la_code=la_code)
+        ba_codes.append((v, k))
+    ba_codes = [('Select Billing authority', None)] + sorted(ba_codes)
+    return render_template('ba_ref.html', ba_ref=ba_ref, ba_codes=ba_codes, ba_code=ba_code)
 
 
 @app.route('/postcode/')
