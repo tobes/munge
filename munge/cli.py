@@ -4,6 +4,7 @@ import os.path
 import config
 import importers
 import sa_util
+import csv_util
 
 
 def import_module(args):
@@ -60,8 +61,7 @@ def clean_db(args):
 def export_all(verbose=False):
     if verbose:
         print('Exporting all tables')
-    from csv_util import dump_all
-    dump_all(verbose=verbose)
+    csv_util.dump_all(verbose=verbose)
 
 
 def export_custom(verbose=False):
@@ -88,7 +88,7 @@ def import_csv(args):
         tablename = os.path.splitext(os.path.basename(filename))[0]
     if verbose:
         print('Importing %s' % args.filename)
-    sa_util.import_single(filename, tablename, encoding=args.encoding,
+    csv_util.import_single(filename, tablename, encoding=args.encoding,
                   delimiter=delimiter, verbose=verbose)
     sa_util.swap_tables(verbose=verbose)
 
