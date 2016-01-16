@@ -1,3 +1,5 @@
+import time
+
 import sqlalchemy as sa
 
 import sa_common
@@ -336,13 +338,28 @@ def build_view(data, verbose=0):
     run_sql(sql.format(**tables_dict))
 
 
+def time_fn(fn, args=None, kw=None, verbose=0):
+    if not args:
+        args = []
+    if not kw:
+        kw = {}
+    kw['verbose'] = verbose
+    start = time.time()
+    fn(*args, **kw)
+    elapsed = int(time.time() - start)
+    if verbose and elapsed > 1:
+        m, s = divmod(elapsed, 60)
+        h, m = divmod(m, 60)
+        print "%d:%02d:%02d" % (h, m, s)
+
+
 def build_views_and_summaries(data, verbose=0, just_views=False):
     for info in data:
         if info.get('as_view'):
-            build_view(info, verbose=verbose)
+            time_fn(build_view, args=[info], verbose=verbose)
         else:
             if not just_views:
-                build_summary(info, verbose=verbose)
+                time_fn(build_summary, args=[info], verbose=verbose)
 
 
 def swap_table(old_name, new_name):
