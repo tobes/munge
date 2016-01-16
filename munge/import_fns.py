@@ -85,6 +85,14 @@ def outcode(value):
         return value.split(' ')[0]
 
 
+def areacode(value):
+    if value == '':
+        return None
+    else:
+        parts = value.split(' ')
+        return parts[0] + ' ' + parts[1][0]
+
+
 def copy(value):
     return value
 
