@@ -158,6 +158,19 @@ vao_types = [
 
 
 AUTO_SQL = [
+    # Only rows with a rateable value are valid
+    {
+        'name': 'vao_list',
+        'sql': '''
+        SELECT *
+        FROM {t1}
+        WHERE rateable_value is not null
+        ''',
+        'tables': ['vao_list_raw'],
+        'as_view': True,
+    },
+    # create index of uran, version to be able to select active rows from
+    # summary data
     {
         'name': 'vao_index',
         'sql': '''
@@ -166,7 +179,6 @@ AUTO_SQL = [
                  first_value(b.version) OVER wnd AS version
              FROM {t1} b
              LEFT JOIN {t2} l ON l.uarn = b.uarn
-             WHERE l.rateable_value is not null
              WINDOW wnd AS (
                  PARTITION BY b.uarn, b.version
                  ORDER BY b.from_date DESC NULLS LAST
@@ -176,19 +188,10 @@ AUTO_SQL = [
         ''',
         'tables': ['vao_base_raw', 'vao_list'],
         'primary_key': ['uarn', 'version'],
-        'disabled': True,
+        'disabled': False,
         'summary': '',
     },
-    {
-        'name': 'vao_list',
-        'sql': '''
-        SELECT b.*
-        FROM {t1} b
-        RIGHT JOIN {t2} i ON i.uarn = b.uarn
-        ''',
-        'tables': ['vao_list_raw', 'vao_index'],
-        'as_view': True,
-    },
+    # Create the views of the active rows
     {
         'name': 'vao_base',
         'sql': '''
@@ -259,6 +262,100 @@ AUTO_SQL = [
         'tables': ['vao_adj_totals_raw', 'vao_index'],
         'as_view': True,
     },
+    # End of the active row views
+
+    # How many list premises also have base data
+    {
+        'name': 's_vao_list_base_summary',
+        'sql': '''
+             SELECT
+             count(t1.uarn) as list_entries,
+             count(t2.uarn) as base_entries,
+             count(t1.uarn) - count(t2.uarn) as difference,
+             t1.scat_code as scat_code
+             FROM {t1} t1
+             LEFT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
+             LEFT OUTER JOIN {t3} t3 ON t3.code = t1.scat_code
+             GROUP BY t3.desc, t1.scat_code
+             ORDER BY t3.desc
+        ''',
+        'tables': ['vao_list', 'vao_base', 'c_scat'],
+        'disabled': False,
+        'summary': '',
+    },
+
+    {
+        'name': 'vao_area_info',
+        'sql': '''
+        SELECT t.*, c.code, c.cg_code
+        FROM {t1} t
+        LEFT JOIN {t2} c ON c.code = t.scat_code
+        WHERE c.cg_code != ''
+        ''',
+        'tables': ['s_vao_list_base_summary', 'c_scat'],
+        'as_view': True,
+    },
+
+
+    # Median nationwide price per meter for scat code
+    {
+        'name': 's_vao_scat_national_areas',
+        'sql': '''
+        SELECT code as scat_code,
+        (
+            WITH y AS (
+               SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
+               FROM   {t1}
+               WHERE  total_area IS NOT NULL
+               AND total_area != 0
+               AND scat_code = code
+               )
+            , c AS (SELECT count(*) AS ct FROM y)
+            SELECT CASE WHEN c.ct%2 = 0 THEN
+                      round((SELECT avg(total_area) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
+                   ELSE
+                            (SELECT     total_area  FROM y WHERE y.rn = (c.ct+1)/2)
+                   END AS median_m2
+            FROM c
+        ),
+        (
+            WITH y AS (
+               SELECT rateable_value/total_area price_per_meter,
+               row_number() OVER (ORDER BY rateable_value/total_area) AS rn
+               FROM {t1} b
+               LEFT JOIN {t2} l ON l.uarn = b.uarn
+               WHERE  total_area IS NOT NULL
+               AND total_area != 0
+               AND b.scat_code = code
+               )
+            , c AS (SELECT count(*) AS ct FROM y)
+            SELECT CASE WHEN c.ct%2 = 0 THEN
+                      round((SELECT avg(price_per_meter) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
+                   ELSE
+                            (SELECT     price_per_meter  FROM y WHERE y.rn = (c.ct+1)/2)
+                   END AS price_per_meter
+            FROM c
+        ),
+        (
+               SELECT count(*)
+               FROM   {t1}
+               WHERE  total_area IS NOT NULL
+               AND total_area != 0
+               AND scat_code = code
+        ) no_with_area,
+        (
+               SELECT count(*)
+               FROM   {t2} l
+               LEFT OUTER JOIN {t1} b ON l.uarn = b.uarn
+               WHERE  b.uarn is Null
+               AND l.scat_code = code
+        ) no_without_area
+        FROM {t3}
+        ''',
+        'tables': ['vao_base', 'vao_list', 'c_scat'],
+        'disabled': False,
+        'summary': '',
+    },
 
 
     {
@@ -291,7 +388,7 @@ AUTO_SQL = [
         FROM {t3} sg
         ''',
         'tables': ['vao_base', 'c_scat', 'c_scat_group'],
-        'disabled': True,
+        'disabled': False,
         'summary': '',
     },
     {
@@ -310,75 +407,132 @@ AUTO_SQL = [
             GROUP BY v.la_code, s.scat_group_code
         ''',
         'tables': ['vao_base', 'c_scat'],
-        'disabled': True,
-        'summary': '',
-    },
-    {
-        'name': 's_vao_list_base_summary',
-        'sql': '''
-             SELECT
-             count(t1.uarn) as list_entries,
-             count(t2.uarn) as base_entries,
-             count(t1.uarn) - count(t2.uarn) as difference,
-             t1.scat_code as scat_code
-             FROM {t1} t1
-             LEFT OUTER JOIN {t2} t2 ON t1.uarn = t2.uarn
-             LEFT OUTER JOIN {t3} t3 ON t3.code = t1.scat_code
-             GROUP BY t3.desc, t1.scat_code
-             ORDER BY t3.desc
-        ''',
-        'tables': ['vao_list', 'vao_base', 'c_scat'],
         'disabled': False,
         'summary': '',
     },
     {
-        'name': 's_vao_base_areas',
+        'name': 's_vao_scat_outcode_areas',
         'sql': '''
-            SELECT la_code, scat_code, count(*),
+            SELECT t1.outcode, t1.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
-            avg(total_area) as mean_m2,
             usr_median(total_area) as median_m2,
-            usr_mode(total_area) as mode_m2,
-            sum(total_area * unadjusted_price) as total_area_price,
-            (sum(total_area * unadjusted_price) - sum(total_value)) as diff
-            FROM {t1}
-            GROUP BY la_code, scat_code
+            usr_median(total_value/total_area) as median_price_per_m2,
+            t2.price_per_meter as national_price_per_m2
+            FROM {t1} t1
+            LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
+            WHERE total_area > 0
+            GROUP BY t1.outcode, t1.scat_code, national_price_per_m2
+
         ''',
-        'tables': ['vao_base'],
+        'tables': ['vao_base', 's_vao_scat_national_areas'],
         'disabled': False,
         'summary': '',
     },
     {
-        'name': 's_vao_scat_median_areas',
+        'name': 's_vao_scat_areacode_areas',
         'sql': '''
-        SELECT code as scat_code,
-        (
-            WITH y AS (
-               SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
-               FROM   {t1}
-               WHERE  total_area IS NOT NULL
-               AND scat_code = code
-               )
-            , c AS (SELECT count(*) AS ct FROM y)
-            SELECT CASE WHEN c.ct%2 = 0 THEN
-                      round((SELECT avg(total_area) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
-                   ELSE
-                            (SELECT     total_area  FROM y WHERE y.rn = (c.ct+1)/2)
-                   END AS median_m2
-            FROM c
-        ), (
-               SELECT count(*)
-               FROM   {t1}
-               WHERE  total_area IS NOT NULL
-               AND scat_code = code
-        ) count
-        FROM {t2}
+            SELECT t1.areacode, t1.scat_code, count(*),
+            sum(total_area) as total_m2,
+            sum(total_value) as total_value,
+            usr_median(total_area) as median_m2,
+            usr_median(total_value/total_area) as median_price_per_m2,
+            t2.price_per_meter as national_price_per_m2
+            FROM {t1} t1
+            LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
+            WHERE total_area > 0
+            GROUP BY t1.areacode, t1.scat_code, national_price_per_m2
+
         ''',
-        'tables': ['vao_base', 'c_scat'],
+        'tables': ['vao_base', 's_vao_scat_national_areas'],
         'disabled': False,
         'summary': '',
     },
+    {
+        'name': 's_vao_scat_la_areas',
+        'sql': '''
+            SELECT la_code, t1.scat_code, count(*),
+            sum(total_area) as total_m2,
+            sum(total_value) as total_value,
+            usr_median(total_area) as median_m2,
+            usr_median(total_value/total_area) as median_price_per_m2,
+            t2.price_per_meter as national_price_per_m2
+            FROM {t1} t1
+            LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
+            WHERE total_area > 0
+            GROUP BY la_code, t1.scat_code, national_price_per_m2
+
+        ''',
+        'tables': ['vao_base', 's_vao_scat_national_areas'],
+        'disabled': False,
+        'summary': '',
+    },
+
+    {
+        'name': 's_area_estimates',
+        'sql': '''
+            SELECT
+            l.uarn, l.rateable_value,
+            l.scat_code, s.scat_group_code,
+
+            CASE WHEN a.count >= 10 AND a.median_price_per_m2 > 0 THEN
+                    'area'
+                 WHEN o.count >= 10 AND o.median_price_per_m2 > 0 THEN
+                    'out'
+                 WHEN la.count >= 10 AND la.median_price_per_m2 > 0 THEN
+                    'la'
+                 WHEN sc.no_with_area > 0 AND sc.price_per_meter > 0 THEN
+                    'national'
+                 ELSE null
+            END source,
+
+            CASE WHEN a.count >= 10 AND a.median_price_per_m2 > 0 THEN
+                    l.rateable_value/a.median_price_per_m2
+                 WHEN o.count >= 10 AND o.median_price_per_m2 > 0 THEN
+                    l.rateable_value/o.median_price_per_m2
+                 WHEN la.count >= 10 AND la.median_price_per_m2 > 0 THEN
+                    l.rateable_value/la.median_price_per_m2
+                 WHEN sc.no_with_area > 0 AND sc.price_per_meter > 0 THEN
+                    l.rateable_value/sc.price_per_meter
+                 ELSE null
+            END area_estimate,
+
+            b.total_area
+
+            FROM {t1} l
+
+            LEFT JOIN {t2} a
+            On a.areacode = l.areacode AND a.scat_code = l.scat_code
+
+            LEFT JOIN {t3} o
+            On o.outcode = l.outcode AND o.scat_code = l.scat_code
+
+            LEFT JOIN {t4} la
+            On la.la_code = l.la_code AND la.scat_code = l.scat_code
+
+            LEFT JOIN {t5} sc On sc.scat_code = l.scat_code
+
+            LEFT JOIN {t6} s ON l.scat_code = s.code
+
+            LEFT OUTER JOIN {t7} b ON l.uarn = b.uarn
+            WHERE l.rateable_value != 0
+            AND s.cg_code !=''
+
+        ''',
+        'tables': ['vao_list', 's_vao_scat_areacode_areas',
+            's_vao_scat_outcode_areas', 's_vao_scat_la_areas',
+            's_vao_scat_national_areas', 'c_scat', 'vao_base'],
+        'disabled': False,
+        'summary': '',
+    },
+
+
+
+
+
+# ==================================
+
+
     {
         'name': 's_vao_base_areas_min_max',
         'sql': '''
@@ -389,7 +543,7 @@ AUTO_SQL = [
             GROUP BY scat_code
         ''',
         'tables': ['s_vao_base_areas'],
-        'disabled': False,
+        'disabled': True,
         'summary': '',
     },
     {
@@ -408,7 +562,7 @@ AUTO_SQL = [
             GROUP BY v.scat_code, m.median_m2, la.min_med_m2, la.max_med_m2
         ''',
         'tables': ['vao_base', 's_vao_scat_median_areas', 's_vao_base_areas_min_max'],
-        'disabled': False,
+        'disabled': True,
         'summary': '',
     },
     {
@@ -421,7 +575,7 @@ AUTO_SQL = [
             WHERE t1.uarn is null
         ''',
         'tables': ['vao_list', 'vao_base'],
-        'disabled': False,
+        'disabled': True,
         'summary': '',
     },
 ]
