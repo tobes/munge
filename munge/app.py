@@ -430,7 +430,7 @@ def postcode_premises():
         print('outcode %s' % outcode)
         data = {'outcode': outcode}
         sql = '''
-        SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
+        SELECT v.uarn uarn, v.ba_ref, v.pc, v.town, b.uarn summary, v.scat_code
         FROM vao_list v
         LEFT OUTER JOIN vao_base b ON b.uarn = v.uarn
         LEFT JOIN c_scat s ON s.code = v.scat_code
@@ -441,7 +441,7 @@ def postcode_premises():
         print('postcode %s' % postcode)
         data = {'postcode': postcode + '%'}
         sql = '''
-        SELECT v.uarn uarn, v.pc, v.town, b.uarn summary, v.scat_code
+        SELECT v.uarn uarn, v.ba_ref, v.pc, v.town, b.uarn summary, v.scat_code
         FROM vao_list v
         LEFT OUTER JOIN vao_base b ON b.uarn = v.uarn
         LEFT JOIN c_scat s ON s.code = v.scat_code
