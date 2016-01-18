@@ -124,7 +124,7 @@ def main():
     import_csv_parser.add_argument('filename')
 
     swap_temp_parser = subparsers.add_parser('swap_temp')
-    swap_temp_parser.add_argument('-f', '--force', default=False)
+    swap_temp_parser.add_argument('-f', '--force', action="store_true")
 
     module_commands = [
         'import',
