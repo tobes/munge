@@ -2,8 +2,8 @@ import re
 import urllib
 
 from flask import (
-        Flask, render_template, abort, request,
-        escape, Markup, redirect, url_for
+    Flask, render_template, abort, request,
+    escape, Markup, redirect, url_for
 )
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug import url_encode
@@ -482,7 +482,6 @@ def scat_group_area_graph():
         for row in results:
             scat_info.append([row[0], row[1], row[2]])
 
-
         sql = '''
         SELECT round(s.median_m2/5)*5, count(*)
         FROM s_vao_base_areas_scat_group s
@@ -505,7 +504,5 @@ def scat_group_area_graph():
             'count': sg_count,
             'scat_info': scat_info,
         }
-        print scat_info
-
 
     return render_template('base_c3.html', output=output)
