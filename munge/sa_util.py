@@ -80,7 +80,7 @@ def drop_sql(table, force=False):
         sql = 'DROP VIEW {table}'.format(table=quote(table))
     if sql:
         if force:
-            sql = sql + ' WITH CASCADE'
+            sql = sql + ' CASCADE'
         sql = sql + ';'
     return sql
 
