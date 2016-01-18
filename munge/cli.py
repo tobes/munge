@@ -34,8 +34,7 @@ def defined_tables():
         if tables_fn:
             tables += tables_fn()
         info = []
-        info += getattr(m, 'VIEWS_DATA', None) or []
-        info += getattr(m, 'SUMMARIES_DATA', None) or []
+        info += getattr(m, 'AUTO_SQL', None) or []
         for item in info:
             tables.append(item['name'])
     return tables
