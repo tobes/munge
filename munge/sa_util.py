@@ -72,12 +72,17 @@ def clear_temp_objects(verbose=False):
         sql = 'DROP SEQUENCE {name};'.format(name=quote(name))
 
 
-def drop_sql(table):
+def drop_sql(table, force=False):
+    sql = ''
     if table in table_list():
-        return 'DROP TABLE {table};'.format(table=quote(table))
+        sql = 'DROP TABLE {table}'.format(table=quote(table))
     elif table in view_list():
-        return 'DROP VIEW {table};'.format(table=quote(table))
-    return ''
+        sql = 'DROP VIEW {table}'.format(table=quote(table))
+    if sql:
+        if force:
+            sql = sql + ' WITH CASCADE'
+        sql = sql + ';'
+    return sql
 
 
 def drop_table_or_view(table, verbose=0):
@@ -94,7 +99,7 @@ def quoted_temp_table_name(name):
     return quote(config.TEMP_TABLE_STR + name)
 
 
-def swap_tables(verbose=0):
+def swap_tables(verbose=0, force=False):
     ''' SWAPS our temp tables, including renaming indexes and sequences
     '''
     temp_table_str = config.TEMP_TABLE_STR
@@ -111,7 +116,7 @@ def swap_tables(verbose=0):
     for name in view_names:
         if verbose:
             print('Swap view %s' % name)
-        sql = drop_sql(name)
+        sql = drop_sql(name, force=force)
         sql += '''
             ALTER VIEW {old_name} RENAME TO {name};
         '''
@@ -128,7 +133,7 @@ def swap_tables(verbose=0):
             indexes.append(pk['name'][tmp_label_len:])
 
         table = table[tmp_label_len:]
-        sql = drop_sql(table)
+        sql = drop_sql(table, force=force)
         sql += '''
         ALTER TABLE {old_table} RENAME TO {table};
         '''

@@ -106,7 +106,6 @@ def main():
         'web',
         'clean_db',
         'db_functions',
-        'swap_temp',
     ]
 
     parser = argparse.ArgumentParser(
@@ -123,6 +122,9 @@ def main():
     import_csv_parser.add_argument("--delimiter", default=',')
     import_csv_parser.add_argument('--tablename', default=None)
     import_csv_parser.add_argument('filename')
+
+    swap_temp_parser = subparsers.add_parser('swap_temp')
+    swap_temp_parser.add_argument('-f', '--force', default=False)
 
     module_commands = [
         'import',
@@ -143,7 +145,7 @@ def main():
         view_summaries(args, just_views=True)
         sa_util.swap_tables(verbose=args.verbose)
     elif args.command == 'swap_temp':
-        sa_util.swap_tables(verbose=args.verbose)
+        sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'summaries':
         view_summaries(args)
         sa_util.swap_tables(verbose=args.verbose)
