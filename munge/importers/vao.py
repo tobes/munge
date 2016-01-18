@@ -355,62 +355,10 @@ AUTO_SQL = [
         ''',
         'tables': ['vao_base', 'vao_list', 'c_scat'],
         'disabled': False,
+        'test': True,
         'summary': '',
     },
 
-
-    {
-        'name': 's_vao_scat_group_median_areas',
-        'sql': '''
-        SELECT sg.code as scat_group_code,
-        (
-            WITH y AS (
-               SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
-               FROM   {t1} v
-               LEFT JOIN {t2} s ON s.code = v.scat_code
-               WHERE  total_area IS NOT NULL
-               AND s.scat_group_code = sg.code
-               )
-            , c AS (SELECT count(*) AS ct FROM y)
-            SELECT CASE WHEN c.ct%2 = 0 THEN
-                      round((SELECT avg(total_area) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
-                   ELSE
-                            (SELECT     total_area  FROM y WHERE y.rn = (c.ct+1)/2)
-                   END AS median_m2
-            FROM c
-        ), (
-               SELECT count(*)
-               FROM   {t1} v
-               LEFT JOIN {t2} s ON s.code = v.scat_code
-               WHERE  total_area IS NOT NULL
-               AND s.scat_group_code = sg.code
-
-        ) count
-        FROM {t3} sg
-        ''',
-        'tables': ['vao_base', 'c_scat', 'c_scat_group'],
-        'disabled': False,
-        'summary': '',
-    },
-    {
-        'name': 's_vao_base_areas_scat_group',
-        'sql': '''
-            SELECT v.la_code, s.scat_group_code, count(v.*),
-            sum(v.total_area) as total_m2,
-            sum(v.total_value) as total_value,
-            avg(v.total_area) as mean_m2,
-            usr_median(v.total_area) as median_m2,
-            usr_mode(v.total_area) as mode_m2,
-            sum(v.total_area * v.unadjusted_price) as total_area_price,
-            (sum(v.total_area * v.unadjusted_price) - sum(v.total_value)) as diff
-            FROM {t1} v
-            LEFT JOIN {t2} s ON s.code = v.scat_code
-            GROUP BY v.la_code, s.scat_group_code
-        ''',
-        'tables': ['vao_base', 'c_scat'],
-        'disabled': False,
-        'summary': '',
-    },
     {
         'name': 's_vao_scat_outcode_areas',
         'sql': '''
@@ -533,6 +481,60 @@ AUTO_SQL = [
 
 # ==================================
 
+
+
+    {
+        'name': 's_vao_base_areas_scat_group',
+        'sql': '''
+            SELECT v.la_code, s.scat_group_code, count(v.*),
+            sum(v.total_area) as total_m2,
+            sum(v.total_value) as total_value,
+            avg(v.total_area) as mean_m2,
+            usr_median(v.total_area) as median_m2,
+            usr_mode(v.total_area) as mode_m2,
+            sum(v.total_area * v.unadjusted_price) as total_area_price,
+            (sum(v.total_area * v.unadjusted_price) - sum(v.total_value)) as diff
+            FROM {t1} v
+            LEFT JOIN {t2} s ON s.code = v.scat_code
+            GROUP BY v.la_code, s.scat_group_code
+        ''',
+        'tables': ['vao_base', 'c_scat'],
+        'disabled': True,
+        'summary': '',
+    },
+    {
+        'name': 's_vao_scat_group_median_areas',
+        'sql': '''
+        SELECT sg.code as scat_group_code,
+        (
+            WITH y AS (
+               SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
+               FROM   {t1} v
+               LEFT JOIN {t2} s ON s.code = v.scat_code
+               WHERE  total_area IS NOT NULL
+               AND s.scat_group_code = sg.code
+               )
+            , c AS (SELECT count(*) AS ct FROM y)
+            SELECT CASE WHEN c.ct%2 = 0 THEN
+                      round((SELECT avg(total_area) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
+                   ELSE
+                            (SELECT     total_area  FROM y WHERE y.rn = (c.ct+1)/2)
+                   END AS median_m2
+            FROM c
+        ), (
+               SELECT count(*)
+               FROM   {t1} v
+               LEFT JOIN {t2} s ON s.code = v.scat_code
+               WHERE  total_area IS NOT NULL
+               AND s.scat_group_code = sg.code
+
+        ) count
+        FROM {t3} sg
+        ''',
+        'tables': ['vao_base', 'c_scat', 'c_scat_group'],
+        'disabled': True,
+        'summary': '',
+    },
 
     {
         'name': 's_vao_base_areas_min_max',
