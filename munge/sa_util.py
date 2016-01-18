@@ -57,7 +57,10 @@ def get_result_fields(*args, **kw):
 def clear_temp_objects(verbose=False):
     dependents = dependent_objects()
     # tables
-    tables = [t for t in table_view_list() if t.startswith(config.TEMP_TABLE_STR)]
+    tables = [
+        t for t in table_view_list()
+        if t.startswith(config.TEMP_TABLE_STR)
+    ]
     for table in tables:
         if table not in dependents:
             drop_table_or_view(table, verbose=verbose)
@@ -298,7 +301,10 @@ def _build_summary(data, verbose=False, limit=None):
     for row in result:
         if first:
             fields = get_result_fields(result)
-            create_table(table_name_temp, fields, primary_key=primary_key, verbose=verbose)
+            create_table(table_name_temp,
+                         fields,
+                         primary_key=primary_key,
+                         verbose=verbose)
             f = [field['name'] for field in fields if not field.get('missing')]
             insert_sql = insert_rows(table_name_temp, fields)
             first = False
@@ -356,7 +362,8 @@ def time_fn(fn, args=None, kw=None, verbose=0):
         print "%d:%02d:%02d" % (h, m, s)
 
 
-def build_views_and_summaries(data, verbose=0, just_views=False, test_only=False):
+def build_views_and_summaries(data, verbose=0, just_views=False,
+                              test_only=False):
     for info in data:
         if info.get('disabled'):
             continue
