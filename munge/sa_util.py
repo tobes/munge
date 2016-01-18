@@ -279,9 +279,7 @@ def insert_rows(table, fields):
     return sql
 
 
-def build_summary(data, verbose=False, limit=None):
-    if data.get('disabled'):
-        return
+def _build_summary(data, verbose=False, limit=None):
     table_name = data['name']
     sql = data['sql']
     tables = data['tables']
@@ -358,13 +356,17 @@ def time_fn(fn, args=None, kw=None, verbose=0):
         print "%d:%02d:%02d" % (h, m, s)
 
 
-def build_views_and_summaries(data, verbose=0, just_views=False):
+def build_views_and_summaries(data, verbose=0, just_views=False, test_only=False):
     for info in data:
+        if info.get('disabled'):
+            continue
         if info.get('as_view'):
             time_fn(build_view, args=[info], verbose=verbose)
         else:
+            if test_only and not info.get('test'):
+                continue
             if not just_views:
-                time_fn(build_summary, args=[info], verbose=verbose)
+                time_fn(_build_summary, args=[info], verbose=verbose)
 
 
 def swap_table(old_name, new_name):

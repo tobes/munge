@@ -21,7 +21,8 @@ def view_summaries(args, just_views=False):
         data = getattr(m, 'AUTO_SQL')
         if data:
             sa_util.build_views_and_summaries(
-                data, verbose=args.verbose, just_views=just_views
+                data, verbose=args.verbose,
+                just_views=just_views, test_only=args.test
             )
 
 
@@ -134,6 +135,7 @@ def main():
 
     for command in module_commands:
         module_parser = subparsers.add_parser(command)
+        module_parser.add_argument('-t', '--test', action="store_true")
         module_parser.add_argument('module', nargs='*')
 
     args = parser.parse_args()
