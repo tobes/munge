@@ -191,6 +191,7 @@ AUTO_SQL = [
         'disabled': False,
         'summary': '',
     },
+
     # Create the views of the active rows
     {
         'name': 'vao_base',
@@ -299,7 +300,7 @@ AUTO_SQL = [
 
     # Median nationwide price per meter for scat code
     {
-        'name': 's_vao_scat_national_areas',
+        'name': 's_vao_area_national_by_scat',
         'sql': '''
         SELECT code as scat_code,
         (
@@ -320,7 +321,7 @@ AUTO_SQL = [
         ),
         (
             WITH y AS (
-               SELECT rateable_value/total_area price_per_meter,
+               SELECT rateable_value/total_area median_price_per_m2,
                row_number() OVER (ORDER BY rateable_value/total_area) AS rn
                FROM {t1} b
                LEFT JOIN {t2} l ON l.uarn = b.uarn
@@ -330,10 +331,10 @@ AUTO_SQL = [
                )
             , c AS (SELECT count(*) AS ct FROM y)
             SELECT CASE WHEN c.ct%2 = 0 THEN
-                      round((SELECT avg(price_per_meter) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
+                      round((SELECT avg(median_price_per_m2) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
                    ELSE
-                            (SELECT     price_per_meter  FROM y WHERE y.rn = (c.ct+1)/2)
-                   END AS price_per_meter
+                            (SELECT     median_price_per_m2  FROM y WHERE y.rn = (c.ct+1)/2)
+                   END AS median_price_per_m2
             FROM c
         ),
         (
@@ -418,7 +419,7 @@ AUTO_SQL = [
             sum(total_value) as total_value,
             usr_median(total_area) as median_m2,
             usr_median(total_value/total_area) as median_price_per_m2,
-            t2.price_per_meter as national_price_per_m2
+            t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
             WHERE total_area > 0
@@ -437,7 +438,7 @@ AUTO_SQL = [
             sum(total_value) as total_value,
             usr_median(total_area) as median_m2,
             usr_median(total_value/total_area) as median_price_per_m2,
-            t2.price_per_meter as national_price_per_m2
+            t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
             WHERE total_area > 0
@@ -456,7 +457,7 @@ AUTO_SQL = [
             sum(total_value) as total_value,
             usr_median(total_area) as median_m2,
             usr_median(total_value/total_area) as median_price_per_m2,
-            t2.price_per_meter as national_price_per_m2
+            t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
             WHERE total_area > 0
@@ -481,7 +482,7 @@ AUTO_SQL = [
                     'out'
                  WHEN la.count >= 10 AND la.median_price_per_m2 > 0 THEN
                     'la'
-                 WHEN sc.no_with_area > 0 AND sc.price_per_meter > 0 THEN
+                 WHEN sc.no_with_area > 0 AND sc.median_price_per_m2 > 0 THEN
                     'national'
                  ELSE null
             END source,
@@ -492,8 +493,8 @@ AUTO_SQL = [
                     l.rateable_value/o.median_price_per_m2
                  WHEN la.count >= 10 AND la.median_price_per_m2 > 0 THEN
                     l.rateable_value/la.median_price_per_m2
-                 WHEN sc.no_with_area > 0 AND sc.price_per_meter > 0 THEN
-                    l.rateable_value/sc.price_per_meter
+                 WHEN sc.no_with_area > 0 AND sc.median_price_per_m2 > 0 THEN
+                    l.rateable_value/sc.median_price_per_m2
                  ELSE null
             END area_estimate,
 
