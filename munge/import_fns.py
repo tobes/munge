@@ -13,8 +13,7 @@ AUTO_FNS = {
 }
 
 
-la_sub_2_la_dict = {}
-ba_2_la_dict = {}
+lookups = {}
 
 
 def make_bool(value):
@@ -82,37 +81,19 @@ def outcode(value):
     if value == '':
         return None
     else:
-        return value.split(' ')[0]
+        return value.split()[0]
 
 
 def areacode(value):
-    if value == '':
-        return None
-    else:
-        parts = value.split(' ')
-        return parts[0] + ' ' + parts[1][0]
+    if value:
+        parts = value.split()
+        if len(parts) > 1:
+            return parts[0] + ' ' + parts[1][0]
+    return None
 
 
 def copy(value):
     return value
-
-
-def la_sub_2_la(value):
-    if not la_sub_2_la_dict:
-        sql = 'SELECT la_sub_code, la_code FROM l_la_sub_la;'
-        result = run_sql(sql)
-        for row in result:
-            la_sub_2_la_dict[row[0]] = row[1]
-    return la_sub_2_la_dict.get(value)
-
-
-def ba_2_la(value):
-    if not ba_2_la_dict:
-        sql = 'SELECT ba_code, la_code FROM l_ba_la;'
-        result = run_sql(sql)
-        for row in result:
-            ba_2_la_dict[row[0]] = row[1]
-    return ba_2_la_dict.get(value)
 
 
 def ct_level(value):
@@ -134,3 +115,26 @@ def ct_level_3(value):
     s = str(value).split('.')
     if len(s) > 2:
         return int(s[2])
+
+
+def _translation_lookup(name, sql):
+    def fn(value):
+        if name not in lookups:
+            result = run_sql(sql)
+            l = {}
+            for row in result:
+                l[row[0]] = row[1]
+            lookups[name] = l
+        return lookups[name].get(value)
+    return fn
+
+
+sql = 'SELECT la_sub_code, la_code FROM l_la_sub_la;'
+la_sub_2_la = _translation_lookup('la_sub_2_la', sql)
+
+
+sql = 'SELECT ba_code, la_code FROM l_ba_la;'
+ba_2_la = _translation_lookup('ba_2_la', sql)
+
+sql = 'SELECT la_code, nuts1_code FROM l_la_nuts;'
+la_sub_2_nuts1 = _translation_lookup('la_sub_2_nuts1', sql)
