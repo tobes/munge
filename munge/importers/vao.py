@@ -424,8 +424,8 @@ AUTO_SQL = [
             FROM {t1} t1
             LEFT JOIN {t2} p ON p.pc = t1.pc
             WHERE total_area > 0
-            AND nuts1 IS NOT NULL
-            GROUP BY nuts1, t1.scat_code;
+            AND nuts1_code IS NOT NULL
+            GROUP BY nuts1_code, t1.scat_code;
         ''',
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
@@ -440,8 +440,8 @@ AUTO_SQL = [
             FROM {t1} t1
             LEFT JOIN {t2} p ON p.pc = t1.pc
             WHERE total_area > 0
-            AND nuts2 IS NOT NULL
-            GROUP BY nuts2, t1.scat_code;
+            AND nuts2_code IS NOT NULL
+            GROUP BY nuts2_code, t1.scat_code;
         ''',
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
@@ -456,8 +456,8 @@ AUTO_SQL = [
             FROM {t1} t1
             LEFT JOIN {t2} p ON p.pc = t1.pc
             WHERE total_area > 0
-            AND nuts3 IS NOT NULL
-            GROUP BY nuts3, t1.scat_code;
+            AND nuts3_code IS NOT NULL
+            GROUP BY nuts3_code, t1.scat_code;
         ''',
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
@@ -539,6 +539,10 @@ AUTO_SQL = [
                     3
                  WHEN n3.count >= 10 AND n3.median_price_per_m2 > 0 THEN
                     4
+                 WHEN n2.count >= 10 AND n2.median_price_per_m2 > 0 THEN
+                    5
+                 WHEN n1.count >= 10 AND n1.median_price_per_m2 > 0 THEN
+                    6
                  WHEN sc.no_with_area > 0 AND sc.median_price_per_m2 > 0 THEN
                     7
                  WHEN sc.no_with_area > 0 AND sc.median_m2 IS NOT NULL THEN
@@ -554,8 +558,12 @@ AUTO_SQL = [
                     l.rateable_value/o.median_price_per_m2
                  WHEN la.count >= 10 AND la.median_price_per_m2 > 0 THEN
                     l.rateable_value/la.median_price_per_m2
-                 WHEN n3.count >= 10 AND n3.median_price_per_m2 > 0 THEN
+                 when n3.count >= 10 and n3.median_price_per_m2 > 0 then
                     l.rateable_value/n3.median_price_per_m2
+                 WHEN n2.count >= 10 AND n2.median_price_per_m2 > 0 THEN
+                    l.rateable_value/n2.median_price_per_m2
+                 WHEN n1.count >= 10 AND n1.median_price_per_m2 > 0 THEN
+                    l.rateable_value/n1.median_price_per_m2
                  WHEN sc.no_with_area > 0 AND sc.median_price_per_m2 > 0 THEN
                     l.rateable_value/sc.median_price_per_m2
                  WHEN sc.no_with_area > 0 AND sc.median_m2 IS NOT NULL THEN
@@ -580,7 +588,11 @@ AUTO_SQL = [
 
             LEFT JOIN {t8} pc ON l.pc = pc.pc
 
-            LEFT JOIN {t9} n3 ON n3.nuts1 = pc.nuts1
+            LEFT JOIN {t9} n3 ON n3.nuts3 = pc.nuts3
+
+            LEFT JOIN {t10} n2 ON n2.nuts2 = pc.nuts2
+
+            LEFT JOIN {t11} n1 ON n1.nuts1 = pc.nuts1
 
             LEFT OUTER JOIN {t7} b ON l.uarn = b.uarn
             WHERE l.rateable_value != 0
@@ -589,10 +601,10 @@ AUTO_SQL = [
             'vao_list', 's_vao_area_areacode_by_scat',
             's_vao_area_outcode_by_scat', 's_vao_area_la_by_scat',
             's_vao_area_national_by_scat', 'c_scat', 'vao_base',
-            'postcode', 's_vao_area_nuts1_by_scat'
+            'postcode', 's_vao_area_nuts3_by_scat',
+            's_vao_area_nuts2_by_scat', 's_vao_area_nuts1_by_scat',
         ],
-        'disabled': False,
-        'test': True,
+        'disabled': True,
         'summary': '',
     },
 
