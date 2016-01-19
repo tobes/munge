@@ -2,6 +2,7 @@ import csv
 import os.path
 import glob
 import re
+import collections
 
 import config
 import import_fns
@@ -91,7 +92,7 @@ def unicode_csv_reader(filename, **kw):
 
 
 def get_fns(fields):
-    fns = {}
+    fns = collections.OrderedDict()
     for field in fields:
         if field.get('fn'):
             fn_field = field.get('fn_field')
