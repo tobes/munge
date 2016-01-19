@@ -18,7 +18,7 @@ def import_module(args):
 def view_summaries(args, just_views=False):
     for module in args.module:
         m = getattr(importers, module)
-        data = getattr(m, 'AUTO_SQL')
+        data = getattr(m, 'AUTO_SQL', None)
         if data:
             sa_util.build_views_and_summaries(
                 data, verbose=args.verbose,
