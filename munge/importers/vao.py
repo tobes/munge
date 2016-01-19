@@ -370,7 +370,7 @@ AUTO_SQL = [
                WHERE  total_area IS NOT NULL
                AND total_area != 0
                AND scat_code = t3.code
-               AND nuts1 = t4.code
+               AND nuts1_code = t4.code
                )
             , c AS (SELECT count(*) AS ct FROM y)
             SELECT CASE WHEN c.ct%2 = 0 THEN
@@ -390,7 +390,7 @@ AUTO_SQL = [
                WHERE  total_area IS NOT NULL
                AND total_area != 0
                AND t1.scat_code = t3.code
-               AND nuts1 = t4.code
+               AND nuts1_code = t4.code
                )
             , c AS (SELECT count(*) AS ct FROM y)
             SELECT CASE WHEN c.ct%2 = 0 THEN
@@ -407,7 +407,7 @@ AUTO_SQL = [
                WHERE  total_area IS NOT NULL
                AND total_area != 0
                AND scat_code = t3.code
-               AND nuts1 = t4.code
+               AND nuts1_code = t4.code
         ) no_with_area
         FROM {t3} t3, {t4} t4
         ''',
