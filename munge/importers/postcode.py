@@ -18,10 +18,12 @@ def importer(verbose=0):
     filename = os.path.join(config.DATA_PATH, DIRECTORY, FILENAME)
 
     fields = [
-        '*pcd',
-        '+@pcc:text~compact_pc|pcd',
+        '-pcd',
         '-pcd2',
-        '-pcds',
+        '*pcds',
+        '+@pcc:text~compact_pc|pcds',
+        '+@outcode:text~outcode|pcds',
+        '+@areacode:text~areacode|pcds',
         '-dointr',
         '-doterm',
         '-oscty',
@@ -41,7 +43,7 @@ def importer(verbose=0):
         '-teclec',
         '-ttwa',
         '-pct',
-        'la_sub_code',
+        '-nuts',
         '-psed',
         '-cened',
         '-edind',
@@ -70,9 +72,10 @@ def importer(verbose=0):
         '-buasd11',
         '-ru11ind',
         '-oac11',
+        '@nuts_sub_code:text~la_sub_2_la|nuts',
+        '@nuts1:text~la_sub_2_nuts1|nuts_sub_code',
         'lat:double precision',
         'long:double precision',
-        '@nuts_sub_code:text~la_sub_2_la|la_sub_code',
     ]
 
     if verbose:
