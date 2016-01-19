@@ -138,3 +138,9 @@ ba_2_la = _translation_lookup('ba_2_la', sql)
 
 sql = 'SELECT la_code, nuts1_code FROM l_la_nuts;'
 la_sub_2_nuts1 = _translation_lookup('la_sub_2_nuts1', sql)
+
+sql = 'SELECT la_code, nuts2_code FROM l_la_nuts;'
+la_sub_2_nuts2 = _translation_lookup('la_sub_2_nuts2', sql)
+
+sql = 'SELECT la_code, nuts3_code FROM l_la_nuts;'
+la_sub_2_nuts3 = _translation_lookup('la_sub_2_nuts3', sql)
