@@ -524,12 +524,28 @@ AUTO_SQL = [
     },
 
     {
+        'name': 's_vao_premises_area_summary',
+        'sql': '''
+            SELECT t1.uarn, t1.scat_code,
+            p.areacode, p.outcode,
+            nuts1_code, nuts2_code, nuts3_code, t1.la_code,
+            t1.rateable_value, t2.total_area, t2.total_value
+            FROM {t1} t1
+            LEFT JOIN {t2} t2 ON t1.uarn = t2.uarn
+            LEFT JOIN {t3} p ON p.pc = t1.pc
+        ''',
+        'tables': ['vao_list', 'vao_base', 'postcode'],
+        'disabled': False,
+        'summary': '',
+    },
+
+    {
         'name': 's_vao_area_estimates',
         'sql': '''
             SELECT
             l.uarn,
 
-            CASE WHEN b.total_area IS NOT NULL THEN
+            CASE WHEN total_area IS NOT NULL THEN
                     0
                  WHEN a.count >= 10 AND a.median_price_per_m2 > 0 THEN
                     1
@@ -550,8 +566,8 @@ AUTO_SQL = [
                  ELSE null
             END area_source_code,
 
-            CASE WHEN b.total_area IS NOT NULL THEN
-                    b.total_area
+            CASE WHEN total_area IS NOT NULL THEN
+                    total_area
                  WHEN a.count >= 10 AND a.median_price_per_m2 > 0 THEN
                     l.rateable_value/a.median_price_per_m2
                  WHEN o.count >= 10 AND o.median_price_per_m2 > 0 THEN
@@ -584,27 +600,21 @@ AUTO_SQL = [
 
             LEFT JOIN {t5} sc On sc.scat_code = l.scat_code
 
-            LEFT JOIN {t6} s ON l.scat_code = s.code
+            LEFT JOIN {t6} n3 ON n3.nuts3_code = l.nuts3_code
 
-            LEFT JOIN {t8} pc ON l.pc = pc.pc
+            LEFT JOIN {t7} n2 ON n2.nuts2_code = l.nuts2_code
 
-            LEFT JOIN {t9} n3 ON n3.nuts3 = pc.nuts3
+            LEFT JOIN {t8} n1 ON n1.nuts1_code = l.nuts1_code
 
-            LEFT JOIN {t10} n2 ON n2.nuts2 = pc.nuts2
-
-            LEFT JOIN {t11} n1 ON n1.nuts1 = pc.nuts1
-
-            LEFT OUTER JOIN {t7} b ON l.uarn = b.uarn
             WHERE l.rateable_value != 0
         ''',
         'tables': [
-            'vao_list', 's_vao_area_areacode_by_scat',
+            's_vao_premises_area_summary', 's_vao_area_areacode_by_scat',
             's_vao_area_outcode_by_scat', 's_vao_area_la_by_scat',
-            's_vao_area_national_by_scat', 'c_scat', 'vao_base',
-            'postcode', 's_vao_area_nuts3_by_scat',
+            's_vao_area_national_by_scat', 's_vao_area_nuts3_by_scat',
             's_vao_area_nuts2_by_scat', 's_vao_area_nuts1_by_scat',
         ],
-        'disabled': True,
+        'disabled': False,
         'summary': '',
     },
 
