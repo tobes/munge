@@ -308,14 +308,60 @@ def _build_summary(data, verbose=0, limit=None):
         print(sql.format(**tables_dict))
     results = run_sql(sql.format(**tables_dict))
 
-    function = data.get('function')
-    if function:
-        _results_to_function(function, data, results, verbose=verbose, limit=limit)
+    row_function = data.get('row_function')
+    table_function = data.get('table_function')
+    if row_function:
+        _results_to_row_function(row_function, data, results, verbose=verbose, limit=limit)
+    if table_function:
+        _results_to_table_function(table_function, data, results, verbose=verbose, limit=limit)
     else:
         _results_to_table(data, results, verbose=verbose, limit=limit)
 
+def _results_to_table_function(function, data, results, verbose=0, limit=None):
+    table_name = data['name']
+    fields_data = data['fields']
+    primary_key = data.get('primary_key')
+    table_name_temp = config.TEMP_TABLE_STR + table_name
+    first = True
+    count = 0
+    out = []
+    for row in function(results, data, verbose=verbose):
+        if first:
+            fields = process_header(fields_data)
+            f = [field['name'] for field in fields]
+            create_table(table_name_temp,
+                         fields,
+                         primary_key=primary_key,
+                         verbose=verbose)
+            insert_sql = insert_rows(table_name_temp, fields)
+            first = False
+        else:
+            row_data = dict(zip(f, row))
+            out.append(row_data)
+            count += 1
+            if count % config.BATCH_SIZE == 0:
+                run_sql(insert_sql, out)
+                out = []
+                if verbose:
+                    print('{table}: {count:,}'.format(
+                        table=table_name, count=count
+                    ))
+        if limit and count == limit:
+            break
+    if out:
+        run_sql(insert_sql, out)
 
-def _results_to_function(function, data, results, verbose=0, limit=None):
+    if verbose:
+        print('{table}: {count:,} rows imported'.format(
+            table=table_name, count=count
+        ))
+    if count:
+        # Add indexes
+        build_indexes(table_name_temp, fields, verbose=verbose)
+
+
+
+def _results_to_row_function(function, data, results, verbose=0, limit=None):
     table_name = data['name']
     fields_data = data['fields']
     primary_key = data.get('primary_key')

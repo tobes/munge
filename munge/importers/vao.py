@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from munge import config
 from munge.csv_util import import_csv, unicode_csv_reader
-from munge.sa_util import results_dict
+from munge.sa_util import results_dict, get_result_fields
 
 DIRECTORY = 'vao'
 
@@ -307,6 +307,64 @@ def s_vao_premises_area(data, verbose=0):
     out['area'] = area
     return out
 
+
+def s_vao_area(results, data, verbose=0):
+    first = True
+    count = 0
+    store = {}
+    for row in results:
+        if first:
+            f = [field['name'] for field in get_result_fields(results)]
+        row_data = dict(zip(f, row))
+        key = row_data['scat_code']
+        value = row_data['total_value']
+        area = row_data['total_area']
+        if key not in store:
+            store[key] = ([], [], 0, 0)
+        if area:
+            store[key][1].append(area)
+        if area and value:
+            store[key][0].append(value/area)
+        count += 1
+        store[key][3] += 1
+        if area == 1:
+            store[key][2] += 1
+        if verbose and count % config.BATCH_SIZE == 0:
+                print('processing {count:,}'.format(
+                    count=count
+                ))
+
+    if verbose:
+        print('calculating...')
+    out = [data['fields']]
+    for key in sorted(store.keys()):
+        if verbose:
+            print('{key}  {c1:,}  {c2:,}'.format(
+                key=key, c1=len(store[key][0]), c2=len(store[key][1])
+            ))
+        out.append(
+            [
+                key,
+                median(store[key][0]),
+                median(store[key][1]),
+                len(store[key][0]),
+                len(store[key][1]),
+                store[key][2],
+                store[key][3],
+            ]
+        )
+
+    return out
+
+
+def median(lst):
+    lst = sorted(lst)
+    if len(lst) < 1:
+            return None
+    if len(lst) %2 == 1:
+            return lst[((len(lst)+1)/2)-1]
+    else:
+            return float(sum(lst[(len(lst)/2)-1:(len(lst)/2)+1]))/2.0
 
 
 AUTO_SQL = [
@@ -632,7 +690,26 @@ AUTO_SQL = [
         'disabled': False,
         'summary': '',
     },
-
+    {
+        'name': 's_vao_area2_national',
+        'sql': '''
+            SELECT  scat_code, total_area, total_value FROM {t1}
+        ''',
+        'tables': ['vao_base'],
+        'fields': [
+            'scat_code:smallint',
+            'median_m2:numeric',
+            'median_price_per_m2:numeric',
+            'count_m2:integer',
+            'count_ppm2:integer',
+            'singles:integer',
+            'total:integer',
+         ],
+        'table_function': s_vao_area,
+        'disabled': False,
+        'test': True,
+        'summary': '',
+    },
     {
         'name': 's_vao_premises_area',
         'sql': '''
@@ -645,9 +722,8 @@ AUTO_SQL = [
             'scat_code:smallint',
             'area_source_code:smallint',
          ],
-        'function': s_vao_premises_area,
+        'row_function': s_vao_premises_area,
         'disabled': False,
-        'test': True,
         'summary': '',
     },
     {
