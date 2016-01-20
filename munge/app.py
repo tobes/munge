@@ -39,7 +39,7 @@ def code_desc(arg, code_type):
     codes = codes_data.get(code_type)
     if not codes:
         return arg
-    if arg:
+    if arg is not None:
         desc = codes.get(arg)
         html = make_html_span('code', 'code') + ' '
         if desc:
