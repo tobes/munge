@@ -4,6 +4,7 @@ import sqlalchemy as sa
 
 import sa_common
 import config
+from common import process_header
 
 
 engine = sa.create_engine(config.CONNECTION_STRING, echo=False)
@@ -282,30 +283,98 @@ def insert_rows(table, fields):
     return sql
 
 
+def results_dict(sql):
+    first = True
+    count = 0
+    results = run_sql(sql)
+    for row in results:
+        if first:
+            fields = get_result_fields(results)
+            f = [field['name'] for field in fields]
+            first = False
+        row_data = dict(zip(f, row))
+        yield row_data
+
+
 def _build_summary(data, verbose=0, limit=None):
     table_name = data['name']
     sql = data['sql']
     tables = data['tables']
-    primary_key = data.get('primary_key')
 
-    table_name_temp = config.TEMP_TABLE_STR + table_name
     if verbose:
         print('creating summary table %s' % table_name)
     tables_dict = make_tables_dict(tables)
     if verbose > 1:
         print(sql.format(**tables_dict))
-    result = run_sql(sql.format(**tables_dict))
+    results = run_sql(sql.format(**tables_dict))
+
+    function = data.get('function')
+    if function:
+        _results_to_function(function, data, results, verbose=verbose, limit=limit)
+    else:
+        _results_to_table(data, results, verbose=verbose, limit=limit)
+
+
+def _results_to_function(function, data, results, verbose=0, limit=None):
+    table_name = data['name']
+    fields_data = data['fields']
+    primary_key = data.get('primary_key')
+    table_name_temp = config.TEMP_TABLE_STR + table_name
     first = True
     count = 0
     data = []
-    for row in result:
+    for row in results:
         if first:
-            fields = get_result_fields(result)
+            fields = get_result_fields(results)
+            f = [field['name'] for field in fields]
+        row_data = dict(zip(f, row))
+        row_data = function(row_data, verbose=verbose)
+        if first:
+            fields = process_header(fields_data)
             create_table(table_name_temp,
                          fields,
                          primary_key=primary_key,
                          verbose=verbose)
-            f = [field['name'] for field in fields if not field.get('missing')]
+            insert_sql = insert_rows(table_name_temp, fields)
+            first = False
+        data.append(row_data)
+        count += 1
+        if count % config.BATCH_SIZE == 0:
+            run_sql(insert_sql, data)
+            data = []
+            if verbose:
+                print('{table}: {count:,}'.format(
+                    table=table_name, count=count
+                ))
+        if limit and count == limit:
+            break
+    if data:
+        run_sql(insert_sql, data)
+
+    if verbose:
+        print('{table}: {count:,} rows imported'.format(
+            table=table_name, count=count
+        ))
+    if count:
+        # Add indexes
+        build_indexes(table_name_temp, fields, verbose=verbose)
+
+
+def _results_to_table(data, results, verbose=0, limit=None):
+    table_name = data['name']
+    primary_key = data.get('primary_key')
+    table_name_temp = config.TEMP_TABLE_STR + table_name
+    first = True
+    count = 0
+    data = []
+    for row in results:
+        if first:
+            fields = get_result_fields(results)
+            create_table(table_name_temp,
+                         fields,
+                         primary_key=primary_key,
+                         verbose=verbose)
+            f = [field['name'] for field in fields]
             insert_sql = insert_rows(table_name_temp, fields)
             first = False
         data.append(dict(zip(f, row)))

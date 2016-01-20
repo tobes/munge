@@ -80,7 +80,7 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
                 except Exception as e:
                     # FIXME log error
                     print(str(e))
-                    print(row)
+                    print(fn)
                     print(row_data)
                     skip = True
             if not skip:

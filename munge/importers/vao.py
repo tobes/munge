@@ -1,7 +1,9 @@
 import os.path
+from decimal import Decimal
 
 from munge import config
 from munge.csv_util import import_csv, unicode_csv_reader
+from munge.sa_util import results_dict
 
 DIRECTORY = 'vao'
 
@@ -155,6 +157,156 @@ vao_types = [
     ('06', 'vao_adj_raw', vao_base_06_fields),
     ('07', 'vao_adj_totals_raw', vao_base_07_fields),
 ]
+
+
+cache = {}
+
+def make_key(keys, data, key_delimiter='#'):
+    out = []
+    for key in keys:
+        out.append(str(data[key]))
+    return key_delimiter.join(out)
+
+
+AREA_ESTIMATERS = [
+    {
+        'name': 'areacode',
+        'cutoff': 10,
+        'value': 'median_price_per_m2',
+        'sql': '''
+            SELECT areacode, scat_code, median_price_per_m2, count
+            FROM s_vao_area_areacode_by_scat
+        ''',
+        'keys': ['scat_code', 'areacode'],
+        'code': 1
+    },
+    {
+        'name': 'outcode',
+        'cutoff': 10,
+        'value': 'median_price_per_m2',
+        'sql': '''
+            SELECT outcode, scat_code, median_price_per_m2, count
+            FROM s_vao_area_outcode_by_scat
+        ''',
+        'keys': ['scat_code', 'outcode'],
+        'code': 2
+    },
+    {
+        'name': 'la',
+        'cutoff': 10,
+        'value': 'median_price_per_m2',
+        'sql': '''
+            SELECT la_code, scat_code, median_price_per_m2, count
+            FROM s_vao_area_la_by_scat
+        ''',
+        'keys': ['scat_code', 'la_code'],
+        'code': 3
+    },
+    {
+        'name': 'nuts3',
+        'cutoff': 10,
+        'value': 'median_price_per_m2',
+        'sql': '''
+            SELECT nuts3_code, scat_code, median_price_per_m2, count
+            FROM s_vao_area_nuts3_by_scat
+        ''',
+        'keys': ['scat_code', 'nuts3_code'],
+        'code': 4
+    },
+    {
+        'name': 'nuts2',
+        'cutoff': 10,
+        'value': 'median_price_per_m2',
+        'sql': '''
+            SELECT nuts2_code, scat_code, median_price_per_m2, count
+            FROM s_vao_area_nuts2_by_scat
+        ''',
+        'keys': ['scat_code', 'nuts2_code'],
+        'code': 5
+    },
+    {
+        'name': 'nuts1',
+        'cutoff': 10,
+        'value': 'median_price_per_m2',
+        'sql': '''
+            SELECT nuts1_code, scat_code, median_price_per_m2, count
+            FROM s_vao_area_nuts1_by_scat
+        ''',
+        'keys': ['scat_code', 'nuts1_code'],
+        'code': 6
+    },
+    {
+        'name': 'national',
+        'cutoff': 0,
+        'value': 'median_price_per_m2',
+        'sql': '''
+            SELECT scat_code, median_price_per_m2, no_with_area as count
+            FROM s_vao_area_national_by_scat
+        ''',
+        'keys': ['scat_code'],
+        'code': 7
+    },
+    {
+        'name': 'unpriced',
+        'cutoff': 0,
+        'value': 'median_m2',
+        'sql': '''
+            SELECT scat_code, median_m2, no_with_area as count
+            FROM s_vao_area_national_by_scat
+        ''',
+        'keys': ['scat_code'],
+        'no_calc': True,
+        'code': 8
+    },
+]
+
+
+def build_cache(name, sql, keys, value, cutoff=0, verbose=0):
+    if verbose:
+        print 'creating cache', name
+    data = {}
+    for row in results_dict(sql):
+        if cutoff and row['count'] < cutoff:
+            continue
+        data[make_key(keys, row)] = row[value]
+    cache[name] = data
+    if verbose:
+        print 'completed'
+
+
+def s_vao_premises_area(data, verbose=0):
+    if 'nuts1' not in cache:
+        for item in AREA_ESTIMATERS:
+            build_cache(
+                item['name'],
+                item['sql'],
+                item['keys'],
+                item['value'],
+                item['cutoff'],
+                verbose,
+            )
+    code = None
+    out = {
+        'uarn': data['uarn'],
+        'scat_code': data['scat_code'],
+    }
+    area = data['total_area']
+    if area:
+        code = 0
+    if not area:
+        for item in AREA_ESTIMATERS:
+            value = cache[item['name']].get(make_key(item['keys'], data))
+            if value:
+                if not item.get('no_calc'):
+                    value = round(data['rateable_value'] / value, 2)
+                if value:
+                    code = item['code']
+                    area = Decimal(str(value))
+                    break
+    out['area_source_code'] = code
+    out['area'] = area
+    return out
+
 
 
 AUTO_SQL = [
@@ -540,6 +692,34 @@ AUTO_SQL = [
     },
 
     {
+        'name': 's_vao_premises_area',
+        'sql': '''
+            SELECT  * FROM {t1}
+        ''',
+        'tables': ['s_vao_premises_area_summary'],
+        'fields': [
+            '*uarn:bigint',
+            'area:numeric',
+            'scat_code:smallint',
+            'area_source_code:smallint',
+         ],
+        'function': s_vao_premises_area,
+        'disabled': False,
+        'test': True,
+        'summary': '',
+    },
+    {
+        'name': 'v_vao_scat_group_area_summary',
+        'sql': '''
+            select scat_group_code, a.*
+            from {t1} c
+            LEFT JOIN {t2} a ON a.scat_code = c.code
+            ORDER BY scat_group_code;
+        ''',
+        'tables': ['c_scat', 's_vao_area_national_by_scat'],
+        'as_view': True,
+    },
+    {
         'name': 's_vao_area_estimates',
         'sql': '''
             SELECT
@@ -614,7 +794,7 @@ AUTO_SQL = [
             's_vao_area_national_by_scat', 's_vao_area_nuts3_by_scat',
             's_vao_area_nuts2_by_scat', 's_vao_area_nuts1_by_scat',
         ],
-        'disabled': False,
+        'disabled': True,
         'summary': '',
     },
 
