@@ -513,64 +513,6 @@ AUTO_SQL = [
     {
         'name': 's_vao_area_nuts1_by_scat',
         'sql': '''
-        SELECT t3.code as scat_code, t4.code as nuts1_code,
-        (
-            WITH y AS (
-               SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
-               FROM   {t1} t1
-               LEFT JOIN {t2} t2 ON t1.pc = t2.pc
-               WHERE  total_area IS NOT NULL
-               AND total_area != 0
-               AND scat_code = t3.code
-               AND nuts1_code = t4.code
-               )
-            , c AS (SELECT count(*) AS ct FROM y)
-            SELECT CASE WHEN c.ct%2 = 0 THEN
-                      round((SELECT avg(total_area) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
-                   ELSE
-                            (SELECT     total_area  FROM y WHERE y.rn = (c.ct+1)/2)
-                   END AS median_m2
-            FROM c
-        ),
-        (
-            WITH y AS (
-               SELECT rateable_value/total_area median_price_per_m2,
-               row_number() OVER (ORDER BY rateable_value/total_area) AS rn
-               FROM   {t1} t1
-               LEFT JOIN {t5} l ON l.uarn = t1.uarn
-               LEFT JOIN {t2} t2 ON t1.pc = t2.pc
-               WHERE  total_area IS NOT NULL
-               AND total_area != 0
-               AND t1.scat_code = t3.code
-               AND nuts1_code = t4.code
-               )
-            , c AS (SELECT count(*) AS ct FROM y)
-            SELECT CASE WHEN c.ct%2 = 0 THEN
-                      round((SELECT avg(median_price_per_m2) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
-                   ELSE
-                            (SELECT     median_price_per_m2  FROM y WHERE y.rn = (c.ct+1)/2)
-                   END AS median_price_per_m2
-            FROM c
-        ),
-        (
-               SELECT count(*)
-               FROM   {t1} t1
-               LEFT JOIN {t2} t2 ON t1.pc = t2.pc
-               WHERE  total_area IS NOT NULL
-               AND total_area != 0
-               AND scat_code = t3.code
-               AND nuts1_code = t4.code
-        ) no_with_area
-        FROM {t3} t3, {t4} t4
-        ''',
-        'tables': ['vao_base', 'postcode', 'c_scat', 'c_nuts1', 'vao_list'],
-        'disabled': False,
-        'summary': '',
-    },
-
-    {
-        'name': 's_vao_area_nuts1_by_scat',
-        'sql': '''
             SELECT nuts1_code, t1.scat_code, count(*),
             usr_median(total_value/total_area) as median_price_per_m2
             FROM {t1} t1
