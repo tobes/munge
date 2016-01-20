@@ -54,7 +54,7 @@ def get_result_fields(*args, **kw):
     return sa_common.get_result_fields(engine, *args, **kw)
 
 
-def clear_temp_objects(verbose=False):
+def clear_temp_objects(verbose=0):
     dependents = dependent_objects()
     # tables
     tables = [
@@ -227,7 +227,7 @@ def create_table(table, fields, primary_key=None, verbose=0):
     run_sql(sql)
 
 
-def build_indexes(table_name, t_fields, verbose=False):
+def build_indexes(table_name, t_fields, verbose=0):
     # get indexed fields
     index_fields = [
         (f['index_key'], f['name'])
@@ -282,7 +282,7 @@ def insert_rows(table, fields):
     return sql
 
 
-def _build_summary(data, verbose=False, limit=None):
+def _build_summary(data, verbose=0, limit=None):
     table_name = data['name']
     sql = data['sql']
     tables = data['tables']
@@ -331,7 +331,7 @@ def _build_summary(data, verbose=False, limit=None):
         build_indexes(table_name_temp, fields, verbose=verbose)
 
 
-def build_view(data, verbose=0):
+def _build_view(data, verbose=0):
     view_name = data['name']
     view_name = config.TEMP_TABLE_STR + view_name
     sql = 'CREATE VIEW {name} AS\n'.format(name=quote(view_name))
@@ -368,7 +368,7 @@ def build_views_and_summaries(data, verbose=0, just_views=False,
         if info.get('disabled'):
             continue
         if info.get('as_view'):
-            time_fn(build_view, args=[info], verbose=verbose)
+            time_fn(_build_view, args=[info], verbose=verbose)
         else:
             if test_only and not info.get('test'):
                 continue
