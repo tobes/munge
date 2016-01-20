@@ -320,7 +320,7 @@ def s_vao_area(results, data, verbose=0):
         value = row_data['total_value']
         area = row_data['total_area']
         if key not in store:
-            store[key] = ([], [], 0, 0)
+            store[key] = [[], [], 0, 0]
         if area:
             store[key][1].append(area)
         if area and value:
