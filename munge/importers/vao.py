@@ -714,6 +714,27 @@ AUTO_SQL = [
         'as_view': True,
     },
 
+    {
+        'name': 'v_premises_summary',
+        'sql': '''
+            SELECT
+            l.uarn,
+            initcap(l.add_no) address_number,
+            initcap(l.street) street,
+            initcap(l.town) town,
+            initcap(l.post_district) postal_district,
+            initcap(l.county) county,
+            l.pc postcode,
+            l.scat_code,
+            l.la_code,
+            initcap(l.prm_desc) description,
+            a.area, a.area_source_code
+            FROM {t1} l
+            LEFT JOIN {t2} a ON a.uarn=l.uarn
+        ''',
+        'tables': ['vao_list', 's_vao_premises_area'],
+        'as_view': True,
+    },
 
 # ==================================
 
