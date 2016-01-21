@@ -79,9 +79,9 @@ def clear_temp_objects(verbose=0):
 def drop_sql(table, force=False):
     sql = ''
     if table in table_list():
-        sql = 'DROP TABLE {table}'.format(table=quote(table))
+        sql = 'DROP TABLE IF EXISTS {table}'.format(table=quote(table))
     elif table in view_list():
-        sql = 'DROP VIEW {table}'.format(table=quote(table))
+        sql = 'DROP VIEW IF EXISTS {table}'.format(table=quote(table))
     if sql:
         if force:
             sql = sql + ' CASCADE'
