@@ -512,58 +512,23 @@ AUTO_SQL = [
     {
         'name': 's_vao_area_national_by_scat',
         'sql': '''
-        SELECT code as scat_code,
-        (
-            WITH y AS (
-               SELECT total_area, row_number() OVER (ORDER BY total_area) AS rn
-               FROM   {t1}
-               WHERE  total_area IS NOT NULL
-               AND total_area != 0
-               AND scat_code = code
-               )
-            , c AS (SELECT count(*) AS ct FROM y)
-            SELECT CASE WHEN c.ct%2 = 0 THEN
-                      round((SELECT avg(total_area) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
-                   ELSE
-                            (SELECT     total_area  FROM y WHERE y.rn = (c.ct+1)/2)
-                   END AS median_m2
-            FROM c
-        ),
-        (
-            WITH y AS (
-               SELECT rateable_value/total_area median_price_per_m2,
-               row_number() OVER (ORDER BY rateable_value/total_area) AS rn
-               FROM {t1} b
-               LEFT JOIN {t2} l ON l.uarn = b.uarn
-               WHERE  total_area IS NOT NULL
-               AND total_area != 0
-               AND b.scat_code = code
-               )
-            , c AS (SELECT count(*) AS ct FROM y)
-            SELECT CASE WHEN c.ct%2 = 0 THEN
-                      round((SELECT avg(median_price_per_m2) FROM y WHERE y.rn IN (c.ct/2, c.ct/2+1)), 3)
-                   ELSE
-                            (SELECT     median_price_per_m2  FROM y WHERE y.rn = (c.ct+1)/2)
-                   END AS median_price_per_m2
-            FROM c
-        ),
-        (
-               SELECT count(*)
-               FROM   {t1}
-               WHERE  total_area IS NOT NULL
-               AND total_area != 0
-               AND scat_code = code
-        ) no_with_area,
-        (
-               SELECT count(*)
-               FROM   {t2} l
-               LEFT OUTER JOIN {t1} b ON l.uarn = b.uarn
-               WHERE  b.uarn is Null
-               AND l.scat_code = code
-        ) no_without_area
-        FROM {t3}
+            SELECT t1.scat_code,
+            (SELECT count(*) FROM {t1} c WHERE c.scat_code = t1.scat_code) total,
+            count(*),
+            (SELECT count(*) FROM {t1} c WHERE c.scat_code = t1.scat_code
+            AND total_area <= 1) count_small,
+            quantile(total_value/total_area, 0.5) as median_price_per_m2,
+            min(total_value/total_area) as min_price_per_m2,
+            max(total_value/total_area) as max_price_per_m2,
+            quantile(total_area, 0.5) as median_m2,
+            min(total_area) as min_m2,
+            max(total_area) as max_m2
+            FROM {t1} t1
+            WHERE total_area > 0
+            GROUP BY t1.scat_code
+            ORDER BY scat_code
         ''',
-        'tables': ['vao_base', 'vao_list', 'c_scat'],
+        'tables': ['vao_base'],
         'disabled': False,
         'summary': '',
     },
@@ -572,12 +537,16 @@ AUTO_SQL = [
         'name': 's_vao_area_nuts1_by_scat',
         'sql': '''
             SELECT nuts1_code, t1.scat_code, count(*),
-            usr_median(total_value/total_area) as median_price_per_m2
+            sum(total_area) as total_m2,
+            sum(total_value) as total_value,
+            quantile(total_value/total_area, 0.5) as median_price_per_m2,
+            quantile(total_area, 0.5) as median_m2
             FROM {t1} t1
             LEFT JOIN {t2} p ON p.pc = t1.pc
             WHERE total_area > 0
             AND nuts1_code IS NOT NULL
-            GROUP BY nuts1_code, t1.scat_code;
+            GROUP BY nuts1_code, t1.scat_code
+            ORDER BY scat_code, nuts1_code
         ''',
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
@@ -588,12 +557,16 @@ AUTO_SQL = [
         'name': 's_vao_area_nuts2_by_scat',
         'sql': '''
             SELECT nuts2_code, t1.scat_code, count(*),
-            usr_median(total_value/total_area) as median_price_per_m2
+            sum(total_area) as total_m2,
+            sum(total_value) as total_value,
+            quantile(total_value/total_area, 0.5) as median_price_per_m2,
+            quantile(total_area, 0.5) as median_m2
             FROM {t1} t1
             LEFT JOIN {t2} p ON p.pc = t1.pc
             WHERE total_area > 0
             AND nuts2_code IS NOT NULL
-            GROUP BY nuts2_code, t1.scat_code;
+            GROUP BY nuts2_code, t1.scat_code
+            ORDER BY scat_code, nuts2_code
         ''',
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
@@ -604,12 +577,16 @@ AUTO_SQL = [
         'name': 's_vao_area_nuts3_by_scat',
         'sql': '''
             SELECT nuts3_code, t1.scat_code, count(*),
-            usr_median(total_value/total_area) as median_price_per_m2
+            sum(total_area) as total_m2,
+            sum(total_value) as total_value,
+            quantile(total_value/total_area, 0.5) as median_price_per_m2,
+            quantile(total_area, 0.5) as median_m2
             FROM {t1} t1
             LEFT JOIN {t2} p ON p.pc = t1.pc
             WHERE total_area > 0
             AND nuts3_code IS NOT NULL
-            GROUP BY nuts3_code, t1.scat_code;
+            GROUP BY nuts3_code, t1.scat_code
+            ORDER BY scat_code, nuts3_code
         ''',
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
@@ -622,8 +599,8 @@ AUTO_SQL = [
             SELECT t1.outcode, t1.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
-            usr_median(total_area) as median_m2,
-            usr_median(total_value/total_area) as median_price_per_m2,
+            quantile(total_area, 0.5) as median_m2,
+            quantile(total_value/total_area, 0.5) as median_price_per_m2,
             t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
@@ -641,8 +618,8 @@ AUTO_SQL = [
             SELECT t1.areacode, t1.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
-            usr_median(total_area) as median_m2,
-            usr_median(total_value/total_area) as median_price_per_m2,
+            quantile(total_area, 0.5) as median_m2,
+            quantile(total_value/total_area, 0.5) as median_price_per_m2,
             t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
@@ -661,8 +638,8 @@ AUTO_SQL = [
             SELECT la_code, t1.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
-            usr_median(total_area) as median_m2,
-            usr_median(total_value/total_area) as median_price_per_m2,
+            quantile(total_area, 0.5) as median_m2,
+            quantile(total_value/total_area, 0.5) as median_price_per_m2,
             t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
@@ -706,8 +683,7 @@ AUTO_SQL = [
             'total:integer',
          ],
         'table_function': s_vao_area,
-        'disabled': False,
-        'test': True,
+        'disabled': True,
         'summary': '',
     },
     {
