@@ -266,15 +266,16 @@ def la_areas(la_code):
     data = {'la_code': la_code}
     sql = '''
     SELECT
-    s.code as scat_code,
+    scat_code,
     count,
     total_m2,
     total_value,
-    total_area_price
-    FROM s_vao_base_areas t
-    LEFT JOIN c_scat s ON s.code = t.scat_code
+    median_m2,
+    median_price_per_m2,
+    national_price_per_m2
+    FROM s_vao_area_la_by_scat t
     WHERE la_code = :la_code
-    ORDER BY s.desc
+    ORDER BY scat_code
     '''
     output = show_result(sql, data=data)
     return render_template('table_output.html', data=output)
@@ -293,15 +294,14 @@ def scat_areas(scat_code):
     data = {'scat_code': scat_code}
     sql = '''
     SELECT
-    s.desc,
+    la_code,
     count,
     total_m2,
-    mean_m2,
-    median_m2,
-    mode_m2,
     total_value,
-    total_area_price
-    FROM s_vao_base_areas t
+    median_m2,
+    median_price_per_m2,
+    national_price_per_m2
+    FROM s_vao_area_la_by_scat t
     LEFT JOIN c_la s ON s.code = t.la_code
     WHERE scat_code = :scat_code
     ORDER BY s.desc
