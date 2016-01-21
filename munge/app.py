@@ -363,6 +363,7 @@ def premises(uarn):
 
     tables = [
         'vao_list',
+        's_vao_premises_area',
         'vao_base',
         'vao_line',
         'vao_additions',
