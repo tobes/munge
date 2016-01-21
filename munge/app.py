@@ -387,6 +387,23 @@ def premises(uarn):
     return render_template('premises.html', output=output)
 
 
+@app.route('/premises/')
+def premises_search():
+    uarn = request.args.get('uarn')
+    if uarn:
+        data = {'uarn': uarn.strip()}
+        sql = '''
+        SELECT uarn
+        FROM vao_list
+        WHERE uarn = :uarn
+        '''
+        results = run_sql(sql, data)
+        for result in results:
+            return redirect(url_for('premises', uarn=uarn))
+
+    return render_template('uarn.html', uarn=uarn)
+
+
 @app.route('/ba_ref/')
 def ba_ref_premises():
     ba_ref = request.args.get('ba_ref')

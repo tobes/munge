@@ -1,0 +1,13 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>uarn search</h1>
+<form>
+  <input name="uarn" value="{{ uarn or '' }}" />
+  <input value="Search" type="submit" />
+</form>
+{% if uarn %}
+<p>{{ uarn }} Not found :(</p>
+{% endif %}
+{% endblock %}
