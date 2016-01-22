@@ -147,8 +147,10 @@ def import_all(directory, verbose=0, keep_table=False):
         import_single(f, table_name, verbose=verbose, keep_table=keep_table)
 
 
-def make_headers(result, table_name):
+def make_headers(result, table_name, simple=False):
     fields = get_result_fields(result, table_name)
+    if simple:
+        return [field['name'] for field in fields]
     headers = []
     for field in fields:
         v = u'%s:%s' % (field['name'], field['type'])
@@ -171,6 +173,7 @@ def csv_encode(value):
 def make_csv(filename, sql, **kw):
     table = kw.get('table')
     verbose = kw.get('verbose')
+    simple = kw.get('simple')
 
     if not table:
         table = os.path.splitext(os.path.basename(filename))[0]
@@ -190,7 +193,7 @@ def make_csv(filename, sql, **kw):
                 headers = kw.get('headers')
                 if not headers:
                     # no headers so get from sqlalchemy
-                    headers = make_headers(result, table)
+                    headers = make_headers(result, table, simple=simple)
                 a.writerows([headers])
                 if verbose:
                     print('\nFields:')
