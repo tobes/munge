@@ -158,6 +158,16 @@ def make_headers(result, table_name):
     return headers
 
 
+def csv_encode(value):
+    if isinstance(value, basestring):
+        return value.strip().encode('utf-8')
+    if isinstance(value, bool):
+        return 'Y' if value else 'N'
+    if value is None:
+        return ''
+    return value
+
+
 def make_csv(filename, sql, **kw):
     table = kw.get('table')
     verbose = kw.get('verbose')
@@ -174,12 +184,7 @@ def make_csv(filename, sql, **kw):
         wrote_headers = False
         count = 0
         for row in result:
-            row = [
-                x.strip().encode('utf-8')
-                if isinstance(x, basestring)
-                else x
-                for x in row
-            ]
+            row = [csv_encode(x) for x in row]
             if not wrote_headers:
                 # do here so we only need to execute the sql once
                 headers = kw.get('headers')
