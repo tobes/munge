@@ -17,14 +17,17 @@ def process_header(row):
         missing = False
         fn = None
         fn_field = None
+        type_ = 'text'
         # field datatype
         if ':' in col:
             field, type_ = col.split(':')
+        elif '~' in col:
+            field, type_ = col.split('~')
+            type_ = 'text~' + type_
         else:
             field = col
-            type_ = 'text'
         # ignored fields
-        if col[0] == '-':
+        if field[0] == '-':
             field = field[1:]
             type_ = None
         # primary key
