@@ -7,7 +7,8 @@ OID_TYPE = {
     23: 'integer',
     25: 'text',
     16: 'boolean',
-    701: 'double precision',
+   # 701: 'double precision',
+    701: 'float',
     1082: 'date',
     1700: 'numeric',
 }
@@ -17,12 +18,14 @@ NUMERIC_TYPES = [
     'smallint',
     'integer',
     'double precision',
+    'float',
     'numeric',
 ]
 
 FLOAT_TYPES = [
     'double precision',
     'numeric',
+    'float',
 ]
 
 

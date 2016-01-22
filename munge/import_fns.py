@@ -5,6 +5,7 @@ from sa_util import run_sql
 
 AUTO_FNS = {
     'double precision': 'make_float',
+    'float': 'make_float',
     'bigint': 'make_int',
     'smallint': 'make_int',
     'integer': 'make_int',
