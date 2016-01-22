@@ -10,6 +10,8 @@ from common import process_header
 engine = sa.create_engine(config.CONNECTION_STRING, echo=False)
 conn = engine.connect()
 
+fields_match = sa_common.fields_match
+
 
 def run_sql(*args, **kw):
     return sa_common.run_sql(engine, *args, **kw)
@@ -37,6 +39,10 @@ def view_list():
 
 def table_view_list():
     return sa_common.table_view_list(engine)
+
+
+def table_columns(table_name):
+    return sa_common.table_columns(engine, table_name)
 
 
 def dependent_objects():
@@ -94,6 +100,19 @@ def drop_table_or_view(table, verbose=0):
     if verbose:
         print('Dropping %s' % table)
     sql = drop_sql(table)
+    if verbose < 1:
+        print(sql)
+    run_sql(sql)
+
+
+def truncate_table(table, verbose=0):
+    sql = '''
+        BEGIN;
+        TRUNCATE TABLE {table};
+        COMMIT;
+    '''.format(table=quote(table))
+    if verbose:
+        print('Truncating %s' % table)
     if verbose < 1:
         print(sql)
     run_sql(sql)
@@ -232,7 +251,7 @@ def build_indexes(table_name, t_fields, verbose=0):
     # get indexed fields
     index_fields = [
         (f['index_key'], f['name'])
-        for f in t_fields if f.get('index')
+        for f in t_fields if f.get('indexed')
     ]
     # group them by index_key
     index_dict = {}

@@ -57,7 +57,7 @@ def process_header(row):
             'name': field,
             'type': type_,
             'pk': pk,
-            'index': index,
+            'indexed': index,
             'index_key': index_key,
             'fn': fn,
             'fn_field': fn_field,

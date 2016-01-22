@@ -5,7 +5,7 @@ DIRECTORY = 'codes'
 
 
 def importer(verbose=0):
-    import_all(DIRECTORY, verbose=verbose)
+    import_all(DIRECTORY, verbose=verbose, keep_table=True)
 
 
 def tables():

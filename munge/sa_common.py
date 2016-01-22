@@ -86,6 +86,27 @@ def dependent_objects(engine):
     return [row[0] for row in result]
 
 
+def table_columns(engine, table_name):
+    sql = '''
+        SELECT column_name,data_type
+        FROM information_schema.columns
+        WHERE table_name = :table_name
+    '''
+    result = run_sql(engine, sql, table_name=table_name)
+    pks = get_primary_keys(engine, table_name)
+    indexes = get_indexes(engine, table_name)
+    fields = []
+    for row in result:
+        name = row[0]
+        fields.append({
+            'name': name,
+            'type': row[1],
+            'pk': name in pks,
+            'indexed': name in indexes,
+        })
+    return fields
+
+
 def get_pk_constraint(engine, table_name):
     insp = reflection.Inspector.from_engine(engine)
     return insp.get_pk_constraint(table_name)
@@ -119,3 +140,15 @@ def get_result_fields(engine, result, table=None):
         }
         fields.append(col)
     return fields
+
+
+def fields_match(f1, f2):
+    set1 = set([
+        '%s:%s:%s:%s' % (f['name'], f['type'], f['pk'], f['indexed'])
+        for f in f1
+    ])
+    set2 = set([
+        '%s:%s:%s:%s' % (f['name'], f['type'], f['pk'], f['indexed'])
+        for f in f2
+    ])
+    return set1 == set2
