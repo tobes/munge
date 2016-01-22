@@ -77,6 +77,13 @@ def compact_pc(value):
         return value.replace(' ', '').upper()
 
 
+def compact_space(value):
+    if value == '':
+        return None
+    else:
+        return ' '.join(value.split())
+
+
 def outcode(value):
     if value == '':
         return None
