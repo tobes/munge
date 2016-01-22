@@ -736,6 +736,21 @@ AUTO_SQL = [
         'as_view': True,
     },
 
+    {
+        'name': 'v_premises_soa',
+        'sql': '''
+            SELECT
+            uarn,
+            nuts1_code,
+            lsoa_code,
+            msoa_code
+            FROM {t1} l
+            LEFT OUTER JOIN {t2} a ON a.pc = l.pc
+        ''',
+        'tables': ['vao_list', 'v_postcode'],
+        'as_view': True,
+    },
+
 # ==================================
 
 
