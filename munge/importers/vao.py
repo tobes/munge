@@ -240,7 +240,7 @@ AREA_ESTIMATERS = [
         'cutoff': 0,
         'value': 'median_price_per_m2',
         'sql': '''
-            SELECT scat_code, median_price_per_m2, no_with_area as count
+            SELECT scat_code, median_price_per_m2, count
             FROM s_vao_area_national_by_scat
         ''',
         'keys': ['scat_code'],
@@ -251,7 +251,7 @@ AREA_ESTIMATERS = [
         'cutoff': 0,
         'value': 'median_m2',
         'sql': '''
-            SELECT scat_code, median_m2, no_with_area as count
+            SELECT scat_code, median_m2, count
             FROM s_vao_area_national_by_scat
         ''',
         'keys': ['scat_code'],
@@ -398,7 +398,7 @@ AUTO_SQL = [
         ''',
         'tables': ['vao_base_raw', 'vao_list'],
         'primary_key': ['uarn', 'version'],
-        'disabled': False,
+        'disabled': True,
         'summary': '',
     },
 
