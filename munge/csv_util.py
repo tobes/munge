@@ -187,7 +187,7 @@ def make_csv(filename, sql, **kw):
             print
 
 
-def dump(table_name, verbose=False):
+def dump(table_name, verbose=0):
     make_csv(
         '%s.csv' % table_name,
         'SELECT * FROM "%s"' % table_name,
