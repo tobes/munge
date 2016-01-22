@@ -19,7 +19,7 @@ lookups = {}
 def make_bool(value):
     if value == '':
         return None
-    return str(value).lower() in ['yes', 'true', 'y', 't', '1', '0']
+    return str(value).lower() in ['yes', 'true', 'y', 't', '1']
 
 
 def make_int(value):
