@@ -501,11 +501,11 @@ def build_views_and_summaries(data, verbose=0, just_views=False,
     for info in data:
         if info.get('disabled'):
             continue
+        if test_only and not info.get('test'):
+            continue
         if info.get('as_view'):
             time_fn(_build_view, args=[info], verbose=verbose)
         else:
-            if test_only and not info.get('test'):
-                continue
             if not just_views:
                 time_fn(_build_summary, args=[info], verbose=verbose)
 
