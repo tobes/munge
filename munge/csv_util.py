@@ -204,6 +204,10 @@ def make_csv(filename, sql, **kw):
                 wrote_headers = True
             a.writerows([row])
             count += 1
+            if verbose and count % config.BATCH_SIZE == 0:
+                print('{filename}: {count:,}'.format(
+                    filename=filename, count=count
+                ))
         if verbose:
             print('%s rows written' % (count - 1))
             print
