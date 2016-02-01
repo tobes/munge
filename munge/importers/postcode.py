@@ -28,6 +28,7 @@ AUTO_SQL = [
         ''',
         'tables': ['postcode', 'l_postcode_oa'],
         'as_view': True,
+        'disabled': True,
     },
 ]
 
@@ -81,8 +82,8 @@ def importer(verbose=0):
         '-oac01',
         '-oldpct',
         '-oa11',
-        '-lsoa11',
-        '-msoa11',
+        '+lsoa_code',
+        '+msoa_code',
         '-parish',
         '-wz11',
         '-ccg',
