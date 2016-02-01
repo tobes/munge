@@ -59,6 +59,12 @@ def make_str(value):
     return value
 
 
+def remove_comma(value):
+    if value == '':
+        return None
+    return int(value.replace(',', ''))
+
+
 def make_numeric(value):
     if value == '':
         return None
@@ -136,7 +142,7 @@ def _translation_lookup(name, sql):
         return lookups[name].get(value)
     return fn
 
-
+# FIX ME MOVE INTO importer
 sql = 'SELECT la_sub_code, la_code FROM l_la_sub_la;'
 la_sub_2_la = _translation_lookup('la_sub_2_la', sql)
 
