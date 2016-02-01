@@ -26,11 +26,15 @@ from common import process_header
 
 def unicode_csv_reader(filename, **kw):
     encoding = kw.pop('encoding', 'utf-8')
+    skip = kw.pop('skip', 0)
     dialect = kw.pop('dialect', csv.excel)
+    count = 0
     with open(filename, 'rb') as f:
         reader = csv.reader(f, dialect=dialect, **kw)
         for row in reader:
-            yield [unicode(cell, encoding) for cell in row]
+            count += 1
+            if count > skip:
+                yield [unicode(cell, encoding) for cell in row]
 
 
 def get_fns(fields):
