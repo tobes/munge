@@ -501,7 +501,7 @@ AUTO_SQL = [
         SELECT t.*, c.code, c.cg_code
         FROM {t1} t
         LEFT JOIN {t2} c ON c.code = t.scat_code
-        WHERE c.cg_code != ''
+        WHERE c.cg_code is not null
         ''',
         'tables': ['s_vao_list_base_summary', 'c_scat'],
         'as_view': True,
@@ -728,28 +728,212 @@ AUTO_SQL = [
             l.scat_code,
             l.la_code,
             initcap(l.prm_desc) description,
-            a.area, a.area_source_code
+            a.area,
+            a.area_source_code,
+            s.local_market,
+            s.scat_group_code,
+            CASE
+                WHEN area > 0 AND employee_m2 > 0 THEN a.area/employee_m2
+                ELSE null
+            END AS    employees,
+            lsoa_code,
+            msoa_code
             FROM {t1} l
             LEFT JOIN {t2} a ON a.uarn=l.uarn
+            LEFT JOIN {t3} s ON s.code=l.scat_code
+            LEFT JOIN {t5} sg ON s.scat_group_code=sg.code
+            LEFT OUTER JOIN {t4} p ON p.pc = l.pc
         ''',
-        'tables': ['vao_list', 's_vao_premises_area'],
+        'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group'],
         'as_view': True,
     },
 
     {
-        'name': 'v_premises_soa',
+        'name': 'v_premises_summary2',
         'sql': '''
             SELECT
-            uarn,
-            nuts1_code,
+            l.uarn,
+            l.rateable_value,
+
+            l.rateable_value / 0.4 AS break_even,
+            l.pc postcode,
+            l.scat_code,
+            l.la_code,
+            a.area,
+            a.area_source_code,
+            s.local_market,
+            s.scat_group_code,
+            s.cg_code as ct_group_code,
+            CASE
+                WHEN area > 0 AND employee_m2 > 0 THEN a.area/employee_m2
+                ELSE null
+            END AS    employees,
+            CASE
+                WHEN area > 0 AND employee_m2 > 0
+                THEN round(a.area/employee_m2) * COALESCE(w.median, w.mean, 22000)
+                ELSE null
+            END AS    employee_cost,
+            w.median,
+            w.mean,
+            COALESCE(w.median, w.mean, 22000) wage_employee,
             lsoa_code,
             msoa_code
             FROM {t1} l
-            LEFT OUTER JOIN {t2} a ON a.pc = l.pc
+            LEFT JOIN {t2} a ON a.uarn=l.uarn
+            LEFT JOIN {t3} s ON s.code=l.scat_code
+            LEFT JOIN {t5} sg ON s.scat_group_code=sg.code
+            LEFT JOIN {t6} w ON l.la_code = w.la_code
+            LEFT OUTER JOIN {t4} p ON p.pc = l.pc
         ''',
-        'tables': ['vao_list', 'v_postcode'],
+        'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group', 'wages'],
         'as_view': True,
     },
+
+    {
+        'name': 's_vao_no_lsoa',
+        'sql': '''
+            SELECT scat_code, count(*)
+            FROM {t1}
+            WHERE lsoa_code is null
+            GROUP BY scat_code
+            ORDER BY count(*) desc;
+        ''',
+        'tables': ['v_premises_summary'],
+        'summary': '',
+    },
+
+    {
+        'name': 's_vao_no_area',
+        'sql': '''
+            SELECT scat_code, count(*)
+            FROM {t1}
+            WHERE lsoa_code is null
+            GROUP BY scat_code
+            ORDER BY count(*) desc;
+        ''',
+        'tables': ['v_premises_summary'],
+        'summary': '',
+    },
+
+
+
+    {
+        'name': 's_la_scat_code_areas',
+        'sql': '''
+            SELECT scat_code, la_code, sum(area) as area
+            FROM {t1}
+            GROUP BY scat_code, la_code
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+    },
+
+
+
+    {
+        'name': 's_la_ct_group_code_areas',
+        'sql': '''
+            SELECT ct_group_code, la_code, sum(area) as area
+            FROM {t1}
+            GROUP BY ct_group_code, la_code
+            ORDER BY la_code, ct_group_code
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+    },
+
+
+
+    {
+        'name': 's_la_spending_by_ct',
+        'sql': '''
+            SELECT la.nuts1_code, la.la_code, p.population,
+            adj_spend_per_capita, s.ct_code, ct.ct_group as ct_group_code,
+            p.population * adj_spend_per_capita total_adj_spend,
+            p.population * adj_spend_per_capita / a.area spend_per_m2,
+a.area
+            FROM {t1} la
+            LEFT JOIN {t2} p ON p.la_code = la.la_code
+            LEFT JOIN {t3} s ON s.nuts1_code = la.nuts1_code
+            LEFT JOIN {t4} ct ON ct.ct_code = s.ct_code
+            LEFT JOIN {t5}  a On a.ct_group_code = ct.ct_group
+AND a.la_code = la.la_code
+            WHERE a.area > 0
+        ''',
+        'tables': ['l_la_nuts', 'population_by_la',
+                   's_consumer_spend_by_nuts1', 'ct_mapping',
+                   's_la_ct_group_code_areas'],
+        'summary': '',
+    },
+
+
+    {
+        'name': 'v_estimated_income',
+        'sql': '''
+            SELECT uarn,
+            s.ct_code, spend_per_m2, p.area,
+            break_even, employee_cost, employees,
+            spend_per_m2 * p.area as est_revenue,
+            (spend_per_m2 * p.area) - break_even - employee_cost as est_profit,
+            (spend_per_m2 * p.area) - employee_cost as est_profit2,
+            (spend_per_m2 * p.area) - break_even as est_profit3,
+            (spend_per_m2 * p.area) / ( break_even + employee_cost) as rating,
+            (spend_per_m2 * p.area) / ( break_even) as rating2,
+            (spend_per_m2 * p.area) / (  employee_cost) as rating3
+            FROM {t1} p
+            LEFT JOIN {t2} s ON s.ct_group_code = p.ct_group_code
+            AND s.la_code = p.la_code
+            LEFT JOIN {t3} ct ON ct.code = s.ct_code
+            WHERE ct_code IS NOT NULL
+            AND p.area > 0
+            and ct.ct_level < 2
+            ORDER BY uarn
+        ''',
+        'tables': ['v_premises_summary2', 's_la_spending_by_ct', 'c_ct'],
+        'summary': '',
+        'as_view': True,
+    },
+
+
+    {
+        'name': 's_premesis_rating',
+        'sql': '''
+             SELECT uarn, max(rating)
+             FROM {t1} GROUP BY uarn
+        ''',
+        'tables': ['v_estimated_income'],
+        'summary': '',
+    },
+
+    {
+        'name': 's_la_general_summary',
+        'sql': '''
+            SELECT p.la_code, scat_code,
+            count(p.uarn) count, wage_employee average_wage,
+            sum(area) total_area, sum(employees) estimated_employees,
+             sum(employees) * wage_employee as estimated_employee_earnings,
+             sum(rateable_value) as total_rateable_value
+            FROM {t1} p
+            GROUP BY p.la_code, scat_code, wage_employee
+
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+    },
+
+
+    {
+        'name': 's_la_median_scat_ratable',
+        'sql': '''
+             SELECT scat_code, quantile(total_rateable_value, 0.5) median_total_rateable_value
+             FROM {t1} GROUP BY scat_code
+        ''',
+        'tables': ['s_la_general_summary'],
+        'summary': '',
+        'test': True,
+    },
+
+
 
 # ==================================
 
