@@ -16,7 +16,7 @@ TABLE_FIELDS = [
     'factor:double precision',
 ]
 
-FILES = ['population_by_la.csv', 'wages.csv']
+FILES = ['population_by_la.csv', 'wages.csv', 'ct_mapping.csv']
 
 AUTO_SQL = [
     {
