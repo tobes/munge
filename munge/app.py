@@ -268,11 +268,12 @@ def scat_list():
 def scat_premises_list(scat_code):
     data = {'scat_code': scat_code}
     sql = '''
-    SELECT v.uarn, b.uarn, c.code as ba_code
+    SELECT v.uarn, b.uarn, c.code as ba_code, max rating
     FROM vao_list v
     LEFT OUTER JOIN vao_base b
     ON b.uarn = v.uarn
     LEFT JOIN c_ba c ON c.code = v.ba_code
+    LEFT OUTER JOIN s_premesis_rating r on r.uarn = v.uarn
     WHERE v.scat_code = :scat_code
     ORDER BY c.desc
     '''
@@ -397,7 +398,10 @@ def premises(uarn):
 
     tables = [
         'vao_list',
+        'v_estimated_income',
         's_vao_premises_area',
+        'v_premises_summary',
+        'v_premises_summary2',
         'vao_base',
         'vao_line',
         'vao_additions',
@@ -410,6 +414,8 @@ def premises(uarn):
     single_row_tables = [
         'vao_list',
         'vao_base',
+        'v_premises_summary',
+        'v_premises_summary2',
     ]
 
     for table in tables:
