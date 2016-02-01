@@ -1,7 +1,7 @@
 import os.path
 
 from munge import config
-from munge.csv_util import import_csv, unicode_csv_reader
+from munge.csv_util import import_csv, unicode_csv_reader, import_single
 
 
 DIRECTORY = 'spending'
@@ -15,6 +15,8 @@ TABLE_FIELDS = [
     'nuts1_code',
     'factor:double precision',
 ]
+
+FILES = ['population_by_la.csv', 'wages.csv']
 
 AUTO_SQL = [
     {
@@ -106,6 +108,10 @@ def hei1_reader():
             yield out
 
 
+def tables():
+    return [f.split('.')[0] for f in FILES] + [HEI1_FILE]
+
+
 def importer(verbose=0):
     if verbose:
         print('importing spending')
@@ -116,3 +122,6 @@ def importer(verbose=0):
         fields=TABLE_FIELDS,
         verbose=verbose
     )
+    for f in FILES:
+        filename = os.path.join(config.DATA_PATH, DIRECTORY, f)
+        import_single(filename, f.split('.')[0], verbose=verbose)
