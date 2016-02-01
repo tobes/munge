@@ -221,6 +221,40 @@ def la_premises_list(la_code):
     output['fields'][1]['name'] = 'summary'
     return render_template('table_output.html', data=output)
 
+@app.route('/la_sum/')
+def la_sum_list():
+    sql = '''
+    SELECT code, "desc" FROM c_la
+    WHERE LEFT(code, 1) IN ('E', 'w')
+    ORDER BY "desc"
+    '''
+    output = show_result(sql)
+    output['links'][1] = ('la_sum_report', 'la_code', 0)
+    return render_template('table_output.html', data=output)
+
+@app.route('/la_sum/<la_code>')
+def la_sum_report(la_code):
+    data = {'la_code': la_code}
+    sql = '''
+    SELECT s.scat_code, count, total_area,
+    estimated_employees, estimated_employee_earnings,
+    total_rateable_value, m.median_total_rateable_value,
+    CASE
+      WHEN total_rateable_value > 0
+      THEN 1.0 - ( m.median_total_rateable_value / total_rateable_value)
+      ELSE NULL
+    END variance
+
+    FROM s_la_general_summary s
+    LEFT JOIN s_la_median_scat_ratable m on m.scat_code = s.scat_code
+    WHERE la_code = :la_code
+
+    ORDER BY scat_code
+    '''
+    output = show_result(sql, data=data)
+    return render_template('table_output.html', data=output)
+
+
 
 @app.route('/scat/')
 def scat_list():
