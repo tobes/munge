@@ -465,13 +465,15 @@ def _results_to_table(data, results, verbose=0, limit=None):
         build_indexes(table_name_temp, fields, verbose=verbose)
 
 
-def _build_view(data, verbose=0):
+def _build_view(data, verbose=0, force=False):
     view_name = data['name']
     view_name = config.TEMP_TABLE_STR + view_name
     sql = 'CREATE VIEW {name} AS\n'.format(name=quote(view_name))
     sql += data['sql']
     tables = data['tables']
     drop_sql = 'DROP VIEW IF EXISTS "%s"' % view_name
+    if force:
+        drop_sql += ' CASCADE'
     run_sql(drop_sql)
     if verbose:
         print('creating view %s' % view_name)
@@ -497,14 +499,14 @@ def time_fn(fn, args=None, kw=None, verbose=0):
 
 
 def build_views_and_summaries(data, verbose=0, just_views=False,
-                              test_only=False):
+                              test_only=False, force=False):
     for info in data:
         if info.get('disabled'):
             continue
         if test_only and not info.get('test'):
             continue
         if info.get('as_view'):
-            time_fn(_build_view, args=[info], verbose=verbose)
+            time_fn(_build_view, args=[info], verbose=verbose, kw={'force': force})
         else:
             if not just_views:
                 time_fn(_build_summary, args=[info], verbose=verbose)

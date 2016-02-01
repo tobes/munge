@@ -12,7 +12,7 @@ def import_module(args):
         m = getattr(importers, module)
         m.importer(verbose=args.verbose)
     view_summaries(args)
-    sa_util.swap_tables(verbose=args.verbose)
+    sa_util.swap_tables(verbose=args.verbose, force=args.force)
 
 
 def view_summaries(args, just_views=False):
@@ -22,7 +22,8 @@ def view_summaries(args, just_views=False):
         if data:
             sa_util.build_views_and_summaries(
                 data, verbose=args.verbose,
-                just_views=just_views, test_only=args.test
+                just_views=just_views, test_only=args.test,
+                force=args.force
             )
 
 
@@ -134,6 +135,7 @@ def main():
 
     for command in module_commands:
         module_parser = subparsers.add_parser(command)
+        module_parser.add_argument('-f', '--force', action="store_true")
         module_parser.add_argument('-t', '--test', action="store_true")
         module_parser.add_argument('module', nargs='*')
 
@@ -144,12 +146,12 @@ def main():
         import_module(args)
     elif args.command == 'views':
         view_summaries(args, just_views=True)
-        sa_util.swap_tables(verbose=args.verbose)
+        sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'swap_temp':
         sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'summaries':
         view_summaries(args)
-        sa_util.swap_tables(verbose=args.verbose)
+        sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'export_custom':
         export_custom(verbose=args.verbose)
     elif args.command == 'import_csv':
