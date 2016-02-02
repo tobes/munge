@@ -212,10 +212,11 @@ def make_tables_dict(tables):
     return output
 
 
-def create_table(table, fields, primary_key=None, verbose=0):
-    sql = 'DROP TABLE IF EXISTS %s' % quote(table)
-    run_sql(sql)
-    sql = ['CREATE TABLE %s (' % quote(table)]
+def create_table(table, fields, primary_key=None, verbose=0, keep=False):
+    if not keep:
+        sql = 'DROP TABLE IF EXISTS %s' % quote(table)
+        run_sql(sql)
+    sql = ['CREATE TABLE IF NOT EXISTS %s (' % quote(table)]
     sql_fields = []
     for field in fields:
         # Skipped field
