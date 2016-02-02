@@ -505,6 +505,7 @@ AUTO_SQL = [
         ''',
         'tables': ['s_vao_list_base_summary', 'c_scat'],
         'as_view': True,
+        'stage': 2,
     },
 
 
@@ -531,6 +532,7 @@ AUTO_SQL = [
         'tables': ['vao_base'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
 
     {
@@ -551,6 +553,7 @@ AUTO_SQL = [
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
 
     {
@@ -571,6 +574,7 @@ AUTO_SQL = [
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
 
     {
@@ -591,6 +595,7 @@ AUTO_SQL = [
         'tables': ['vao_base', 'postcode'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
 
     {
@@ -610,6 +615,7 @@ AUTO_SQL = [
         'tables': ['vao_base', 's_vao_area_national_by_scat'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
 
     {
@@ -630,6 +636,7 @@ AUTO_SQL = [
         'tables': ['vao_base', 's_vao_area_national_by_scat'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
 
     {
@@ -650,6 +657,7 @@ AUTO_SQL = [
         'tables': ['vao_base', 's_vao_area_national_by_scat'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
 
     {
@@ -666,6 +674,7 @@ AUTO_SQL = [
         'tables': ['vao_list', 'vao_base', 'postcode'],
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
     {
         'name': 's_vao_area2_national',
@@ -685,6 +694,7 @@ AUTO_SQL = [
         'table_function': s_vao_area,
         'disabled': True,
         'summary': '',
+        'stage': 2,
     },
     {
         'name': 's_vao_premises_area',
@@ -701,6 +711,7 @@ AUTO_SQL = [
         'row_function': s_vao_premises_area,
         'disabled': False,
         'summary': '',
+        'stage': 2,
     },
     {
         'name': 'v_vao_scat_group_area_summary',
@@ -712,6 +723,8 @@ AUTO_SQL = [
         ''',
         'tables': ['c_scat', 's_vao_area_national_by_scat'],
         'as_view': True,
+        'summary': '',
+        'stage': 2,
     },
 
     {
@@ -746,6 +759,8 @@ AUTO_SQL = [
         ''',
         'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group'],
         'as_view': True,
+        'summary': '',
+        'stage': 3,
     },
 
     {
@@ -754,8 +769,6 @@ AUTO_SQL = [
             SELECT
             l.uarn,
             l.rateable_value,
-
-            l.rateable_value / 0.4 AS break_even,
             l.pc postcode,
             l.scat_code,
             l.la_code,
@@ -773,6 +786,11 @@ AUTO_SQL = [
                 THEN round(a.area/employee_m2) * COALESCE(w.median, w.mean, 22000)
                 ELSE null
             END AS    employee_cost,
+            CASE
+                WHEN area > 0 AND employee_m2 > 0
+                THEN (l.rateable_value + round(a.area/employee_m2) * COALESCE(w.median, w.mean, 22000)) / 0.4
+                ELSE l.rateable_value / 0.4
+            END AS break_even,
             w.median,
             w.mean,
             COALESCE(w.median, w.mean, 22000) wage_employee,
@@ -787,6 +805,8 @@ AUTO_SQL = [
         ''',
         'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group', 'wages'],
         'as_view': True,
+        'summary': '',
+        'stage': 3,
     },
 
     {
@@ -800,6 +820,7 @@ AUTO_SQL = [
         ''',
         'tables': ['v_premises_summary'],
         'summary': '',
+        'stage': 3,
     },
 
     {
@@ -813,6 +834,7 @@ AUTO_SQL = [
         ''',
         'tables': ['v_premises_summary'],
         'summary': '',
+        'stage': 3,
     },
 
 
@@ -826,6 +848,7 @@ AUTO_SQL = [
         ''',
         'tables': ['v_premises_summary2'],
         'summary': '',
+        'stage': 4,
     },
 
 
@@ -840,6 +863,7 @@ AUTO_SQL = [
         ''',
         'tables': ['v_premises_summary2'],
         'summary': '',
+        'stage': 4,
     },
 
 
@@ -864,6 +888,7 @@ AND a.la_code = la.la_code
                    's_consumer_spend_by_nuts1', 'ct_mapping',
                    's_la_ct_group_code_areas'],
         'summary': '',
+        'stage': 5,
     },
 
 
@@ -874,17 +899,14 @@ AND a.la_code = la.la_code
             s.ct_code, spend_per_m2, p.area,
             break_even, employee_cost, employees,
             spend_per_m2 * p.area as est_revenue,
-            (spend_per_m2 * p.area) - break_even - employee_cost as est_profit,
-            (spend_per_m2 * p.area) - employee_cost as est_profit2,
-            (spend_per_m2 * p.area) - break_even as est_profit3,
-            (spend_per_m2 * p.area) / ( break_even + employee_cost) as rating,
-            (spend_per_m2 * p.area) / ( break_even) as rating2,
-            (spend_per_m2 * p.area) / (  employee_cost) as rating3
+            (spend_per_m2 * p.area) - break_even as est_profit,
+            (spend_per_m2 * p.area) / break_even as rating
             FROM {t1} p
             LEFT JOIN {t2} s ON s.ct_group_code = p.ct_group_code
             AND s.la_code = p.la_code
             LEFT JOIN {t3} ct ON ct.code = s.ct_code
             WHERE ct_code IS NOT NULL
+            AND break_even > 0
             AND p.area > 0
             and ct.ct_level < 2
             ORDER BY uarn
@@ -892,6 +914,7 @@ AND a.la_code = la.la_code
         'tables': ['v_premises_summary2', 's_la_spending_by_ct', 'c_ct'],
         'summary': '',
         'as_view': True,
+        'stage': 5,
     },
 
 
@@ -903,6 +926,7 @@ AND a.la_code = la.la_code
         ''',
         'tables': ['v_estimated_income'],
         'summary': '',
+        'stage': 5,
     },
 
     {
@@ -919,6 +943,7 @@ AND a.la_code = la.la_code
         ''',
         'tables': ['v_premises_summary2'],
         'summary': '',
+        'stage': 5,
     },
 
 
@@ -930,7 +955,7 @@ AND a.la_code = la.la_code
         ''',
         'tables': ['s_la_general_summary'],
         'summary': '',
-        'test': True,
+        'stage': 5,
     },
 
 
