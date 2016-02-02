@@ -465,23 +465,27 @@ def _results_to_table(data, results, verbose=0, limit=None):
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
 
+from summeries import update_summary_table
 
 def _build_view(data, verbose=0, force=False):
     view_name = data['name']
-    view_name = config.TEMP_TABLE_STR + view_name
-    sql = 'CREATE VIEW {name} AS\n'.format(name=quote(view_name))
+    temp_view_name = config.TEMP_TABLE_STR + view_name
+    sql = 'CREATE VIEW {name} AS\n'.format(name=quote(temp_view_name))
     sql += data['sql']
     tables = data['tables']
-    drop_sql = 'DROP VIEW IF EXISTS "%s"' % view_name
+    drop_sql = 'DROP VIEW IF EXISTS "%s"' % temp_view_name
     if force:
         drop_sql += ' CASCADE'
     run_sql(drop_sql)
+    created = True
     if verbose:
-        print('creating view %s' % view_name)
+        print('creating view %s' % temp_view_name)
     tables_dict = make_tables_dict(tables)
     if verbose > 1:
         print(sql.format(**tables_dict))
     run_sql(sql.format(**tables_dict))
+    description = data.get('summary')
+    update_summary_table(view_name, description=description, created=created)
 
 
 def time_fn(fn, args=None, kw=None, verbose=0):

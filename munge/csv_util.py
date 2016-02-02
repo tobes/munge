@@ -19,6 +19,7 @@ from sa_util import (
     truncate_table,
 )
 from common import process_header
+from summeries import update_summary_table
 
 
 # FIXME add logging of imports
@@ -63,28 +64,35 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
     data = []
     has_header_row = (fields is None) or skip_first
     first = True
+    description = None
+    set_first = False
     for row in reader:
         skip = False
         if first:
-            if fields is None:
-                fields = row
-            t_fields = process_header(fields)
-            t_fns = get_fns(t_fields)
-            if keep_table:
-                old_fields = table_columns(table_name)
-                if fields_match(old_fields, t_fields):
-                    truncate_table(table_name, verbose=verbose)
-                    temp_table = table_name
-                else:
-                    keep_table = False
-            if not keep_table:
-                create_table(temp_table, t_fields, verbose=verbose)
-            f = [
-                field['name'] for field in t_fields
-                if not field.get('missing')
-            ]
-            insert_sql = insert_rows(temp_table, t_fields)
-        if not (has_header_row and first):
+            if len(row) == 1 and row[0][:1] == '#':
+                description = row[0][1:].strip()
+                skip = True
+            else:
+                if fields is None:
+                    fields = row
+                t_fields = process_header(fields)
+                t_fns = get_fns(t_fields)
+                if keep_table:
+                    old_fields = table_columns(table_name)
+                    if fields_match(old_fields, t_fields):
+                        truncate_table(table_name, verbose=verbose)
+                        temp_table = table_name
+                    else:
+                        keep_table = False
+                if not keep_table:
+                    create_table(temp_table, t_fields, verbose=verbose)
+                f = [
+                    field['name'] for field in t_fields
+                    if not field.get('missing')
+                ]
+                insert_sql = insert_rows(temp_table, t_fields)
+                set_first = True
+        if not ((description or has_header_row) and first):
             row_data = dict(zip(f, row))
             for fn in t_fns:
                 fn_info = t_fns[fn]
@@ -113,7 +121,8 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
                 count += 1
             if limit and count == limit:
                 break
-        first = False
+        if set_first:
+            first = False
     if data:
         run_sql(insert_sql, data)
 
@@ -124,6 +133,7 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
     # Add indexes
     if not keep_table:
         build_indexes(temp_table, t_fields, verbose=verbose)
+    update_summary_table(table_name, description, created=not keep_table)
 
 
 def import_single(filename, table_name, verbose=0, keep_table=False, **kw):
