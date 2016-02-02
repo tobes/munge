@@ -503,7 +503,7 @@ def build_views_and_summaries(data, verbose=0, just_views=False,
     for info in data:
         if info.get('disabled'):
             continue
-        if info.get('stage', 0) != stage:
+        if stage is not None and ('stage', 0) != stage:
             continue
         if test_only and not info.get('test'):
             continue

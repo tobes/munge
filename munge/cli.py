@@ -137,7 +137,7 @@ def main():
         module_parser = subparsers.add_parser(command)
         module_parser.add_argument('-f', '--force', action="store_true")
         module_parser.add_argument('-t', '--test', action="store_true")
-        module_parser.add_argument('-s', '--stage', default=0, type=int)
+        module_parser.add_argument('-s', '--stage', default=None, type=int)
         module_parser.add_argument('module', nargs='*')
 
     args = parser.parse_args()
