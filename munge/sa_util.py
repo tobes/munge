@@ -499,9 +499,11 @@ def time_fn(fn, args=None, kw=None, verbose=0):
 
 
 def build_views_and_summaries(data, verbose=0, just_views=False,
-                              test_only=False, force=False):
+                              test_only=False, force=False, stage=0):
     for info in data:
         if info.get('disabled'):
+            continue
+        if info.get('stage', 0) != stage:
             continue
         if test_only and not info.get('test'):
             continue
