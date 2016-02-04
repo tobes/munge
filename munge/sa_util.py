@@ -473,6 +473,7 @@ def _build_view(data, verbose=0, force=False):
     sql = 'CREATE VIEW {name} AS\n'.format(name=quote(temp_view_name))
     sql += data['sql']
     tables = data['tables']
+    importer = data.get('importer')
     drop_sql = 'DROP VIEW IF EXISTS "%s"' % temp_view_name
     if force:
         drop_sql += ' CASCADE'
@@ -485,7 +486,12 @@ def _build_view(data, verbose=0, force=False):
         print(sql.format(**tables_dict))
     run_sql(sql.format(**tables_dict))
     description = data.get('summary')
-    update_summary_table(view_name, description=description, created=created)
+    update_summary_table(view_name,
+                         description=description,
+                         dependencies=tables,
+                         importer=importer,
+                         is_view=True,
+                         created=created)
 
 
 def time_fn(fn, args=None, kw=None, verbose=0):
@@ -503,9 +509,10 @@ def time_fn(fn, args=None, kw=None, verbose=0):
         print "%d:%02d:%02d" % (h, m, s)
 
 
-def build_views_and_summaries(data, verbose=0, just_views=False,
+def build_views_and_summaries(data, verbose=0, just_views=False, importer=None,
                               test_only=False, force=False, stage=0):
     for info in data:
+        info['importer'] = importer
         if info.get('disabled'):
             continue
         if stage != 0 and info.get('stage', 0) != stage:

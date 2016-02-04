@@ -19,10 +19,12 @@ def view_summaries(args, just_views=False):
     for module in args.module:
         m = getattr(importers, module)
         data = getattr(m, 'AUTO_SQL', None)
+        importer = getattr(m, 'IMPORTER', None)
         if data:
             sa_util.build_views_and_summaries(
                 data, verbose=args.verbose,
                 just_views=just_views, test_only=args.test,
+                importer=importer,
                 force=args.force, stage=args.stage
             )
 

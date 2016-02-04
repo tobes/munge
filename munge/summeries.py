@@ -4,9 +4,12 @@ import sa_util
 
 table_fields = [
     '*name',
+    'view:boolean',
     'description',
     'created:timestamp',
     'updated:timestamp',
+    'dependencies',
+    'importer',
 ]
 
 _initiated = False
@@ -20,13 +23,24 @@ def _init():
     _initiated = True
 
 
-def update_summary_table(table_name, description, created=False):
+def update_summary_table(table_name,
+                         description,
+                         dependencies=None,
+                         is_view=False,
+                         created=False,
+                         importer=None):
     if not _initiated:
         _init()
-    # set the table name
-    data = {}
-    data['name'] = table_name
-    data['description'] = description
+    data = {
+        'name': table_name,
+        'view': is_view,
+        'importer': importer,
+    }
+    if dependencies:
+        dependencies = ', '.join(dependencies)
+    data['dependencies'] = dependencies
+    if description:
+        data['description'] = description
     data['updated'] = datetime.datetime.now()
     if created:
         data['created'] = datetime.datetime.now()
