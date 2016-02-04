@@ -195,12 +195,24 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/table/')
-def tables():
+@app.route('/table_all/')
+def tables_all():
     out = []
     for table in sorted(table_view_list()):
         out.append(table)
     return render_template('tables.html', data=out)
+
+
+@app.route('/table/')
+def tables():
+    sql = 'SELECT * FROM tables order by name'
+    output = show_result(sql)
+    output['functions'][1] = (add_yes, )
+    output['functions'][3] = (date_since, 1)
+    output['functions'][4] = (date_since, 1)
+    output['links'][0] = {'route': 'table', 'args': [('table', 0)]}
+    output['links'][5] = {'route': 'table', 'args': [('table', 5)], 'split':True}
+    return render_template('table_output.html', data=output)
 
 
 @app.route('/table/<table>')
