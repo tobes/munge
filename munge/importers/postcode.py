@@ -6,31 +6,13 @@ from munge.csv_util import import_csv
 
 
 DIRECTORY = 'pc'
+IMPORTER = 'postcode'
 FILENAME = 'ONSPD_MAY_2015_UK.csv'
 TABLE_NAME = 'postcode'
 
 
 def tables():
     return [TABLE_NAME]
-
-AUTO_SQL = [
-    # Only rows with a rateable value are valid
-    {
-        'name': 'v_postcode',
-        'sql': '''
-        SELECT t1.*,
-        t2.oa_code,
-        t2.lsoa_code,
-        t2.msoa_code,
-        t2.pcdoasplt
-        FROM {t1} t1
-        LEFT JOIN {t2} t2 on t1.pc = t2.pc
-        ''',
-        'tables': ['postcode', 'l_postcode_oa'],
-        'as_view': True,
-        'disabled': True,
-    },
-]
 
 
 def importer(verbose=0):
@@ -103,5 +85,10 @@ def importer(verbose=0):
         print('Importing postcodes')
     with open(filename, 'rb') as f:
         reader = csv.reader(f, dialect=csv.excel)
-        import_csv(reader, TABLE_NAME, fields=fields,
-                   skip_first=True, verbose=verbose)
+        import_csv(reader,
+                   TABLE_NAME,
+                   fields=fields,
+                   importer=IMPORTER,
+                   description='Postcode data',
+                   skip_first=True,
+                   verbose=verbose)
