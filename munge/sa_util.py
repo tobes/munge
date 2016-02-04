@@ -67,7 +67,7 @@ def update_summary_table(data, created=True):
     tables = data['tables']
     importer = data.get('importer')
     description = data.get('summary')
-    is_view = data.get('is_view', False)
+    is_view = data.get('as_view', False)
     _update_summary_table(name,
                           description=description,
                           dependencies=tables,
