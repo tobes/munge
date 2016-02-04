@@ -8,7 +8,7 @@ table_fields = [
     'description',
     'created:timestamp',
     'updated:timestamp',
-    'dependencies',
+    'dependencies:text[]',
     'importer',
 ]
 
@@ -36,8 +36,6 @@ def update_summary_table(table_name,
         'view': is_view,
         'importer': importer,
     }
-    if dependencies:
-        dependencies = ', '.join(dependencies)
     data['dependencies'] = dependencies
     if description:
         data['description'] = description

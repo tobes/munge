@@ -25,10 +25,8 @@ def dictify_data_array(link, row, value, index):
     if not value:
         return urls
     route = link['route']
-    split = link.get('split')
-    if split:
-        split_on = link.get('split_on', ',')
-        split = map(unicode.strip, value.split(split_on))
+    if isinstance(value, list):
+        split = map(unicode.strip, value)
         row = list(row)
         for item in split:
             row[index] = item

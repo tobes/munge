@@ -5,7 +5,7 @@ import sqlalchemy as sa
 import sa_common
 import config
 from common import process_header
-from summeries import update_summary_table
+from summeries import update_summary_table as _update_summary_table
 
 
 engine = sa.create_engine(config.CONNECTION_STRING, echo=False)
@@ -60,6 +60,20 @@ def table_list():
 
 def get_result_fields(*args, **kw):
     return sa_common.get_result_fields(engine, *args, **kw)
+
+
+def update_summary_table(data, created=True):
+    name = data['name']
+    tables = data['tables']
+    importer = data.get('importer')
+    description = data.get('summary')
+    is_view = data.get('is_view', False)
+    _update_summary_table(name,
+                          description=description,
+                          dependencies=tables,
+                          importer=importer,
+                          is_view=is_view,
+                          created=created)
 
 
 def clear_temp_objects(verbose=0):
@@ -379,6 +393,7 @@ def _results_to_table_function(function, data, results, verbose=0, limit=None):
     if count:
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
+    update_summary_table(data)
 
 
 
@@ -389,7 +404,7 @@ def _results_to_row_function(function, data, results, verbose=0, limit=None):
     table_name_temp = config.TEMP_TABLE_STR + table_name
     first = True
     count = 0
-    data = []
+    output = []
     for row in results:
         if first:
             fields = get_result_fields(results)
@@ -404,19 +419,19 @@ def _results_to_row_function(function, data, results, verbose=0, limit=None):
                          verbose=verbose)
             insert_sql = insert_rows(table_name_temp, fields)
             first = False
-        data.append(row_data)
+        output.append(row_data)
         count += 1
         if count % config.BATCH_SIZE == 0:
-            run_sql(insert_sql, data)
-            data = []
+            run_sql(insert_sql, output)
+            output = []
             if verbose:
                 print('{table}: {count:,}'.format(
                     table=table_name, count=count
                 ))
         if limit and count == limit:
             break
-    if data:
-        run_sql(insert_sql, data)
+    if output:
+        run_sql(insert_sql, output)
 
     if verbose:
         print('{table}: {count:,} rows imported'.format(
@@ -425,6 +440,7 @@ def _results_to_row_function(function, data, results, verbose=0, limit=None):
     if count:
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
+    update_summary_table(data)
 
 
 def _results_to_table(data, results, verbose=0, limit=None):
@@ -433,7 +449,7 @@ def _results_to_table(data, results, verbose=0, limit=None):
     table_name_temp = config.TEMP_TABLE_STR + table_name
     first = True
     count = 0
-    data = []
+    output = []
     for row in results:
         if first:
             fields = get_result_fields(results)
@@ -444,19 +460,19 @@ def _results_to_table(data, results, verbose=0, limit=None):
             f = [field['name'] for field in fields]
             insert_sql = insert_rows(table_name_temp, fields)
             first = False
-        data.append(dict(zip(f, row)))
+        output.append(dict(zip(f, row)))
         count += 1
         if count % config.BATCH_SIZE == 0:
-            run_sql(insert_sql, data)
-            data = []
+            run_sql(insert_sql, output)
+            output = []
             if verbose:
                 print('{table}: {count:,}'.format(
                     table=table_name, count=count
                 ))
         if limit and count == limit:
             break
-    if data:
-        run_sql(insert_sql, data)
+    if output:
+        run_sql(insert_sql, output)
 
     if verbose:
         print('{table}: {count:,} rows imported'.format(
@@ -465,6 +481,7 @@ def _results_to_table(data, results, verbose=0, limit=None):
     if count:
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
+    update_summary_table(data)
 
 
 def _build_view(data, verbose=0, force=False):
@@ -472,8 +489,6 @@ def _build_view(data, verbose=0, force=False):
     temp_view_name = config.TEMP_TABLE_STR + view_name
     sql = 'CREATE VIEW {name} AS\n'.format(name=quote(temp_view_name))
     sql += data['sql']
-    tables = data['tables']
-    importer = data.get('importer')
     drop_sql = 'DROP VIEW IF EXISTS "%s"' % temp_view_name
     if force:
         drop_sql += ' CASCADE'
@@ -481,17 +496,12 @@ def _build_view(data, verbose=0, force=False):
     created = True
     if verbose:
         print('creating view %s' % temp_view_name)
+    tables = data.get('tables')
     tables_dict = make_tables_dict(tables)
     if verbose > 1:
         print(sql.format(**tables_dict))
     run_sql(sql.format(**tables_dict))
-    description = data.get('summary')
-    update_summary_table(view_name,
-                         description=description,
-                         dependencies=tables,
-                         importer=importer,
-                         is_view=True,
-                         created=created)
+    update_summary_table(data)
 
 
 def time_fn(fn, args=None, kw=None, verbose=0):
