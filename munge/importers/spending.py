@@ -5,6 +5,7 @@ from munge.csv_util import import_csv, unicode_csv_reader, import_single
 
 
 DIRECTORY = 'spending'
+IMPORTER = 'spending'
 
 HEI1_FILE = 'spending_by_nuts1.csv'
 
@@ -16,7 +17,12 @@ TABLE_FIELDS = [
     'factor:double precision',
 ]
 
-FILES = ['population_by_la.csv', 'wages.csv', 'ct_mapping.csv']
+FILES = [
+    'population_by_la.csv',
+    'wages.csv',
+    'ct_mapping.csv',
+    'consumer_trend_yearly.csv',
+]
 
 AUTO_SQL = [
     {
@@ -28,6 +34,7 @@ AUTO_SQL = [
         ''',
         'tables': ['consumer_trend_yearly'],
         'as_view': True,
+        'summary': 'Consumer trend data for 2014',
     },
     {
         'name': 's_population_by_nuts1',
@@ -40,6 +47,7 @@ AUTO_SQL = [
              LEFT outer JOIN {t1} t ON t.la_code = 'K02000001';
         ''',
         'tables': ['population_by_la', 'l_nuts1_ons'],
+        'summary': '',
     },
 
     {
@@ -120,8 +128,13 @@ def importer(verbose=0):
         reader,
         TABLE_NAME,
         fields=TABLE_FIELDS,
+        importer=IMPORTER,
+        description='Consumer trend category spending rations for each NUTS1 area',
         verbose=verbose
     )
     for f in FILES:
         filename = os.path.join(config.DATA_PATH, DIRECTORY, f)
-        import_single(filename, f.split('.')[0], verbose=verbose)
+        import_single(filename,
+                      f.split('.')[0],
+                      importer=IMPORTER,
+                      verbose=verbose)
