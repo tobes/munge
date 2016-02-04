@@ -6,6 +6,7 @@ from munge.csv_util import import_csv, unicode_csv_reader
 from munge.sa_util import results_dict, get_result_fields
 
 DIRECTORY = 'vao'
+IMPORTER = 'vao'
 
 VAO_LIST_TABLE = 'vao_list_raw'
 
@@ -378,6 +379,7 @@ AUTO_SQL = [
         ''',
         'tables': ['vao_list_raw'],
         'as_view': True,
+        'summary': 'Premises with rateable values',
     },
     # create index of uran, version to be able to select active rows from
     # summary data
@@ -386,12 +388,14 @@ AUTO_SQL = [
         'sql': '''
              SELECT DISTINCT ON (b.uarn)
                  first_value(b.uarn) OVER wnd AS uarn,
+                 first_value(b.from_date) OVER wnd AS date,
+                 last_value(b.from_date) OVER wnd AS date2,
                  first_value(b.version) OVER wnd AS version
              FROM {t1} b
-             LEFT JOIN {t2} l ON l.uarn = b.uarn
+             INNER JOIN {t2} l ON l.uarn = b.uarn
              WINDOW wnd AS (
                  PARTITION BY b.uarn, b.version
-                 ORDER BY b.from_date DESC NULLS LAST
+                 ORDER BY b.version  NULLS LAST
                  ROWS BETWEEN UNBOUNDED PRECEDING
                  AND UNBOUNDED FOLLOWING
              )
@@ -399,7 +403,7 @@ AUTO_SQL = [
         'tables': ['vao_base_raw', 'vao_list'],
         'primary_key': ['uarn', 'version'],
         'disabled': True,
-        'summary': '',
+        'summary': 'Used to select which summay data to use for a premesis',
     },
 
     # Create the views of the active rows
@@ -408,9 +412,9 @@ AUTO_SQL = [
         'sql': '''
         SELECT b.*
         FROM {t1} b
-        RIGHT JOIN {t2} i ON i.uarn = b.uarn AND i.version = b.version
+        WHERE version = 1
         ''',
-        'tables': ['vao_base_raw', 'vao_index'],
+        'tables': ['vao_base_raw'],
         'as_view': True,
     },
     {
@@ -418,9 +422,9 @@ AUTO_SQL = [
         'sql': '''
         SELECT t.*
         FROM {t1} t
-        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        WHERE version = 1
         ''',
-        'tables': ['vao_line_raw', 'vao_index'],
+        'tables': ['vao_line_raw'],
         'as_view': True,
     },
     {
@@ -428,9 +432,9 @@ AUTO_SQL = [
         'sql': '''
         SELECT t.*
         FROM {t1} t
-        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        WHERE version = 1
         ''',
-        'tables': ['vao_parking_raw', 'vao_index'],
+        'tables': ['vao_parking_raw'],
         'as_view': True,
     },
     {
@@ -438,9 +442,9 @@ AUTO_SQL = [
         'sql': '''
         SELECT t.*
         FROM {t1} t
-        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        WHERE version = 1
         ''',
-        'tables': ['vao_plant_raw', 'vao_index'],
+        'tables': ['vao_plant_raw'],
         'as_view': True,
     },
     {
@@ -448,9 +452,9 @@ AUTO_SQL = [
         'sql': '''
         SELECT t.*
         FROM {t1} t
-        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        WHERE version = 1
         ''',
-        'tables': ['vao_additions_raw', 'vao_index'],
+        'tables': ['vao_additions_raw'],
         'as_view': True,
     },
     {
@@ -458,9 +462,9 @@ AUTO_SQL = [
         'sql': '''
         SELECT t.*
         FROM {t1} t
-        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        WHERE version = 1
         ''',
-        'tables': ['vao_adj_raw', 'vao_index'],
+        'tables': ['vao_adj_raw'],
         'as_view': True,
     },
     {
@@ -468,9 +472,9 @@ AUTO_SQL = [
         'sql': '''
         SELECT t.*
         FROM {t1} t
-        RIGHT JOIN {t2} i ON i.uarn = t.uarn AND i.version = t.version
+        WHERE version = 1
         ''',
-        'tables': ['vao_adj_totals_raw', 'vao_index'],
+        'tables': ['vao_adj_totals_raw'],
         'as_view': True,
     },
     # End of the active row views
@@ -492,6 +496,7 @@ AUTO_SQL = [
         ''',
         'tables': ['vao_list', 'vao_base', 'c_scat'],
         'disabled': False,
+        'stage': 2,
         'summary': '',
     },
 
