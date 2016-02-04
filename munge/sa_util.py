@@ -5,6 +5,7 @@ import sqlalchemy as sa
 import sa_common
 import config
 from common import process_header
+from summeries import update_summary_table
 
 
 engine = sa.create_engine(config.CONNECTION_STRING, echo=False)
@@ -465,7 +466,6 @@ def _results_to_table(data, results, verbose=0, limit=None):
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
 
-from summeries import update_summary_table
 
 def _build_view(data, verbose=0, force=False):
     view_name = data['name']
