@@ -18,6 +18,27 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
+@app.template_global()
+def dictify_data_array(link, row, value, index):
+    urls = []
+    if not value:
+        return urls
+    route = link['route']
+    split = link.get('split')
+    if split:
+        split_on = link.get('split_on', ',')
+        split = map(unicode.strip, value.split(split_on))
+        row = list(row)
+        for item in split:
+            row[index] = item
+            args = {k: row[v] for k, v in link['args']}
+            urls.append((url_for(route, **args), item))
+    else:
+        args = {k: row[v] for k, v in link['args']}
+        urls.append((url_for(route, **args), value))
+    return urls
+
+
 def html_format(html, *args, **kw):
     # escape any values
     args = [escape(arg) for arg in args]
@@ -131,7 +152,7 @@ def auto_links(fields):
     links = {}
     for i, field in enumerate(fields):
         if field.get('name') == 'uarn':
-            links[i] = ('premises', 'uarn', i)
+            links[i] = {'route': 'premises', 'args': [('uarn', i)]}
     return links
 
 
@@ -199,7 +220,7 @@ def la_list():
     ORDER BY "desc"
     '''
     output = show_result(sql)
-    output['links'][1] = ('la_premises_list', 'la_code', 0)
+    output['links'][1] = {'route': 'la_premises_list', 'args': [('la_code', 0)]}
     return render_template('table_output.html', data=output)
 
 
@@ -229,7 +250,7 @@ def la_sum_list():
     ORDER BY "desc"
     '''
     output = show_result(sql)
-    output['links'][1] = ('la_sum_report', 'la_code', 0)
+    output['links'][1] = {'route': 'la_sum_report', 'args': [('la_code', 0)]}
     return render_template('table_output.html', data=output)
 
 @app.route('/la_sum/<la_code>')
@@ -260,7 +281,7 @@ def la_sum_report(la_code):
 def scat_list():
     sql = 'SELECT code, "desc" FROM c_scat ORDER BY "desc"'
     output = show_result(sql)
-    output['links'][1] = ('scat_premises_list', 'scat_code', 0)
+    output['links'][1] = {'route': 'scat_premises_list', 'args': [('scat_code', 0)]}
     return render_template('table_output.html', data=output)
 
 
@@ -292,7 +313,7 @@ def la_areas_list():
     ORDER BY "desc"
     '''
     output = show_result(sql)
-    output['links'][1] = ('la_areas', 'la_code', 0)
+    output['links'][1] = {'route': 'la_areas', 'args': [('la_code', 0)]}
     return render_template('table_output.html', data=output)
 
 
@@ -316,11 +337,31 @@ def la_areas(la_code):
     return render_template('table_output.html', data=output)
 
 
+@app.route('/scat/<scat_code>/<ba_code>')
+def scat_area_premises_list(scat_code, ba_code):
+    data = {'scat_code': scat_code, 'ba_code': ba_code}
+    sql = '''
+    SELECT v.uarn, b.uarn, c.desc
+    FROM vao_list v
+    LEFT OUTER JOIN vao_base b
+    ON b.uarn = v.uarn
+    LEFT JOIN c_ba c ON c.code = v.ba_code
+    WHERE v.scat_code = :scat_code
+    AND v.ba_code = :ba_code
+    ORDER BY c.desc
+    '''
+    output = show_result(sql, data=data)
+    del output['links'][1]
+    output['fields'][1]['name'] = 'summary'
+    output['functions'][1] = (add_yes,)
+    return render_template('table_output.html', data=output)
+
+
 @app.route('/scat_areas/')
 def scat_areas_list():
     sql = 'SELECT code, "desc" FROM c_scat ORDER BY "desc"'
     output = show_result(sql)
-    output['links'][1] = ('scat_areas', 'scat_code', 0)
+    output['links'][1] = {'route': 'scat_areas', 'args': [('scat_code', 0)]}
     return render_template('table_output.html', data=output)
 
 
@@ -364,7 +405,7 @@ def spending_nuts1_list():
     ORDER BY "desc"
     '''
     output = show_result(sql)
-    output['links'][1] = ('spending_nuts1', 'nuts1', 0)
+    output['links'][1] = {'route': 'spending_nuts1', 'args': [('nuts1', 0)]}
     return render_template('table_output.html', data=output)
 
 

@@ -52,8 +52,12 @@
   {% set name = data.fields[loop.index -1].name %}
   <td{{ make_td_class(type, name) }}>
   {% if (loop.index - 1) in data.links %}
-    {% set link = data.links[loop.index - 1] %}
-    <a href="{{ url_for(link[0], **{link[1]: row[link[2]]})}}">{{ cell }}</a>
+  {% set link = data.links[loop.index - 1] %}
+  {% set urls = dictify_data_array(link, row, cell, loop.index - 1) %}
+    {% for url in urls %}
+      <a href="{{ url[0] }}">{{ url[1] }}</a>
+      {% if not loop.last %} | {% endif %}
+    {% endfor %}
   {% else %}
     {{ format_table_value(type, cell) }}
   {% endif %}
