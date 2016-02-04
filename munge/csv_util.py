@@ -7,7 +7,6 @@ import collections
 import config
 import import_fns
 from sa_util import (
-    swap_tables,
     run_sql,
     table_list,
     get_result_fields,
@@ -54,8 +53,15 @@ def get_fns(fields):
     return fns
 
 
-def import_csv(reader, table_name, fields=None, skip_first=False,
-               verbose=0, limit=None, keep_table=False):
+def import_csv(reader,
+               table_name,
+               fields=None,
+               skip_first=False,
+               description=None,
+               verbose=0,
+               limit=None,
+               keep_table=False,
+               importer=None):
     if keep_table and table_name not in table_list():
         keep_table = False
     temp_table = config.TEMP_TABLE_STR + table_name
@@ -64,13 +70,13 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
     data = []
     has_header_row = (fields is None) or skip_first
     first = True
-    description = None
     set_first = False
     for row in reader:
         skip = False
         if first:
             if len(row) == 1 and row[0][:1] == '#':
-                description = row[0][1:].strip()
+                if not description:
+                    description = row[0][1:].strip()
                 skip = True
             else:
                 if fields is None:
@@ -133,14 +139,26 @@ def import_csv(reader, table_name, fields=None, skip_first=False,
     # Add indexes
     if not keep_table:
         build_indexes(temp_table, t_fields, verbose=verbose)
-    update_summary_table(table_name, description, created=not keep_table)
+    update_summary_table(table_name,
+                         description,
+                         importer=importer,
+                         created=not keep_table)
 
 
-def import_single(filename, table_name, verbose=0, keep_table=False, **kw):
+def import_single(filename,
+                  table_name,
+                  verbose=0,
+                  importer=None,
+                  keep_table=False,
+                  **kw):
     if verbose:
         print('importing %s' % table_name)
     reader = unicode_csv_reader(filename, **kw)
-    import_csv(reader, table_name, verbose=verbose, keep_table=keep_table)
+    import_csv(reader,
+               table_name,
+               verbose=verbose,
+               importer=importer,
+               keep_table=keep_table)
 
 
 def get_csv_files(directory):
@@ -155,10 +173,14 @@ def csv_table_list(directory):
     return [table_name_from_path(f) for f in get_csv_files(directory)]
 
 
-def import_all(directory, verbose=0, keep_table=False):
+def import_all(directory, verbose=0, keep_table=False, importer=None):
     for f in get_csv_files(directory):
         table_name = table_name_from_path(f)
-        import_single(f, table_name, verbose=verbose, keep_table=keep_table)
+        import_single(f,
+                      table_name,
+                      verbose=verbose,
+                      importer=importer,
+                      keep_table=keep_table)
 
 
 def make_headers(result, table_name, simple=False):
