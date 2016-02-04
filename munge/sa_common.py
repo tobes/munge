@@ -11,6 +11,7 @@ OID_TYPE = {
     701: 'float',
     1082: 'date',
     1700: 'numeric',
+    1114: 'timestamp',
 }
 
 NUMERIC_TYPES = [
@@ -27,6 +28,15 @@ FLOAT_TYPES = [
     'numeric',
     'float',
 ]
+
+TRANSLATIONS = {
+    'double precision': 'float'
+}
+
+
+
+def field_type(type):
+    return TRANSLATIONS.get(type, type)
 
 
 def run_sql(engine, sql, *args, **kw):
@@ -103,7 +113,7 @@ def table_columns(engine, table_name):
         name = row[0]
         fields.append({
             'name': name,
-            'type': row[1],
+            'type': field_type(row[1]),
             'pk': name in pks,
             'indexed': name in indexes,
         })
@@ -147,11 +157,11 @@ def get_result_fields(engine, result, table=None):
 
 def fields_match(f1, f2):
     set1 = set([
-        '%s:%s:%s:%s' % (f['name'], f['type'], f['pk'], f['indexed'])
+        '%s:%s:%s:%s' % (f['name'], field_type(f['type']), f['pk'], f['indexed'])
         for f in f1
     ])
     set2 = set([
-        '%s:%s:%s:%s' % (f['name'], f['type'], f['pk'], f['indexed'])
+        '%s:%s:%s:%s' % (f['name'], field_type(f['type']), f['pk'], f['indexed'])
         for f in f2
     ])
     return set1 == set2
