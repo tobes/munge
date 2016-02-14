@@ -31,7 +31,7 @@
       <th>#</th>
 {% for field in data.fields %}
   <th>
-    {{ field.name }}
+    {{ field.name.replace('_', ' ') }}
     {% if field.type %}
       </br>
       <span class="field_type">{{ field.type }}</span>
@@ -90,7 +90,7 @@
     {% if field.type %}
     <span class="field_type">{{ field.type }}</span>
     {% endif %}
-    {{ field.name }}
+    {{ field.name.replace('_', ' ') }}
   </th>
   <td>
   {% if (loop.index - 1) in data.functions %}
