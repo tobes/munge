@@ -938,8 +938,11 @@ AND a.la_code = la.la_code
         'name': 's_la_general_summary',
         'sql': '''
             SELECT p.la_code, scat_code,
-            count(p.uarn) count, wage_employee average_wage,
-            sum(area) total_area, sum(employees) estimated_employees,
+            count(p.uarn) count,
+            wage_employee average_wage,
+            sum(area) total_area,
+            sum(break_even) total_break_even,
+            sum(employees) estimated_employees,
              sum(employees) * wage_employee as estimated_employee_earnings,
              sum(rateable_value) as total_rateable_value
             FROM {t1} p
@@ -949,18 +952,22 @@ AND a.la_code = la.la_code
         'tables': ['v_premises_summary2'],
         'summary': '',
         'stage': 5,
+        'test': True,
     },
 
 
     {
-        'name': 's_la_median_scat_ratable',
+        'name': 's_la_median_scat_ratable_breakeven',
         'sql': '''
-             SELECT scat_code, quantile(total_rateable_value, 0.5) median_total_rateable_value
+             SELECT scat_code,
+             quantile(total_rateable_value, 0.5) median_total_rateable_value,
+             quantile(total_break_even, 0.5) median_total_break_even
              FROM {t1} GROUP BY scat_code
         ''',
         'tables': ['s_la_general_summary'],
         'summary': '',
         'stage': 5,
+        'test': True,
     },
 
 

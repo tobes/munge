@@ -275,10 +275,17 @@ def la_sum_report(la_code):
       WHEN total_rateable_value > 0
       THEN 1.0 - ( m.median_total_rateable_value / total_rateable_value)
       ELSE NULL
-    END variance
+    END ratable_variance,
+    total_break_even,
+    CASE
+      WHEN total_break_even > 0
+      THEN 1.0 - ( m.median_total_break_even / total_break_even)
+      ELSE NULL
+    END break_even_variance
+
 
     FROM s_la_general_summary s
-    LEFT JOIN s_la_median_scat_ratable m on m.scat_code = s.scat_code
+    LEFT JOIN s_la_median_scat_ratable_breakeven m on m.scat_code = s.scat_code
     WHERE la_code = :la_code
 
     ORDER BY scat_code
