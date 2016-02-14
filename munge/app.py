@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.CONNECTION_STRING
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
+app.config['PROPAGATE_EXCEPTIONS'] = True
 
 @app.template_global()
 def dictify_data_array(link, row, value, index):
