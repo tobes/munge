@@ -952,7 +952,6 @@ AND a.la_code = la.la_code
         'tables': ['v_premises_summary2'],
         'summary': '',
         'stage': 5,
-        'test': True,
     },
 
 
@@ -967,9 +966,38 @@ AND a.la_code = la.la_code
         'tables': ['s_la_general_summary'],
         'summary': '',
         'stage': 5,
-        'test': True,
     },
 
+
+    {
+        'name': 's_nuts1_spending_by_ct_group',
+        'sql': '''
+            SELECT nuts1_code, ct_group_code,
+            sum(adj_spend_per_capita) spend_per_capita
+            FROM {t1} s
+            JOIN {t2} c ON c.code = s.ct_code
+            JOIN {t3} cg ON cg.ct_code = c.code
+            WHERE base = true
+            AND nuts1_code IS NOT NULL
+            GROUP BY nuts1_code, ct_group_code;
+        ''',
+        'tables': ['s_consumer_spend_by_nuts1', 'c_ct', 'l_ct_cg'],
+        'summary': '',
+        'stage': 6,
+    },
+
+    {
+        'name': 's_la_area_per_ct_group',
+        'sql': '''
+            SELECT la_code, ct_group_code,
+            sum(area) area
+            FROM {t1}
+            GROUP BY la_code, ct_group_code;
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+        'stage': 6,
+    },
 
 
 # ==================================

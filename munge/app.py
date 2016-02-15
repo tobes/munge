@@ -209,7 +209,7 @@ def tables():
     output['functions'][3] = (date_since, 1)
     output['functions'][4] = (date_since, 1)
     output['links'][0] = {'route': 'table', 'args': [('table', 0)]}
-    output['links'][5] = {'route': 'table', 'args': [('table', 5)], 'split':True}
+    output['links'][5] = {'route': 'table', 'args': [('table', 5)]}
     return render_template('table_output.html', data=output)
 
 
@@ -293,6 +293,36 @@ def la_sum_report(la_code):
     output = show_result(sql, data=data)
     return render_template('table_output.html', data=output)
 
+
+@app.route('/la_ct/')
+def la_ct_list():
+    sql = '''
+    SELECT code, "desc" FROM c_la
+    WHERE LEFT(code, 1) IN ('E', 'w')
+    ORDER BY "desc"
+    '''
+    output = show_result(sql)
+    output['links'][1] = {'route': 'la_ct_report', 'args': [('la_code', 0)]}
+    return render_template('table_output.html', data=output)
+
+@app.route('/la_ct/<la_code>')
+def la_ct_report(la_code):
+    data = {'la_code': la_code}
+    sql = '''
+        SELECT ct_code,
+        adj_spend_per_capita,
+        adj_spend_per_capita * population as total_spend,
+        adj_spend_per_capita/spend_per_capita area_precent,
+        (adj_spend_per_capita/spend_per_capita) * area as area
+
+        FROM s_la_spending_by_ct s
+        JOIN s_nuts1_spending_by_ct_group t ON t.nuts1_code = s.nuts1_code AND s.ct_group_code = t.ct_group_code
+        JOIN c_ct c ON c.code = s.ct_code
+        WHERE s.la_code = :la_code
+        ORDER BY l1, l2 nulls first, l3 nulls first
+    '''
+    output = show_result(sql, data=data)
+    return render_template('table_output.html', data=output)
 
 
 @app.route('/scat/')
