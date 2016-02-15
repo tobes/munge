@@ -227,7 +227,7 @@ def table(table=None):
 def la_list():
     sql = '''
     SELECT code, "desc" FROM c_la
-    WHERE LEFT(code, 1) IN ('E', 'w')
+    WHERE LEFT(code, 1) IN ('E', 'W')
     ORDER BY "desc"
     '''
     output = show_result(sql)
@@ -257,7 +257,7 @@ def la_premises_list(la_code):
 def la_sum_list():
     sql = '''
     SELECT code, "desc" FROM c_la
-    WHERE LEFT(code, 1) IN ('E', 'w')
+    WHERE LEFT(code, 1) IN ('E', 'W')
     ORDER BY "desc"
     '''
     output = show_result(sql)
@@ -298,7 +298,7 @@ def la_sum_report(la_code):
 def la_ct_list():
     sql = '''
     SELECT code, "desc" FROM c_la
-    WHERE LEFT(code, 1) IN ('E', 'w')
+    WHERE LEFT(code, 1) IN ('E', 'W')
     ORDER BY "desc"
     '''
     output = show_result(sql)
@@ -357,7 +357,7 @@ def scat_premises_list(scat_code):
 def la_areas_list():
     sql = '''
     SELECT code, "desc" FROM c_la
-    WHERE LEFT(code, 1) IN ('E', 'w')
+    WHERE LEFT(code, 1) IN ('E', 'W')
     ORDER BY "desc"
     '''
     output = show_result(sql)
