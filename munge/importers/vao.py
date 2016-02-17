@@ -1000,6 +1000,98 @@ AND a.la_code = la.la_code
     },
 
 
+    {
+        'name': 's_lsoa_general_summary',
+        'sql': '''
+            SELECT p.lsoa_code, scat_code,
+            count(p.uarn) count,
+            wage_employee average_wage,
+            sum(area) total_area,
+            sum(break_even) total_break_even,
+            sum(employees) estimated_employees,
+             sum(employees) * wage_employee as estimated_employee_earnings,
+             sum(rateable_value) as total_rateable_value
+            FROM {t1} p
+            GROUP BY lsoa_code, scat_code, wage_employee
+
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+        'stage': 7,
+    },
+
+    {
+        'name': 's_msoa_general_summary',
+        'sql': '''
+            SELECT p.msoa_code, scat_code,
+            count(p.uarn) count,
+            wage_employee average_wage,
+            sum(area) total_area,
+            sum(break_even) total_break_even,
+            sum(employees) estimated_employees,
+             sum(employees) * wage_employee as estimated_employee_earnings,
+             sum(rateable_value) as total_rateable_value
+            FROM {t1} p
+            GROUP BY msoa_code, scat_code, wage_employee
+
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+        'stage': 7,
+    },
+
+    {
+        'name': 's_lsoa_median_scat_ratable_breakeven',
+        'sql': '''
+             SELECT scat_code,
+             quantile(total_rateable_value, 0.5) median_total_rateable_value,
+             quantile(total_break_even, 0.5) median_total_break_even
+             FROM {t1} GROUP BY scat_code
+        ''',
+        'tables': ['s_lsoa_general_summary'],
+        'summary': '',
+        'stage': 7,
+    },
+
+    {
+        'name': 's_msoa_median_scat_ratable_breakeven',
+        'sql': '''
+             SELECT scat_code,
+             quantile(total_rateable_value, 0.5) median_total_rateable_value,
+             quantile(total_break_even, 0.5) median_total_break_even
+             FROM {t1} GROUP BY scat_code
+        ''',
+        'tables': ['s_msoa_general_summary'],
+        'summary': '',
+        'stage': 7,
+    },
+
+    {
+        'name': 's_la_scat_summary',
+        'sql': '''
+            SELECT s.scat_code, la_code, count, total_area,
+            estimated_employees, estimated_employee_earnings,
+            total_rateable_value, m.median_total_rateable_value,
+            CASE
+              WHEN total_rateable_value > 0
+              THEN 1.0 - ( m.median_total_rateable_value / total_rateable_value)
+              ELSE NULL
+            END ratable_variance,
+            total_break_even,
+            CASE
+              WHEN total_break_even > 0
+              THEN 1.0 - ( m.median_total_break_even / total_break_even)
+              ELSE NULL
+            END break_even_variance
+
+
+            FROM {t1} s
+            LEFT JOIN {t2} m on m.scat_code = s.scat_code
+        ''',
+        'tables': ['s_la_general_summary', 's_la_median_scat_ratable_breakeven'],
+        'stage': 8,
+    },
+
 # ==================================
 
 
