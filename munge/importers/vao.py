@@ -941,6 +941,8 @@ AND a.la_code = la.la_code
             count(p.uarn) count,
             wage_employee average_wage,
             sum(area) total_area,
+            min(area) min_area,
+            max(area) max_area,
             sum(break_even) total_break_even,
             sum(employees) estimated_employees,
              sum(employees) * wage_employee as estimated_employee_earnings,
