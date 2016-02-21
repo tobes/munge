@@ -15,7 +15,7 @@ def import_module(args):
         tables += definitions.get_tables(module)
     deps = dependencies_manager.updates_for(tables, include=False)
     sa_util.build_views_and_summaries(
-        items=deps
+        items=deps,
         verbose=args.verbose,
     )
 
