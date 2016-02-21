@@ -26,6 +26,17 @@ FILES = [
 
 AUTO_SQL = [
     {
+        'name': 'v_wages',
+        'sql': '''
+        SELECT la_code,
+            COALESCE(median, mean, (SELECT quantile(median, 0.5) from {t1})) wage
+        FROM {t1}
+        ''',
+        'tables': ['wages'],
+        'as_view': True,
+        'summary': 'Average wage for la',
+    },
+    {
         'name': 'v_consumer_trend_latest',
         'sql': '''
         SELECT ct_code, amount * 1000000 as amount
