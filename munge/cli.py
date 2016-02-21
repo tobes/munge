@@ -23,6 +23,7 @@ def import_module(args):
 def build_views_summaries(args):
     sa_util.build_views_and_summaries(
         items=args.module,
+        all=args.all,
         verbose=args.verbose,
         force=args.force,
     )
@@ -134,6 +135,7 @@ def main():
     for command in module_commands:
         module_parser = subparsers.add_parser(command)
         module_parser.add_argument('-f', '--force', action="store_true")
+        module_parser.add_argument('-a', '--all', action="store_true")
         module_parser.add_argument('-t', '--test', action="store_true")
         module_parser.add_argument('-s', '--stage', default=0, type=int)
         module_parser.add_argument('module', nargs='*')
