@@ -128,7 +128,7 @@ def truncate_table(table, verbose=0):
     '''.format(table=quote(table))
     if verbose:
         print('Truncating %s' % table)
-    if verbose < 1:
+    if verbose > 1:
         print(sql)
     run_sql(sql)
 
