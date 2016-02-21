@@ -2,31 +2,26 @@ import argparse
 import os.path
 
 import config
-import importers
+import definitions
 import sa_util
 import csv_util
 
 
 def import_module(args):
+    from dependencies import dependencies_manager
+    tables = []
     for module in args.module:
-        m = getattr(importers, module)
-        m.importer(verbose=args.verbose)
-    view_summaries(args)
-    sa_util.swap_tables(verbose=args.verbose, force=args.force)
+        tables += definitions.get_tables(module)
+    deps = dependencies_manager.updates_for(tables, include=False)
+    build_views_summaries(deps)
 
 
-def view_summaries(args, just_views=False):
-    for module in args.module:
-        m = getattr(importers, module)
-        data = getattr(m, 'AUTO_SQL', None)
-        importer = getattr(m, 'IMPORTER', None)
-        if data:
-            sa_util.build_views_and_summaries(
-                data, verbose=args.verbose,
-                just_views=just_views, test_only=args.test,
-                importer=importer,
-                force=args.force, stage=args.stage
-            )
+def build_views_summaries(args):
+    sa_util.build_views_and_summaries(
+        items=args.module,
+        verbose=args.verbose,
+        force=args.force,
+    )
 
 
 def defined_tables():
@@ -41,6 +36,13 @@ def defined_tables():
         for item in info:
             tables.append(item['name'])
     return tables
+
+
+def deps(args):
+    from dependencies import dependencies_manager
+    for item in args.items:
+        print 'Dependencies for %s' % item
+        print dependencies_manager.get_needed_updates(item)
 
 
 def clean_db(args):
@@ -91,8 +93,13 @@ def import_csv(args):
         tablename = os.path.splitext(os.path.basename(filename))[0]
     if verbose:
         print('Importing %s' % args.filename)
-    csv_util.import_single(filename, tablename, encoding=args.encoding,
-                  delimiter=delimiter, verbose=verbose)
+    csv_util.import_single(
+        filename,
+        tablename,
+        encoding=args.encoding,
+        delimiter=delimiter,
+        verbose=verbose
+    )
     sa_util.swap_tables(verbose=verbose)
 
 
@@ -131,7 +138,6 @@ def main():
 
     module_commands = [
         'import',
-        'views',
         'summaries',
     ]
 
@@ -142,18 +148,22 @@ def main():
         module_parser.add_argument('-s', '--stage', default=0, type=int)
         module_parser.add_argument('module', nargs='*')
 
+    dep_parser = subparsers.add_parser('deps')
+    dep_parser.add_argument('items', nargs='*')
+
     args = parser.parse_args()
+    if args.command == 'deps':
+        deps(args)
+    if args.command == 'export_all':
+        export_all(verbose=args.verbose)
     if args.command == 'export_all':
         export_all(verbose=args.verbose)
     elif args.command == 'import':
         import_module(args)
-    elif args.command == 'views':
-        view_summaries(args, just_views=True)
-        sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'swap_temp':
         sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'summaries':
-        view_summaries(args)
+        build_views_summaries(args)
         sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'export_custom':
         export_custom(verbose=args.verbose)

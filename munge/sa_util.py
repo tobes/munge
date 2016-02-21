@@ -6,6 +6,7 @@ import sa_common
 import config
 from common import process_header
 from summeries import update_summary_table as _update_summary_table
+import definitions
 
 
 engine = sa.create_engine(config.CONNECTION_STRING, echo=False)
@@ -519,7 +520,20 @@ def time_fn(fn, args=None, kw=None, verbose=0):
         print "%d:%02d:%02d" % (h, m, s)
 
 
-def build_views_and_summaries(data, verbose=0, just_views=False, importer=None,
+def build_views_and_summaries(items, verbose=0, force=False):
+    # FIXME would be nice to move this to top of page
+    from dependencies import dependencies_manager
+    updates = dependencies_manager.updates_for(items)
+    for item in updates:
+        info = definitions.get_definition(item)
+        if info.get('as_view'):
+            time_fn(_build_view, args=[info], verbose=verbose, kw={'force': force})
+        else:
+            time_fn(_build_summary, args=[info], verbose=verbose)
+
+
+
+def _build_views_and_summaries(data, verbose=0, just_views=False, importer=None,
                               test_only=False, force=False, stage=0):
     for info in data:
         info['importer'] = importer
