@@ -20,7 +20,9 @@ class DependenciesManager(object):
             if include:
                 updates.add(item)
             updates |= set(self.get_needed_updates(item))
-        return self.sort_deps(updates)
+        updates = self.sort_deps(updates)
+        updates.reverse()
+        return updates
 
     def get_dependencies(self):
 
