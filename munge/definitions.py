@@ -65,6 +65,16 @@ def get_definition(name):
                 return info
 
 
+def get_all_definition_names():
+    if not initialized:
+        init()
+    defs = []
+    for item in _CACHE.values():
+        for info in item['auto_sql']:
+            defs.append(info['name'])
+    return defs
+
+
 def defined_dependencies(disabled=False):
     if not initialized:
         init()

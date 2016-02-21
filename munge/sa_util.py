@@ -533,10 +533,13 @@ def time_fn(fn, args=None, kw=None, verbose=0):
         print "%d:%02d:%02d" % (h, m, s)
 
 
-def build_views_and_summaries(items, verbose=0, force=False):
-    # FIXME would be nice to move this to top of page
-    from dependencies import dependencies_manager
-    updates = dependencies_manager.updates_for(items)
+def build_views_and_summaries(items, all=False, verbose=0, force=False):
+    if items:
+        # FIXME would be nice to move this to top of page
+        from dependencies import dependencies_manager
+        updates = dependencies_manager.updates_for(items)
+    if all:
+        updates = definitions.get_all_definition_names()
     for item in updates:
         info = definitions.get_definition(item)
         if info.get('as_view'):
