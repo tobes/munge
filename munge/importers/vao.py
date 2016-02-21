@@ -900,7 +900,7 @@ AND a.la_code = la.la_code
 
 
     {
-        'name': 'v_estimated_income',
+        'name': 's_estimated_income',
         'sql': '''
             SELECT uarn,
             s.ct_code, spend_per_m2, p.area,
@@ -920,7 +920,6 @@ AND a.la_code = la.la_code
         ''',
         'tables': ['v_premises_summary2', 's_la_spending_by_ct', 'c_ct'],
         'summary': '',
-        'as_view': True,
         'stage': 5,
     },
 
@@ -931,7 +930,7 @@ AND a.la_code = la.la_code
              SELECT uarn, max(rating)
              FROM {t1} GROUP BY uarn
         ''',
-        'tables': ['v_estimated_income'],
+        'tables': ['s_estimated_income'],
         'summary': '',
         'stage': 5,
     },
