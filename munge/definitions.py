@@ -71,7 +71,8 @@ def get_all_definition_names():
     defs = []
     for item in _CACHE.values():
         for info in item['auto_sql']:
-            defs.append(info['name'])
+            if not info.get('disabled', False):
+                defs.append(info['name'])
     return defs
 
 
