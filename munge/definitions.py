@@ -9,6 +9,8 @@ def init():
         m = getattr(importers, module)
         importer = getattr(m, 'IMPORTER', None)
         auto_sql = getattr(m, 'AUTO_SQL', {})
+        for item in auto_sql:
+            item['importer'] = importer
         tables_fn = getattr(m, 'tables', None)
         tables = tables_fn() if tables_fn else []
         definition = {

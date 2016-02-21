@@ -63,7 +63,7 @@ def get_result_fields(*args, **kw):
     return sa_common.get_result_fields(engine, *args, **kw)
 
 
-def update_summary_table(data, created=True):
+def update_summary_table(data, created=True, rows=None, time=None):
     name = data['name']
     tables = data['tables']
     importer = data.get('importer')
@@ -73,6 +73,8 @@ def update_summary_table(data, created=True):
                           description=description,
                           dependencies=tables,
                           importer=importer,
+                          rows=rows,
+                          time=time,
                           is_view=is_view,
                           created=created)
 
@@ -229,6 +231,10 @@ def make_tables_dict(tables):
 
 
 def create_table(table, fields, primary_key=None, verbose=0, keep=False):
+    if keep:
+        old_fields = table_columns(table)
+        if not fields_match(old_fields, fields):
+            keep = False
     if not keep:
         sql = 'DROP TABLE IF EXISTS %s' % quote(table)
         run_sql(sql)
@@ -333,6 +339,7 @@ def results_dict(sql):
 
 
 def _build_summary(data, verbose=0, limit=None):
+    start = time.time()
     table_name = data['name']
     sql = data['sql']
     tables = data['tables']
@@ -347,11 +354,17 @@ def _build_summary(data, verbose=0, limit=None):
     row_function = data.get('row_function')
     table_function = data.get('table_function')
     if row_function:
-        _results_to_row_function(row_function, data, results, verbose=verbose, limit=limit)
+        count = _results_to_row_function(row_function, data, results, verbose=verbose, limit=limit)
     if table_function:
-        _results_to_table_function(table_function, data, results, verbose=verbose, limit=limit)
+        count = _results_to_table_function(table_function, data, results, verbose=verbose, limit=limit)
     else:
-        _results_to_table(data, results, verbose=verbose, limit=limit)
+        count = _results_to_table(data, results, verbose=verbose, limit=limit)
+    elapsed = int(time.time() - start)
+    m, s = divmod(elapsed, 60)
+    h, m = divmod(m, 60)
+    t = "%d:%02d:%02d" % (h, m, s)
+    update_summary_table(data, rows=count, time=t)
+
 
 def _results_to_table_function(function, data, results, verbose=0, limit=None):
     table_name = data['name']
@@ -394,7 +407,7 @@ def _results_to_table_function(function, data, results, verbose=0, limit=None):
     if count:
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
-    update_summary_table(data)
+    return count
 
 
 
@@ -441,7 +454,7 @@ def _results_to_row_function(function, data, results, verbose=0, limit=None):
     if count:
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
-    update_summary_table(data)
+    return count
 
 
 def _results_to_table(data, results, verbose=0, limit=None):
@@ -482,7 +495,7 @@ def _results_to_table(data, results, verbose=0, limit=None):
     if count:
         # Add indexes
         build_indexes(table_name_temp, fields, verbose=verbose)
-    update_summary_table(data)
+    return count
 
 
 def _build_view(data, verbose=0, force=False):

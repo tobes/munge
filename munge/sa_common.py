@@ -123,17 +123,26 @@ def table_columns(engine, table_name):
 
 def get_pk_constraint(engine, table_name):
     insp = reflection.Inspector.from_engine(engine)
-    return insp.get_pk_constraint(table_name)
+    try:
+        return insp.get_pk_constraint(table_name)
+    except sa.exc.NoSuchTableError:
+        return []
 
 
 def get_primary_keys(engine, table_name):
     insp = reflection.Inspector.from_engine(engine)
-    return insp.get_primary_keys(table_name)
+    try:
+        return insp.get_primary_keys(table_name)
+    except sa.exc.NoSuchTableError:
+        return []
 
 
 def get_indexes(engine, table_name):
     insp = reflection.Inspector.from_engine(engine)
-    return insp.get_indexes(table_name)
+    try:
+        return insp.get_indexes(table_name)
+    except sa.exc.NoSuchTableError:
+        return []
 
 
 def get_result_fields(engine, result, table=None):

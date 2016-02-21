@@ -10,6 +10,8 @@ table_fields = [
     'updated:timestamp',
     'dependencies:text[]',
     'importer',
+    'time',
+    'rows:bigint',
 ]
 
 _initiated = False
@@ -28,6 +30,8 @@ def update_summary_table(table_name,
                          dependencies=None,
                          is_view=False,
                          created=False,
+                         time=None,
+                         rows=None,
                          importer=None):
     if not _initiated:
         _init()
@@ -42,6 +46,10 @@ def update_summary_table(table_name,
     data['updated'] = datetime.datetime.now()
     if created:
         data['created'] = datetime.datetime.now()
+    if time:
+        data['time'] = time
+    if rows:
+        data['rows'] = rows
     # does the entry exist?
     exists = False
     sql = 'SELECT * FROM tables WHERE name=:name'
