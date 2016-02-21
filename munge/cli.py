@@ -150,6 +150,7 @@ def main():
         export_all(verbose=args.verbose)
     elif args.command == 'import':
         import_module(args)
+        sa_util.swap_tables(verbose=verbose)
     elif args.command == 'swap_temp':
         sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'summaries':
