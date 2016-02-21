@@ -714,6 +714,16 @@ AUTO_SQL = [
             'area_source_code:smallint',
          ],
         'row_function': s_vao_premises_area,
+        'dependencies': [
+            's_vao_area_areacode_by_scat',
+            's_vao_area_outcode_by_scat',
+            's_vao_area_la_by_scat',
+            's_vao_area_nuts3_by_scat',
+            's_vao_area_nuts2_by_scat',
+            's_vao_area_nuts1_by_scat',
+            's_vao_area_national_by_scat',
+            's_vao_area_national_by_scat',
+        ],
         'disabled': False,
         'summary': '',
         'stage': 2,
@@ -750,10 +760,7 @@ AUTO_SQL = [
             a.area_source_code,
             s.local_market,
             s.scat_group_code,
-            CASE
-                WHEN area > 0 AND employee_m2 > 0 THEN a.area/employee_m2
-                ELSE null
-            END AS    employees,
+            safe_divide(a.area, employee_m2) employees,
             lsoa_code,
             msoa_code
             FROM {t1} l
@@ -782,23 +789,18 @@ AUTO_SQL = [
             s.local_market,
             s.scat_group_code,
             s.cg_code as ct_group_code,
-            CASE
-                WHEN area > 0 AND employee_m2 > 0 THEN a.area/employee_m2
-                ELSE null
-            END AS    employees,
+            safe_divide(a.area, employee_m2) employees,
             CASE
                 WHEN area > 0 AND employee_m2 > 0
-                THEN round(a.area/employee_m2) * COALESCE(w.median, w.mean, 22000)
+                THEN round(a.area/employee_m2) * w.wage
                 ELSE null
             END AS    employee_cost,
             CASE
                 WHEN area > 0 AND employee_m2 > 0
-                THEN (l.rateable_value + round(a.area/employee_m2) * COALESCE(w.median, w.mean, 22000)) / 0.4
+                THEN (l.rateable_value + round(a.area/employee_m2) * w.wage) / 0.4
                 ELSE l.rateable_value / 0.4
             END AS break_even,
-            w.median,
-            w.mean,
-            COALESCE(w.median, w.mean, 22000) wage_employee,
+            w.wage wage_employee,
             lsoa_code,
             msoa_code
             FROM {t1} l
@@ -808,7 +810,7 @@ AUTO_SQL = [
             LEFT JOIN {t6} w ON l.la_code = w.la_code
             LEFT OUTER JOIN {t4} p ON p.pc = l.pc
         ''',
-        'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group', 'wages'],
+        'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group', 'v_wages'],
         'as_view': True,
         'summary': '',
         'stage': 3,
@@ -1074,19 +1076,11 @@ AND a.la_code = la.la_code
             SELECT s.scat_code, la_code, count, total_area,
             estimated_employees, estimated_employee_earnings,
             total_rateable_value, m.median_total_rateable_value,
-            CASE
-              WHEN total_rateable_value > 0
-              THEN 1.0 - ( m.median_total_rateable_value / total_rateable_value)
-              ELSE NULL
-            END ratable_variance,
+            percent_diff(m.median_total_rateable_value, total_rateable_value)
+                ratable_variance,
             total_break_even,
-            CASE
-              WHEN total_break_even > 0
-              THEN 1.0 - ( m.median_total_break_even / total_break_even)
-              ELSE NULL
-            END break_even_variance
-
-
+            percent_diff(m.median_total_break_even, total_break_even)
+                break_even_variance
             FROM {t1} s
             LEFT JOIN {t2} m on m.scat_code = s.scat_code
         ''',
