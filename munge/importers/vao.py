@@ -609,8 +609,8 @@ AUTO_SQL = [
             SELECT t1.outcode, t1.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
-            quantile(total_area, 0.5) as median_m2,
-            quantile(total_value/total_area, 0.5) as median_price_per_m2,
+            usr_median(total_area) as median_m2,
+            usr_median(total_value/total_area) as median_price_per_m2,
             t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
@@ -629,8 +629,8 @@ AUTO_SQL = [
             SELECT t1.areacode, t1.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
-            quantile(total_area, 0.5) as median_m2,
-            quantile(total_value/total_area, 0.5) as median_price_per_m2,
+            usr_median(total_area) as median_m2,
+            usr_median(total_value/total_area) as median_price_per_m2,
             t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
@@ -650,8 +650,8 @@ AUTO_SQL = [
             SELECT la_code, t1.scat_code, count(*),
             sum(total_area) as total_m2,
             sum(total_value) as total_value,
-            quantile(total_area, 0.5) as median_m2,
-            quantile(total_value/total_area, 0.5) as median_price_per_m2,
+            usr_median(total_area) as median_m2,
+            usr_median(total_value/total_area) as median_price_per_m2,
             t2.median_price_per_m2 as national_price_per_m2
             FROM {t1} t1
             LEFT OUTER JOIN {t2} t2 on t1.scat_code = t2.scat_code
@@ -797,7 +797,7 @@ AUTO_SQL = [
             END AS    employee_cost,
             CASE
                 WHEN area > 0 AND employee_m2 > 0
-                THEN (l.rateable_value + round(a.area/employee_m2) * w.wage) / 0.4
+                THEN (l.rateable_value + (round(a.area/employee_m2) * w.wage)) / 0.4
                 ELSE l.rateable_value / 0.4
             END AS break_even,
             w.wage wage_employee,
@@ -943,8 +943,15 @@ AND a.la_code = la.la_code
             count(p.uarn) count,
             wage_employee average_wage,
             sum(area) total_area,
+            usr_median(area) median_area,
             min(area) min_area,
             max(area) max_area,
+            usr_median(rateable_value) median_rateable_value,
+            min(rateable_value) min_rateable_value,
+            max(rateable_value) max_rateable_value,
+            usr_median(safe_divide(rateable_value, area)) median_rate_per_area,
+            min(safe_divide(rateable_value, area)) min_rate_per_area,
+            max(safe_divide(rateable_value, area)) max_rate_per_area,
             sum(break_even) total_break_even,
             sum(employees) estimated_employees,
              sum(employees) * wage_employee as estimated_employee_earnings,
@@ -963,8 +970,8 @@ AND a.la_code = la.la_code
         'name': 's_la_median_scat_ratable_breakeven',
         'sql': '''
              SELECT scat_code,
-             quantile(total_rateable_value, 0.5) median_total_rateable_value,
-             quantile(total_break_even, 0.5) median_total_break_even
+             usr_median(total_rateable_value) median_total_rateable_value,
+             usr_median(total_break_even) median_total_break_even
              FROM {t1} GROUP BY scat_code
         ''',
         'tables': ['s_la_general_summary'],
@@ -1048,8 +1055,8 @@ AND a.la_code = la.la_code
         'name': 's_lsoa_median_scat_ratable_breakeven',
         'sql': '''
              SELECT scat_code,
-             quantile(total_rateable_value, 0.5) median_total_rateable_value,
-             quantile(total_break_even, 0.5) median_total_break_even
+             usr_median(total_rateable_value) median_total_rateable_value,
+             usr_median(total_break_even) median_total_break_even
              FROM {t1} GROUP BY scat_code
         ''',
         'tables': ['s_lsoa_general_summary'],
@@ -1061,8 +1068,8 @@ AND a.la_code = la.la_code
         'name': 's_msoa_median_scat_ratable_breakeven',
         'sql': '''
              SELECT scat_code,
-             quantile(total_rateable_value, 0.5) median_total_rateable_value,
-             quantile(total_break_even, 0.5) median_total_break_even
+             usr_median(total_rateable_value) median_total_rateable_value,
+             usr_median(total_break_even) median_total_break_even
              FROM {t1} GROUP BY scat_code
         ''',
         'tables': ['s_msoa_general_summary'],
