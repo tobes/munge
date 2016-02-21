@@ -28,20 +28,6 @@ def build_views_summaries(args):
     )
 
 
-def defined_tables():
-    tables = []
-    for module in importers.__all__:
-        m = getattr(importers, module)
-        tables_fn = getattr(m, 'tables', None)
-        if tables_fn:
-            tables += tables_fn()
-        info = []
-        info += getattr(m, 'AUTO_SQL', None) or []
-        for item in info:
-            tables.append(item['name'])
-    return tables
-
-
 def deps(args):
     from dependencies import dependencies_manager
     for item in args.items:
@@ -53,7 +39,7 @@ def clean_db(args):
     sa_util.clear_temp_objects(verbose=args.verbose)
     tables = sorted(list(
         set(sa_util.table_view_list())
-        - set(defined_tables())
+        - set(definitions.defined_tables())
         - set(sa_util.dependent_objects())
     ))
     print 'Unknown tables'
