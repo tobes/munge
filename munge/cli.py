@@ -11,9 +11,13 @@ def import_module(args):
     from dependencies import dependencies_manager
     tables = []
     for module in args.module:
+        dependencies_manager.get_importer(module)(verbose=args.verbose)
         tables += definitions.get_tables(module)
     deps = dependencies_manager.updates_for(tables, include=False)
-    build_views_summaries(deps)
+    sa_util.build_views_and_summaries(
+        items=deps
+        verbose=args.verbose,
+    )
 
 
 def build_views_summaries(args):
