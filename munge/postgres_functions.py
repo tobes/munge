@@ -90,3 +90,34 @@ COMMIT;
 '''
 
 run_sql(sql)
+
+
+sql = '''
+CREATE OR REPLACE FUNCTION percent_diff(a float8, b float8) RETURNS float8 AS $BODY$
+SELECT
+    CASE
+        WHEN $1 > 0
+            THEN ($2 / $1) - 1.0
+        ELSE NULL
+    END;
+
+$BODY$
+LANGUAGE SQL IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION safe_divide(numeric, numeric)
+  RETURNS numeric AS $$
+   SELECT CASE
+     WHEN $1 IS NULL OR $2 IS NULL OR $2 = 0 THEN NULL ELSE $1 / $2 END;
+  $$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION safe_divide(double precision, double precision)
+  RETURNS numeric AS $$
+   SELECT CASE
+     WHEN $1 IS NULL OR $2 IS NULL OR $2 = 0 THEN NULL
+     ELSE $1::numeric / $2::numeric END;
+  $$ LANGUAGE SQL;
+
+COMMIT;
+'''
+
+run_sql(sql)
