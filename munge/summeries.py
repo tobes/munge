@@ -62,7 +62,7 @@ def update_summary_table(table_name,
     if exists:
         sql = "UPDATE table_summaries SET ({columns}) = ({values}) WHERE name=:name"
     else:
-        sql = "INSERT INTO tables ({columns}) VALUES ({values})"
+        sql = "INSERT INTO table_summaries ({columns}) VALUES ({values})"
 
     sql = sql.format(columns=columns, values=values)
     sa_util.run_sql(sql, **data)
