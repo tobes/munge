@@ -143,9 +143,15 @@ def quoted_temp_table_name(name):
 def swap_tables(verbose=0, force=False):
     ''' SWAPS our temp tables, including renaming indexes and sequences
     '''
+    from dependencies import dependencies_manager
     temp_table_str = config.TEMP_TABLE_STR
     tmp_label_len = len(temp_table_str)
     tables = [t for t in table_list() if t.startswith(temp_table_str)]
+    # order the tables
+    base_tables = [t[len(temp_table_str):] for t in tables]
+    base_tables = dependencies_manager.sort_deps(base_tables)
+    tables = [temp_table_str + t for t in base_tables]
+
     sql_list = []
     sql_list.append('BEGIN;')
     # views
