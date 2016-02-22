@@ -31,7 +31,9 @@ FLOAT_TYPES = [
 ]
 
 TRANSLATIONS = {
-    'double precision': 'float'
+    'double precision': 'float',
+    'timestamp without time zone': 'timestamp',
+    'ARRAY': 'text[]'
 }
 
 

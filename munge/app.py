@@ -203,7 +203,7 @@ def tables_all():
 
 @app.route('/table/')
 def tables():
-    sql = 'SELECT * FROM tables order by name'
+    sql = 'SELECT * FROM table_summaries order by name'
     output = show_result(sql)
     output['functions'][1] = (add_yes, )
     output['functions'][3] = (date_since, 1)
