@@ -3,14 +3,14 @@ import datetime
 import sa_util
 
 table_fields = [
-    '*name',
+    '*name:text',
     'view:boolean',
-    'description',
+    'description:text',
     'created:timestamp',
     'updated:timestamp',
     'dependencies:text[]',
-    'importer',
-    'time',
+    'importer:text',
+    'time:text',
     'rows:bigint',
 ]
 
