@@ -271,20 +271,17 @@ def la_sum_report(la_code):
     SELECT s.scat_code, count, total_area,
     estimated_employees, estimated_employee_earnings,
     total_rateable_value, m.median_total_rateable_value,
-    CASE
-      WHEN total_rateable_value > 0
-      THEN 1.0 - ( m.median_total_rateable_value / total_rateable_value)
-      ELSE NULL
-    END ratable_variance,
+    percent_diff( m.median_total_rateable_value, total_rateable_value)
+        ratable_variance,
     total_break_even,
-    CASE
-      WHEN total_break_even > 0
-      THEN 1.0 - ( m.median_total_break_even / total_break_even)
-      ELSE NULL
-    END break_even_variance,
+    percent_diff( m.median_total_break_even, total_break_even)
+        break_even_variance,
     m.median_total_rateable_value/total_area median_rate_m2,
     min_area,
-    max_area
+    max_area,
+    median_rate_per_area,
+    min_rate_per_area,
+    max_rate_per_area
 
     FROM s_la_general_summary s
     LEFT JOIN s_la_median_scat_ratable_breakeven m on m.scat_code = s.scat_code
@@ -489,7 +486,7 @@ def premises(uarn):
 
     tables = [
         'vao_list',
-        'v_estimated_income',
+        's_estimated_income',
         's_vao_premises_area',
         'v_premises_summary',
         'v_premises_summary2',
