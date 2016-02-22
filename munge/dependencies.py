@@ -7,8 +7,18 @@ class DependenciesManager(object):
         self.get_dependencies()
 
     def sort_deps(self, deps):
+        def cmp(x, y):
+            try:
+                idx_x = self.deps_ordered.index(x)
+            except ValueError:
+                idx_x = -1
+            try:
+                idx_y = self.deps_ordered.index(y)
+            except ValueError:
+                idx_y = -1
+            return idx_x > idx_y
         deps = list(deps)
-        deps.sort(key=lambda x: len(self.deps_ordered) - self.deps_ordered.index(x))
+        deps.sort(cmp)
         return deps
 
     def get_needed_updates(self, item):
@@ -48,15 +58,21 @@ class DependenciesManager(object):
                 if i not in deps_partial:
                     deps_partial[i] = set()
                 deps_partial[i].add(k)
+
         deps_full = {}
         for k, v in deps_partial.items():
             deps_full[k] = set(v)
             for i in v:
                 deps_full[k] |= deps_partial.get(i, set())
 
+        deps_full2 = {}
+        for k, v in deps_full.items():
+            deps_full2[k] = set(v)
+            for i in v:
+                deps_full2[k] |= deps_full.get(i, set())
+        deps_full = deps_full2
         # make item list so we can order it
         deps_ordered = list(deps_full)
-        deps = deps_full
         # order dependencies list
         sort_bubblesort(deps_ordered)
 
