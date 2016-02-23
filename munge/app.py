@@ -268,23 +268,7 @@ def la_sum_list():
 def la_sum_report(la_code):
     data = {'la_code': la_code}
     sql = '''
-    SELECT s.scat_code, count, total_area,
-    estimated_employees, estimated_employee_earnings,
-    total_rateable_value, m.median_total_rateable_value,
-    percent_diff( m.median_total_rateable_value, total_rateable_value)
-        ratable_variance,
-    total_break_even,
-    percent_diff( m.median_total_break_even, total_break_even)
-        break_even_variance,
-    m.median_total_rateable_value/total_area median_rate_m2,
-    min_area,
-    max_area,
-    median_rate_per_area,
-    min_rate_per_area,
-    max_rate_per_area
-
-    FROM s_la_general_summary s
-    LEFT JOIN s_la_median_scat_ratable_breakeven m on m.scat_code = s.scat_code
+    SELECT * from v_la_general_summary
     WHERE la_code = :la_code
 
     ORDER BY scat_code

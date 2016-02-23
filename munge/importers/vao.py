@@ -980,6 +980,33 @@ AND a.la_code = la.la_code
 
 
     {
+        'name': 'v_la_general_summary',
+        'sql': '''
+    SELECT la_code, s.scat_code, count, total_area,
+    estimated_employees, estimated_employee_earnings,
+    total_rateable_value, m.median_total_rateable_value,
+    percent_diff( m.median_total_rateable_value, total_rateable_value)
+        ratable_variance,
+    total_break_even,
+    percent_diff( m.median_total_break_even, total_break_even)
+        break_even_variance,
+    m.median_total_rateable_value/total_area median_rate_m2,
+    min_area,
+    max_area,
+    median_rate_per_area,
+    min_rate_per_area,
+    max_rate_per_area
+
+    FROM {t1} s
+    LEFT JOIN {t2} m on m.scat_code = s.scat_code
+        ''',
+        'tables': ['s_la_general_summary', 's_la_median_scat_ratable_breakeven'],
+        'summary': '',
+        'as_view': True,
+        'stage': 5,
+    },
+
+    {
         'name': 's_nuts1_spending_by_ct_group',
         'sql': '''
             SELECT nuts1_code, ct_group_code,
