@@ -1024,10 +1024,11 @@ AND a.la_code = la.la_code
     },
 
     {
-        'name': 's_la_area_per_ct_group',
+        'name': 's_la_area_rental_per_ct_group',
         'sql': '''
             SELECT la_code, ct_group_code,
-            sum(area) area
+            sum(area) total_area,
+            sum(rateable_value) total_rateable_value
             FROM {t1}
             GROUP BY la_code, ct_group_code;
         ''',
