@@ -1028,7 +1028,8 @@ AND a.la_code = la.la_code
         'sql': '''
             SELECT la_code, ct_group_code,
             sum(area) total_area,
-            sum(rateable_value) total_rateable_value
+            sum(rateable_value) total_rateable_value,
+            sum(break_even) total_breakeven
             FROM {t1}
             GROUP BY la_code, ct_group_code;
         ''',
@@ -1036,6 +1037,36 @@ AND a.la_code = la.la_code
         'summary': '',
         'stage': 6,
     },
+
+
+    {
+        'name': 'v_la_ct_sum_projections',
+        'sql': '''
+    SELECT c.ct_code,
+    sp.ct_group_code,
+    s.la_code,
+    sp.area * adj_spend_per_capita/spend_per_capita area_m2,
+    sp.spend_per_m2,
+    (s.total_rateable_value /sp.area) * (adj_spend_per_capita/spend_per_capita) rateable_value_per_m2,
+    (s.total_breakeven /sp.area) * (adj_spend_per_capita/spend_per_capita) projected_spend_per_m2,
+(s.total_rateable_value /sp.area) * 0.15 as rent_per_m2,
+   sp.spend_per_m2 * 0.15 as projected_rent_per_m2,
+    safe_divide(((sp.area * adj_spend_per_capita/spend_per_capita ) * (s.total_rateable_value /sp.area) * (adj_spend_per_capita/spend_per_capita)), sp.spend_per_m2 * 0.15) projected_area_m2
+    FROM {t1} c
+    LEFT JOIN {t2} s
+    ON c.ct_group = s.ct_group_code
+    LEFT JOIN {t3} sp
+    ON sp.ct_code = c.ct_code AND sp.la_code = s.la_code
+    JOIN {t4} t ON t.nuts1_code = sp.nuts1_code AND sp.ct_group_code = t.ct_group_code
+        ''',
+        'tables': ['ct_mapping', 's_la_area_rental_per_ct_group',
+            's_la_spending_by_ct', 's_nuts1_spending_by_ct_group'],
+        'summary': '',
+        'as_view': True,
+        'stage': 6,
+    },
+
+
 
 
     {
