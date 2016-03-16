@@ -210,6 +210,7 @@ def make_csv(filename, sql, **kw):
     table = kw.get('table')
     verbose = kw.get('verbose')
     simple = kw.get('simple')
+    data = kw.get('data', {})
 
     if not table:
         table = os.path.splitext(os.path.basename(filename))[0]
@@ -219,7 +220,7 @@ def make_csv(filename, sql, **kw):
     with open(filename, 'w') as f:
         a = csv.writer(f, delimiter=',', dialect=csv.excel)
 
-        result = run_sql(sql)
+        result = run_sql(sql, data)
         wrote_headers = False
         count = 0
         for row in result:
@@ -234,8 +235,10 @@ def make_csv(filename, sql, **kw):
                 if verbose:
                     print('\nFields:')
                     for h in headers:
-
-                        print('\t%s  \t%s' % tuple(h.split(':')))
+                        if simple:
+                            print('\t%s' % h)
+                        else:
+                            print('\t%s  \t%s' % tuple(h.split(':')))
                     print
                 wrote_headers = True
             a.writerows([row])

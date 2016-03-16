@@ -1153,6 +1153,40 @@ AND a.la_code = la.la_code
         'stage': 8,
     },
 
+
+    {
+        'name': 'v_download_premises_data',
+        'sql': '''
+        SELECT
+            v1.uarn,
+            v1.address_number,
+            v1.street,
+            v1.town,
+            v1.postal_district,
+            v1.county,
+            v1.postcode,
+          --  scat_code (description),
+          --  la_code (description),
+            v1.description,
+            v1.area,
+            v1.area_source_code,
+            v1.local_market,
+         --   scat_group_code (description),
+            v1.la_code,
+            v1.lsoa_code,
+            v1.msoa_code,
+            v2.rateable_value,
+            v2.employees,
+            v2.employee_cost,
+            v2.break_even
+        FROM {t1} v1
+        JOIN {t2} v2 ON v1.uarn = v2.uarn
+        ''',
+        'tables': ['v_premises_summary', 'v_premises_summary2'],
+        'as_view': True,
+        'stage': 8,
+    },
+
 # ==================================
 
 
