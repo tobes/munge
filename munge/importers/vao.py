@@ -1185,7 +1185,7 @@ AND a.la_code = la.la_code
         FROM {t1} v1
         JOIN {t2} v2 ON v1.uarn = v2.uarn
         JOIN {t3} sc ON v1.scat_code = sc.code
-        JOIN {t4} sg ON v1.scat_group_code = sc.code
+        JOIN {t4} sg ON v1.scat_group_code = sg.code
         JOIN {t5} la ON v1.la_code = la.code
         ''',
         'tables': ['v_premises_summary', 'v_premises_summary2',
