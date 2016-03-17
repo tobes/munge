@@ -39,7 +39,13 @@ data = [
         'file_name': 'premises.csv',
         'sql': 'select * from v_download_premises_data where la_code IN :la_codes',
     },
+    {
+        # premises
+        'file_name': 'market_size.csv',
+        'sql': 'select * from s_la_spending_by_ct where la_code IN :la_codes',
+    },
 ]
+
 
 def zoopla_downloads():
     sql = 'SELECT directory, la_codes FROM "group" WHERE directory != \'\''
@@ -47,6 +53,7 @@ def zoopla_downloads():
     results = run_sql(sql)
     for result in results:
         vao_downloads(dict(result))
+
 
 def vao_downloads(result):
     directory = os.path.join(config.DOWNLOAD_DIR, result['directory'])

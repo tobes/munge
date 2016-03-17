@@ -1166,12 +1166,15 @@ AND a.la_code = la.la_code
             v1.county,
             v1.postcode,
           --  scat_code (description),
+            sc.desc scat_code_desc,
           --  la_code (description),
+            la.desc la_desc,
             v1.description,
             v1.area,
             v1.area_source_code,
             v1.local_market,
          --   scat_group_code (description),
+            sg.desc scat_group_desc,
             v1.la_code,
             v1.lsoa_code,
             v1.msoa_code,
@@ -1181,8 +1184,12 @@ AND a.la_code = la.la_code
             v2.break_even
         FROM {t1} v1
         JOIN {t2} v2 ON v1.uarn = v2.uarn
+        JOIN {t3} sc ON v1.scat_code = sc.code
+        JOIN {t4} sg ON v1.scat_group_code = sc.code
+        JOIN {t5} la ON v1.la_code = la.code
         ''',
-        'tables': ['v_premises_summary', 'v_premises_summary2'],
+        'tables': ['v_premises_summary', 'v_premises_summary2',
+            'c_scat', 'c_scat_group', 'c_la'],
         'as_view': True,
         'stage': 8,
     },
