@@ -1178,6 +1178,7 @@ AND a.la_code = la.la_code
             v1.la_code,
             v1.lsoa_code,
             v1.msoa_code,
+            v2.ct_group_code,
             v2.rateable_value,
             v2.employees,
             v2.employee_cost,
