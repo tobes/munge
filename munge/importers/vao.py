@@ -1195,6 +1195,20 @@ AND a.la_code = la.la_code
         'stage': 8,
     },
 
+
+    {
+        'name': 's_map_premises',
+        'sql': '''
+         SELECT
+            POINT(p.lat,p.long) as location,
+            v.uarn, v.scat_group_code, v.scat_code
+         FROM {t1} v
+         JOIN {t2} p ON v.postcode = p.pc
+        ''',
+        'tables': ['v_premises_summary2', 'postcode'],
+     #   'primary_key': 'location',
+        'summary': 'Premises map location',
+    },
 # ==================================
 
 
