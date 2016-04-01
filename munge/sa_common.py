@@ -8,6 +8,7 @@ OID_TYPE = {
     25: 'text',
     16: 'boolean',
    # 701: 'double precision',
+    600: 'point',
     701: 'float',
     1082: 'date',
     1700: 'numeric',
