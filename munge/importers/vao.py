@@ -1209,6 +1209,129 @@ AND a.la_code = la.la_code
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
+    {
+        'name': 's_map_la',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.la_code,
+            POINT(c.lat,c.long) as location
+         FROM {t1} v
+         JOIN {t2} c on c.la_code = v.la_code
+         GROUP BY v.la_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'la_centroids'],
+        'summary': 'Premises map all by la',
+    },
+    {
+        'name': 's_map_la_sg',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.la_code,
+            POINT(c.lat,c.long) as location,
+            v.scat_group_code
+         FROM {t1} v
+         JOIN {t2} c on c.la_code = v.la_code
+         GROUP BY v.scat_group_code, v.la_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'la_centroids'],
+        'summary': 'Premises map scat group by la',
+    },
+    {
+        'name': 's_map_la_sc',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.la_code,
+            POINT(c.lat,c.long) as location,
+            v.scat_code
+         FROM {t1} v
+         JOIN {t2} c on c.la_code = v.la_code
+         GROUP BY v.scat_code, v.la_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'la_centroids'],
+        'summary': 'Premises map location scat code by la',
+    },
+    {
+        'name': 's_map_lsoa',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.lsoa_code,
+            POINT(c.lat,c.long) as location
+         FROM {t1} v
+         JOIN {t2} c on c.code = v.lsoa_code
+         GROUP BY v.lsoa_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'c_lsoa'],
+        'summary': 'Premises map all by lsoa',
+    },
+    {
+        'name': 's_map_lsoa_sg',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.lsoa_code,
+            POINT(c.lat,c.long) as location,
+            v.scat_group_code
+         FROM {t1} v
+         JOIN {t2} c on c.code = v.lsoa_code
+         GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'c_lsoa'],
+        'summary': 'Premises map scat group by lsoa',
+    },
+    {
+        'name': 's_map_lsoa_sc',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.lsoa_code,
+            POINT(c.lat,c.long) as location,
+            v.scat_code
+         FROM {t1} v
+         JOIN {t2} c on c.code = v.lsoa_code
+         GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'c_lsoa'],
+        'summary': 'Premises map location scat code by lsoa',
+    },
+    {
+        'name': 's_map_msoa',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.msoa_code,
+            POINT(c.lat,c.long) as location
+         FROM {t1} v
+         JOIN {t2} c on c.code = v.msoa_code
+         GROUP BY v.msoa_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'c_msoa'],
+        'summary': 'Premises map all by msoa',
+    },
+    {
+        'name': 's_map_msoa_sg',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.msoa_code,
+            POINT(c.lat,c.long) as location,
+            v.scat_group_code
+         FROM {t1} v
+         JOIN {t2} c on c.code = v.msoa_code
+         GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'c_msoa'],
+        'summary': 'Premises map scat group by msoa',
+    },
+    {
+        'name': 's_map_msoa_sc',
+        'sql': '''
+         SELECT
+            count(v.uarn) count, v.msoa_code,
+            POINT(c.lat,c.long) as location,
+            v.scat_code
+         FROM {t1} v
+         JOIN {t2} c on c.code = v.msoa_code
+         GROUP BY v.scat_code, v.msoa_code, c.lat, c.long
+        ''',
+        'tables': ['v_premises_summary2', 'c_msoa'],
+        'summary': 'Premises map location scat code by msoa',
+    },
 # ==================================
 
 
