@@ -35,12 +35,17 @@ data = [
         'sql': 'select * from c_ct',
     },
     {
+        # scat_group_codes
+        'file_name': 'scat_group_codes.csv',
+        'sql': 'select code, desc from c_scat_group',
+    },
+    {
         # premises
         'file_name': 'premises.csv',
         'sql': 'select * from v_download_premises_data where la_code IN :la_codes',
     },
     {
-        # premises
+        # market size
         'file_name': 'market_size.csv',
         'sql': 'select * from s_la_spending_by_ct where la_code IN :la_codes',
     },
