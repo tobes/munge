@@ -37,7 +37,7 @@ data = [
     {
         # scat_group_codes
         'file_name': 'scat_group_codes.csv',
-        'sql': 'select code, desc from c_scat_group',
+        'sql': 'select code, "desc" from c_scat_group',
     },
     {
         # premises
