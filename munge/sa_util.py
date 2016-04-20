@@ -544,7 +544,7 @@ def build_views_and_summaries(items, all=False, verbose=0, force=False):
         updates = dependencies_manager.updates_for(items)
     if all:
         updates = definitions.get_all_definition_names()
-    for item in updates:
+    for item in reversed(updates):
         info = definitions.get_definition(item)
         if info.get('as_view'):
             time_fn(_build_view, args=[info], verbose=verbose, kw={'force': force})
