@@ -1201,11 +1201,13 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             POINT(p.lat,p.long) as location,
-            v.uarn, v.scat_group_code, v.scat_code
+            v.uarn, v.scat_group_code, v.scat_code,
+            r.max
          FROM {t1} v
          JOIN {t2} p ON v.postcode = p.pc
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
         ''',
-        'tables': ['v_premises_summary2', 'postcode'],
+        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating'],
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
@@ -1214,12 +1216,17 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count, v.la_code,
-            POINT(c.lat,c.long) as location
+            POINT(c.lat,c.long) as location,
+            d.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
-         GROUP BY v.la_code, c.lat, c.long
+         JOIN {t3} d on c.la_code = d.code
+         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
+         GROUP BY v.la_code, c.lat, c.long, d.desc
         ''',
-        'tables': ['v_premises_summary2', 'la_centroids'],
+        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating'],
         'summary': 'Premises map all by la',
     },
     {
@@ -1228,12 +1235,17 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.la_code,
             POINT(c.lat,c.long) as location,
-            v.scat_group_code
+            v.scat_group_code,
+            d.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
-         GROUP BY v.scat_group_code, v.la_code, c.lat, c.long
+         JOIN {t3} d on c.la_code = d.code
+         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
+         GROUP BY v.scat_group_code, v.la_code, c.lat, c.long, d.desc
         ''',
-        'tables': ['v_premises_summary2', 'la_centroids'],
+        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating'],
         'summary': 'Premises map scat group by la',
     },
     {
@@ -1242,12 +1254,17 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.la_code,
             POINT(c.lat,c.long) as location,
-            v.scat_code
+            v.scat_code,
+            d.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
-         GROUP BY v.scat_code, v.la_code, c.lat, c.long
+         JOIN {t3} d on c.la_code = d.code
+         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
+         GROUP BY v.scat_code, v.la_code, c.lat, c.long, d.desc
         ''',
-        'tables': ['v_premises_summary2', 'la_centroids'],
+        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating'],
         'summary': 'Premises map location scat code by la',
     },
     {
@@ -1255,12 +1272,16 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count, v.lsoa_code,
-            POINT(c.lat,c.long) as location
+            POINT(c.lat,c.long) as location,
+            c.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
-         GROUP BY v.lsoa_code, c.lat, c.long
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         GROUP BY v.lsoa_code, c.lat, c.long, c.desc
         ''',
-        'tables': ['v_premises_summary2', 'c_lsoa'],
+        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating'],
         'summary': 'Premises map all by lsoa',
     },
     {
@@ -1269,12 +1290,16 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.lsoa_code,
             POINT(c.lat,c.long) as location,
-            v.scat_group_code
+            v.scat_group_code,
+            c.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
-         GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long, c.desc
         ''',
-        'tables': ['v_premises_summary2', 'c_lsoa'],
+        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating'],
         'summary': 'Premises map scat group by lsoa',
     },
     {
@@ -1283,12 +1308,16 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.lsoa_code,
             POINT(c.lat,c.long) as location,
-            v.scat_code
+            v.scat_code,
+            c.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
-         GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long, c.desc
         ''',
-        'tables': ['v_premises_summary2', 'c_lsoa'],
+        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating'],
         'summary': 'Premises map location scat code by lsoa',
     },
     {
@@ -1296,12 +1325,16 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count, v.msoa_code,
-            POINT(c.lat,c.long) as location
+            POINT(c.lat,c.long) as location,
+            c.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
-         GROUP BY v.msoa_code, c.lat, c.long
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         GROUP BY v.msoa_code, c.lat, c.long, c.desc
         ''',
-        'tables': ['v_premises_summary2', 'c_msoa'],
+        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating'],
         'summary': 'Premises map all by msoa',
     },
     {
@@ -1310,12 +1343,16 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.msoa_code,
             POINT(c.lat,c.long) as location,
-            v.scat_group_code
+            v.scat_group_code,
+            c.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
-         GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long, c.desc
         ''',
-        'tables': ['v_premises_summary2', 'c_msoa'],
+        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating'],
         'summary': 'Premises map scat group by msoa',
     },
     {
@@ -1324,14 +1361,74 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.msoa_code,
             POINT(c.lat,c.long) as location,
-            v.scat_code
+            v.scat_code,
+            c.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
-         GROUP BY v.scat_code, v.msoa_code, c.lat, c.long
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         GROUP BY v.scat_code, v.msoa_code, c.lat, c.long, c.desc
         ''',
-        'tables': ['v_premises_summary2', 'c_msoa'],
+        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating'],
         'summary': 'Premises map location scat code by msoa',
     },
+
+
+    {
+        'name': 'v_la_scat_rating',
+        'sql': '''
+            SELECT
+            max(r.max) rating,
+            scat_code,
+            la_code,
+            scat_group_code
+            FROM
+            {t1} r
+            RIGHT OUTER JOIN {t2} p on p.uarn = r.uarn
+            GROUP BY la_code, scat_group_code, scat_code
+        ''',
+        'tables': ['s_premesis_rating', 'v_premises_summary2'],
+        'summary': 'Top rating for la by scat code',
+        'as_view': True,
+    },
+    {
+        'name': 'v_la_general_summary_desc',
+        'sql': '''
+
+
+            SELECT
+            t.la_code,
+            la.desc as la_code_desc,
+            s.code as scat_code,
+            sg.code as scat_group_code,
+            s.desc scat_code_desc,
+            sg.desc scat_group_code_desc,
+            t.count,
+            round(t.total_area) total_area,
+            round(t.total_break_even) total_break_even,
+            t.break_even_variance,
+            round(t.estimated_employee_earnings) estimated_employee_earnings,
+            round(t.estimated_employees) estimated_employees,
+            round(t.total_rateable_value) total_rateable_value,
+            median_rate_per_area,
+            min_rate_per_area,
+            max_rate_per_area,
+            ratable_variance,
+            r.rating
+
+            FROM {t1} t
+            JOIN {t2} s ON s.code = t.scat_code
+            JOIN {t3} sg ON sg.code = s.scat_group_code
+            JOIN {t4} la ON la.code = t.la_code
+            JOIN {t5} r ON r.la_code = t.la_code AND r.scat_code=t.scat_code
+        ''',
+        'tables': ['v_la_general_summary', 'c_scat', 'c_scat_group', 'c_la', 'v_la_scat_rating'],
+        'summary': 'General LA summary used by client site',
+        'as_view': True,
+    },
+
+
 # ==================================
 
 
