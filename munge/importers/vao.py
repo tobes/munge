@@ -961,8 +961,70 @@ AND a.la_code = la.la_code
         ''',
         'tables': ['v_premises_summary2'],
         'summary': '',
+        'test': True,
         'stage': 5,
     },
+
+    {
+        'name': 's_lsoa_general_summary',
+        'sql': '''
+            SELECT p.lsoa_code, scat_code,
+            count(p.uarn) count,
+            wage_employee average_wage,
+            sum(area) total_area,
+            usr_median(area) median_area,
+            min(area) min_area,
+            max(area) max_area,
+            usr_median(rateable_value) median_rateable_value,
+            min(rateable_value) min_rateable_value,
+            max(rateable_value) max_rateable_value,
+            usr_median(safe_divide(rateable_value, area)) median_rate_per_area,
+            min(safe_divide(rateable_value, area)) min_rate_per_area,
+            max(safe_divide(rateable_value, area)) max_rate_per_area,
+            sum(break_even) total_break_even,
+            sum(employees) estimated_employees,
+             sum(employees) * wage_employee as estimated_employee_earnings,
+             sum(rateable_value) as total_rateable_value
+            FROM {t1} p
+            GROUP BY p.lsoa_code, scat_code, wage_employee
+
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+        'test': True,
+        'stage': 5,
+    },
+
+    {
+        'name': 's_msoa_general_summary',
+        'sql': '''
+            SELECT p.msoa_code, scat_code,
+            count(p.uarn) count,
+            wage_employee average_wage,
+            sum(area) total_area,
+            usr_median(area) median_area,
+            min(area) min_area,
+            max(area) max_area,
+            usr_median(rateable_value) median_rateable_value,
+            min(rateable_value) min_rateable_value,
+            max(rateable_value) max_rateable_value,
+            usr_median(safe_divide(rateable_value, area)) median_rate_per_area,
+            min(safe_divide(rateable_value, area)) min_rate_per_area,
+            max(safe_divide(rateable_value, area)) max_rate_per_area,
+            sum(break_even) total_break_even,
+            sum(employees) estimated_employees,
+             sum(employees) * wage_employee as estimated_employee_earnings,
+             sum(rateable_value) as total_rateable_value
+            FROM {t1} p
+            GROUP BY p.msoa_code, scat_code, wage_employee
+
+        ''',
+        'tables': ['v_premises_summary2'],
+        'summary': '',
+        'test': True,
+        'stage': 5,
+    },
+
 
 
     {
@@ -974,6 +1036,33 @@ AND a.la_code = la.la_code
              FROM {t1} GROUP BY scat_code
         ''',
         'tables': ['s_la_general_summary'],
+        'summary': '',
+        'stage': 5,
+    },
+
+    {
+        'name': 's_msoa_median_scat_ratable_breakeven',
+        'sql': '''
+             SELECT scat_code,
+             usr_median(total_rateable_value) median_total_rateable_value,
+             usr_median(total_break_even) median_total_break_even
+             FROM {t1} GROUP BY scat_code
+        ''',
+        'tables': ['s_msoa_general_summary'],
+        'summary': '',
+        'stage': 5,
+    },
+
+
+    {
+        'name': 's_lsoa_median_scat_ratable_breakeven',
+        'sql': '''
+             SELECT scat_code,
+             usr_median(total_rateable_value) median_total_rateable_value,
+             usr_median(total_break_even) median_total_break_even
+             FROM {t1} GROUP BY scat_code
+        ''',
+        'tables': ['s_lsoa_general_summary'],
         'summary': '',
         'stage': 5,
     },
@@ -1001,6 +1090,60 @@ AND a.la_code = la.la_code
     LEFT JOIN {t2} m on m.scat_code = s.scat_code
         ''',
         'tables': ['s_la_general_summary', 's_la_median_scat_ratable_breakeven'],
+        'summary': '',
+        'as_view': True,
+        'stage': 5,
+    },
+
+    {
+        'name': 'v_msoa_general_summary',
+        'sql': '''
+    SELECT msoa_code, s.scat_code, count, total_area,
+    estimated_employees, estimated_employee_earnings,
+    total_rateable_value, m.median_total_rateable_value,
+    percent_diff( m.median_total_rateable_value, total_rateable_value)
+        ratable_variance,
+    total_break_even,
+    percent_diff( m.median_total_break_even, total_break_even)
+        break_even_variance,
+    m.median_total_rateable_value/total_area median_rate_m2,
+    min_area,
+    max_area,
+    median_rate_per_area,
+    min_rate_per_area,
+    max_rate_per_area
+
+    FROM {t1} s
+    LEFT JOIN {t2} m on m.scat_code = s.scat_code
+        ''',
+        'tables': ['s_msoa_general_summary', 's_msoa_median_scat_ratable_breakeven'],
+        'summary': '',
+        'as_view': True,
+        'stage': 5,
+    },
+
+    {
+        'name': 'v_lsoa_general_summary',
+        'sql': '''
+    SELECT lsoa_code, s.scat_code, count, total_area,
+    estimated_employees, estimated_employee_earnings,
+    total_rateable_value, m.median_total_rateable_value,
+    percent_diff( m.median_total_rateable_value, total_rateable_value)
+        ratable_variance,
+    total_break_even,
+    percent_diff( m.median_total_break_even, total_break_even)
+        break_even_variance,
+    m.median_total_rateable_value/total_area median_rate_m2,
+    min_area,
+    max_area,
+    median_rate_per_area,
+    min_rate_per_area,
+    max_rate_per_area
+
+    FROM {t1} s
+    LEFT JOIN {t2} m on m.scat_code = s.scat_code
+        ''',
+        'tables': ['s_lsoa_general_summary', 's_lsoa_median_scat_ratable_breakeven'],
         'summary': '',
         'as_view': True,
         'stage': 5,
@@ -1068,46 +1211,6 @@ AND a.la_code = la.la_code
 
 
 
-
-    {
-        'name': 's_lsoa_general_summary',
-        'sql': '''
-            SELECT p.lsoa_code, scat_code,
-            count(p.uarn) count,
-            wage_employee average_wage,
-            sum(area) total_area,
-            sum(break_even) total_break_even,
-            sum(employees) estimated_employees,
-             sum(employees) * wage_employee as estimated_employee_earnings,
-             sum(rateable_value) as total_rateable_value
-            FROM {t1} p
-            GROUP BY lsoa_code, scat_code, wage_employee
-
-        ''',
-        'tables': ['v_premises_summary2'],
-        'summary': '',
-        'stage': 7,
-    },
-
-    {
-        'name': 's_msoa_general_summary',
-        'sql': '''
-            SELECT p.msoa_code, scat_code,
-            count(p.uarn) count,
-            wage_employee average_wage,
-            sum(area) total_area,
-            sum(break_even) total_break_even,
-            sum(employees) estimated_employees,
-             sum(employees) * wage_employee as estimated_employee_earnings,
-             sum(rateable_value) as total_rateable_value
-            FROM {t1} p
-            GROUP BY msoa_code, scat_code, wage_employee
-
-        ''',
-        'tables': ['v_premises_summary2'],
-        'summary': '',
-        'stage': 7,
-    },
 
     {
         'name': 's_lsoa_median_scat_ratable_breakeven',
@@ -1217,6 +1320,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.la_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
@@ -1235,6 +1343,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.la_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             v.scat_group_code,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1254,6 +1367,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.la_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             v.scat_code,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1273,6 +1391,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.lsoa_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
@@ -1290,6 +1413,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.lsoa_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             v.scat_group_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1308,6 +1436,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.lsoa_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             v.scat_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1326,6 +1459,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.msoa_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
@@ -1343,6 +1481,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.msoa_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             v.scat_group_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1361,6 +1504,11 @@ AND a.la_code = la.la_code
          SELECT
             count(v.uarn) count, v.msoa_code,
             POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
             v.scat_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
