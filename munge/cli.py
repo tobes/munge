@@ -14,10 +14,11 @@ def import_module(args):
         definitions.get_importer(module)(verbose=args.verbose)
         tables += definitions.get_tables(module)
     deps = dependencies_manager.updates_for(tables, include=False)
-    sa_util.build_views_and_summaries(
-        items=deps,
-        verbose=args.verbose,
-    )
+    if not args.noupdate:
+        sa_util.build_views_and_summaries(
+            items=deps,
+            verbose=args.verbose,
+        )
 
 
 def build_views_summaries(args):
@@ -137,6 +138,7 @@ def main():
         module_parser.add_argument('-f', '--force', action="store_true")
         module_parser.add_argument('-a', '--all', action="store_true")
         module_parser.add_argument('-t', '--test', action="store_true")
+        module_parser.add_argument('-n', '--noupdate', action="store_true")
         module_parser.add_argument('-s', '--stage', default=0, type=int)
         module_parser.add_argument('module', nargs='*')
 
