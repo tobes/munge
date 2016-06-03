@@ -11,7 +11,8 @@ def import_module(args):
     from dependencies import dependencies_manager
     tables = []
     for module in args.module:
-        definitions.get_importer(module)(verbose=args.verbose)
+        if not args.updateonly:
+            definitions.get_importer(module)(verbose=args.verbose)
         tables += definitions.get_tables(module)
     deps = dependencies_manager.updates_for(tables, include=False)
     if not args.noupdate:
@@ -139,6 +140,7 @@ def main():
         module_parser.add_argument('-a', '--all', action="store_true")
         module_parser.add_argument('-t', '--test', action="store_true")
         module_parser.add_argument('-n', '--noupdate', action="store_true")
+        module_parser.add_argument('-u', '--updateonly', action="store_true")
         module_parser.add_argument('-s', '--stage', default=0, type=int)
         module_parser.add_argument('module', nargs='*')
 
@@ -154,12 +156,13 @@ def main():
         export_all(verbose=args.verbose)
     elif args.command == 'import':
         import_module(args)
-        sa_util.swap_tables(verbose=verbose)
+        sa_util.swap_tables(verbose=args.verbose)
     elif args.command == 'swap_temp':
         sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'summaries':
         build_views_summaries(args)
-        sa_util.swap_tables(verbose=args.verbose, force=args.force)
+        if not args.noupdate:
+            sa_util.swap_tables(verbose=args.verbose, force=args.force)
     elif args.command == 'export_custom':
         export_custom(verbose=args.verbose)
     elif args.command == 'import_csv':
