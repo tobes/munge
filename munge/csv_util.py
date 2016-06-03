@@ -103,11 +103,11 @@ def import_csv(reader,
             for fn in t_fns:
                 fn_info = t_fns[fn]
                 if fn_info[1]:
-                    fn_field = fn_info[1]
+                    fn_fields = fn_info[1].split('|')
                 else:
-                    fn_field = fn
+                    fn_fields = [fn]
                 try:
-                    row_data[fn] = fn_info[0](row_data[fn_field])
+                    row_data[fn] = fn_info[0](*[row_data[x] for x in fn_fields])
                 except Exception as e:
                     # FIXME log error
                     print(str(e))

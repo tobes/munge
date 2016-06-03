@@ -51,7 +51,7 @@ def process_header(row):
         if type_ and '~' in type_:
             type_, fn = type_.split('~')
             if '|' in fn:
-                fn, fn_field = fn.split('|')
+                fn, fn_field = fn.split('|', 1)
 
         col = {
             'name': field,
