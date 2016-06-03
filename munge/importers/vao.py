@@ -19,7 +19,7 @@ vao_list_fields = [
     '+ba_code',
     '+@la_code:text~ba_2_la|ba_code',
     'comm_code',
-    'ba_ref',
+    '+ba_ref',
     'prm_desc_code',
     'prm_desc',
     '+uarn:bigint',
@@ -1305,6 +1305,12 @@ AND a.la_code = la.la_code
          SELECT
             POINT(p.lat,p.long) as location,
             v.uarn, v.scat_group_code, v.scat_code,
+            1 as count,
+            rateable_value,
+            area,
+            employees,
+            employee_cost,
+            break_even,
             r.max
          FROM {t1} v
          JOIN {t2} p ON v.postcode = p.pc
@@ -1688,8 +1694,14 @@ def tables():
     return t
 
 
+def get_file(directory, prefix):
+    for file in os.listdir(directory):
+        if file.startswith(prefix):
+            return os.path.join(directory, file)
+
+
 def vao_reader(data_type):
-    f = os.path.join(config.DATA_PATH, DIRECTORY, VAO_FILE)
+    f = get_file(os.path.join(config.DATA_PATH, DIRECTORY),'SMV')
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     uarn = None
     versions = {}
@@ -1718,7 +1730,7 @@ def import_vao_summary(verbose=False):
 def import_vao_list(verbose=False):
     if verbose:
         print('importing vao_list')
-    f = os.path.join(config.DATA_PATH, DIRECTORY, VAO_LIST_FILE)
+    f = get_file(os.path.join(config.DATA_PATH, DIRECTORY), 'LIST')
     reader = unicode_csv_reader(f, encoding='latin-1', delimiter='*')
     import_csv(reader, VAO_LIST_TABLE, fields=vao_list_fields, verbose=verbose)
 
