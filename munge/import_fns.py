@@ -11,6 +11,7 @@ AUTO_FNS = {
     'integer': 'make_int',
     'boolean': 'make_bool',
     'numeric': 'make_numeric',
+    'date': 'make_date_YYYY_MM_DD',
 }
 
 
