@@ -168,3 +168,6 @@ la_sub_2_nuts2 = _translation_lookup('la_sub_2_nuts2', sql)
 
 sql = 'SELECT la_code, nuts3_code FROM l_la_nuts;'
 la_sub_2_nuts3 = _translation_lookup('la_sub_2_nuts3', sql)
+
+sql = 'SELECT "desc", code FROM c_nuts3;'
+nuts3_from_name = _translation_lookup('nuts3_from_name', sql)
