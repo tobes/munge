@@ -26,7 +26,10 @@ def make_bool(value):
 def make_int(value):
     if value == '':
         return None
-    return int(value)
+    try:
+        return int(value)
+    except ValueError:
+        return int(float(value))
 
 
 def int_commas(value):
@@ -52,6 +55,13 @@ def make_date_DD_MON_YYYY(value):
     if value == '':
         return None
     date = datetime.datetime.strptime(value, "%d-%b-%Y")
+    return date.date()
+
+
+def make_date_YYYY_MM_DD(value):
+    if value == '':
+        return None
+    date = datetime.datetime.strptime(value.split(' ')[0], "%Y-%m-%d")
     return date.date()
 
 
