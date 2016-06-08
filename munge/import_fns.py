@@ -11,6 +11,7 @@ AUTO_FNS = {
     'integer': 'make_int',
     'boolean': 'make_bool',
     'numeric': 'make_numeric',
+    'date': 'make_null',
 }
 
 
@@ -21,6 +22,12 @@ def make_bool(value):
     if value == '':
         return None
     return str(value).lower() in ['yes', 'true', 'y', 't', '1']
+
+
+def make_null(value):
+    if value == '':
+        return None
+    return value
 
 
 def make_int(value):
