@@ -194,7 +194,7 @@ def make_text_c(v):
     return v
 
 
-def get_uarn(la_code=la_code, ba_ref=ba_ref):
+def get_uarn(la_code='', ba_ref=''):
     sql = '''
     SELECT uarn FROM vao_base
     WHERE ba_ref=:ba_ref AND la_code=:la_code
