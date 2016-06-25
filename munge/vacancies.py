@@ -244,7 +244,7 @@ def update_vacancies():
 
             updates = {}
             if not uarn:
-                uarn = get_uarn(la_code=la_code, ba_ref=ba_ref)
+                uarn = get_uarn(la_code=row[0], ba_ref=row[1])
                 if uarn:
                     updates['uarn'] = uarn
 
