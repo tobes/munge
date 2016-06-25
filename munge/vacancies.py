@@ -199,7 +199,7 @@ def get_uarn(la_code='', ba_ref=''):
     SELECT uarn FROM vao_base
     WHERE ba_ref=:ba_ref AND la_code=:la_code
     '''
-    result = run_sql(sql, ba_ref=row[1], la_code=row[0])
+    result = run_sql(sql, ba_ref=ba_ref, la_code=la_code)
     for r in result:
         return r[0]
 
