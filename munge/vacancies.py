@@ -160,16 +160,23 @@ def import_raw_xlsx():
                 e.writerows(errors)
 
 sql = '''
+
+DROP TABLE vacancy_updates;
+'''
+#run_sql(sql)
+
+sql = '''
     CREATE TABLE IF NOT EXISTS vacancy_updates (
         la_code text NOT NULL,
         ba_ref text NOT NULL,
-        uarn text,
+        uarn bigint,
         prop_empty boolean,
         prop_empty_date date,
         prop_occupied boolean,
         prop_occupied_date date,
         prop_ba_rates numeric,
-        tenant text
+        tenant text,
+        last_updated timestamp
     );
 
 do
@@ -283,6 +290,8 @@ def update_vacancies():
             for i in range(6):
                 if row[i + 2].strip():
                     updates[fields[i][0]] = fields[i][1](row[i + 2])
+            if updates:
+                updates['last_updated'] = datetime.now()
             params = ' ,'.join(['%s = :%s' % (k, k) for k in updates.keys()])
             sql = '''
             UPDATE vacancy_updates SET %s
