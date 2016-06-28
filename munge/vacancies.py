@@ -171,6 +171,38 @@ sql = '''
         prop_ba_rates numeric,
         tenant text
     );
+
+do
+$$
+begin
+if not exists (
+    select indexname
+        from pg_indexes
+    where
+        tablename = 'vacancy_updates'
+        and indexname = 'vacancy_updates_ba_ref'
+)
+then
+    create index vacancy_updates_ba_ref on vacancy_updates (ba_ref);
+end if;
+end
+$$;
+
+do
+$$
+begin
+if not exists (
+    select indexname
+        from pg_indexes
+    where
+        tablename = 'vacancy_updates'
+        and indexname = 'vacancy_updates_uarn'
+)
+then
+    create index vacancy_updates_uarn on vacancy_updates (uarn);
+end if;
+end
+$$;
 '''
 run_sql(sql)
 
