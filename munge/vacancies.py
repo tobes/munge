@@ -236,14 +236,14 @@ def make_text_c(v):
 def get_uarn(la_code='', ba_ref=''):
     sql = '''
     SELECT uarn FROM vao_base
-    WHERE ba_ref=:ba_ref AND la_code=:la_code
+    WHERE trim(leading '0' from ba_ref)=:ba_ref AND la_code=:la_code
     '''
-    if len(ba_ref) > 9:
+    if ba_ref[0] not in '0123456789' and len(ba_ref) > 9:
         count = 3
     else:
         count = 0
     for x in range(count + 1):
-        result = run_sql(sql, ba_ref=ba_ref[x:], la_code=la_code)
+        result = run_sql(sql, ba_ref=ba_ref[x:].lstrip('0'), la_code=la_code)
         for r in result:
             return r[0]
 
