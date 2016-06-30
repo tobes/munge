@@ -238,9 +238,37 @@ def get_uarn(la_code='', ba_ref=''):
     SELECT uarn FROM vao_base
     WHERE ba_ref=:ba_ref AND la_code=:la_code
     '''
-    result = run_sql(sql, ba_ref=ba_ref, la_code=la_code)
-    for r in result:
-        return r[0]
+    if len(ba_ref) > 9:
+        count = 3
+    else:
+        count = 0
+    for x in range(count + 1):
+        result = run_sql(sql, ba_ref=ba_ref[x:], la_code=la_code)
+        for r in result:
+            return r[0]
+
+
+def update_matches():
+    sql = '''
+    SELECT ba_ref, la_code FROM vacancy_updates
+    WHERE uarn is null
+    '''
+    result = run_sql(sql)
+    count = 0
+    match = 0
+    for row in result:
+        uarn = get_uarn(row[1], row[0])
+        if uarn:
+            sql = '''
+            UPDATE vacancy_updates SET uarn = :uarn
+            WHERE ba_ref = :ba_ref AND la_code = :la_code
+            '''
+            run_sql(sql, ba_ref=row[0], la_code=row[1], uarn=uarn)
+            match += 1
+        count += 1
+        if count % 100 == 0:
+            print count, match
+    print count, match
 
 
 def update_vacancies():
@@ -303,4 +331,5 @@ def update_vacancies():
 
 
 
-update_vacancies()
+#update_vacancies()
+update_matches()
