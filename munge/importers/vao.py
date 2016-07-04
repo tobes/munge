@@ -1331,9 +1331,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
@@ -1342,7 +1340,7 @@ AND a.la_code = la.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
-         GROUP BY v.la_code, c.lat, c.long, d.desc
+         GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map all by la',
@@ -1358,9 +1356,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             v.scat_group_code,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1370,7 +1366,7 @@ AND a.la_code = la.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, v.la_code, c.lat, c.long, d.desc
+         GROUP BY v.scat_group_code, v.la_code, c.lat, c.long, d.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map scat group by la',
@@ -1386,9 +1382,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             v.scat_code,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1398,7 +1392,7 @@ AND a.la_code = la.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, v.la_code, c.lat, c.long, d.desc
+         GROUP BY v.scat_code, v.la_code, c.lat, c.long, d.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map location scat code by la',
@@ -1414,9 +1408,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
@@ -1424,7 +1416,7 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.code = v.lsoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.lsoa_code, c.lat, c.long, c.desc
+         GROUP BY v.lsoa_code, c.lat, c.long, c.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map all by lsoa',
@@ -1440,9 +1432,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             v.scat_group_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1451,7 +1441,7 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.code = v.lsoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long, c.desc
+         GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long, c.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map scat group by lsoa',
@@ -1467,9 +1457,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             v.scat_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1478,7 +1466,7 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.code = v.lsoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long, c.desc
+         GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long, c.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map location scat code by lsoa',
@@ -1494,9 +1482,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
@@ -1504,7 +1490,7 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.code = v.msoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.msoa_code, c.lat, c.long, c.desc
+         GROUP BY v.msoa_code, c.lat, c.long, c.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map all by msoa',
@@ -1520,9 +1506,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             v.scat_group_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1531,7 +1515,7 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.code = v.msoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long, c.desc
+         GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long, c.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map scat group by msoa',
@@ -1547,9 +1531,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            count(nullif(vac.prop_empty, true)) not_empty,
-            count(nullif(vac.prop_empty, false)) empty,
-            count(vac.uarn) vacancy_properties,
+            vac.prop_empty,
             v.scat_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1558,7 +1540,7 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.code = v.msoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, v.msoa_code, c.lat, c.long, c.desc
+         GROUP BY v.scat_code, v.msoa_code, c.lat, c.long, c.desc, vac.prop_empty
         ''',
         'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'vacancy_updates'],
         'summary': 'Premises map location scat code by msoa',
