@@ -1311,12 +1311,14 @@ AND a.la_code = la.la_code
             employees,
             employee_cost,
             break_even,
+            prop_empty,
             r.max
          FROM {t1} v
          JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
         ''',
-        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating'],
+        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'vacancy_updates'],
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
