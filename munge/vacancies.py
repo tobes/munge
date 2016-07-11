@@ -202,11 +202,11 @@ if not exists (
     select indexname
         from pg_indexes
     where
-        tablename = 'vao_base'
+        tablename = 'vao_list_raw'
         and indexname = 'vao_base_ba_ref'
 )
 then
-    create index vao_base_ba_ref on vao_base (ba_ref);
+    create index vao_base_ba_ref on vao_list_raw (ba_ref);
 end if;
 end
 $$;
@@ -251,7 +251,7 @@ def make_text_c(v):
 
 def get_uarn(la_code='', ba_ref=''):
     sql = '''
-    SELECT uarn FROM vao_base
+    SELECT uarn FROM vao_list
     WHERE trim(leading '0' from ba_ref)=:ba_ref
     '''
     if la_code:
@@ -383,7 +383,7 @@ SET uarn=subquery.uarn
 FROM (
 
     SELECT b.uarn, b.ba_ref, b.la_code
-    FROM vao_base b
+    FROM vao_list b
     JOIN vacancy_updates v
     ON trim(leading '0' from v.ba_ref) = trim(leading '0' from b.ba_ref)
     WHERE v.uarn is null
@@ -400,7 +400,7 @@ SET uarn=subquery.uarn
 FROM (
 
     SELECT b.uarn, v.ba_ref, v.la_code
-    FROM vao_base b
+    FROM vao_list b
     JOIN vacancy_updates v
     ON ltrim(ltrim(v.ba_ref, 'N'''), '0') = ltrim(b.ba_ref, '0')
     AND b.la_code = v.la_code
@@ -423,7 +423,7 @@ FROM (
 
  SELECT b.uarn, v.ba_ref, v.la_code
 FROM vacancy_updates v
-JOIN vao_base b
+JOIN vao_list b
 ON v.ba_ref = right(b.ba_ref, length(v.ba_ref))
 AND b.la_code = v.la_code
 WHERE v.uarn is null
