@@ -1603,6 +1603,37 @@ AND a.la_code = la.la_code
     },
 
 
+    {
+        'name': 's_area_parent_info',
+        'sql': '''
+            select distinct msoa_code code, la_code parent, null grandparent,
+            c1.desc title, c2.desc title_parent, null title_grandparent
+            from {t1} v
+            join {t3} c1 on c1.code=v.msoa_code
+            join {t4} c2 on c2.code=v.la_code
+            where split_part(c2.desc, ',', 1) = regexp_replace(c1.desc, ' \w+$', '')
+
+            union
+
+            select distinct lsoa_code code, msoa_code parent, la_code grandparent,
+            c1.desc title, c2.desc title_parent, c3.desc title_grandparent
+            from {t1} v
+            join {t2} c1 on c1.code=v.lsoa_code
+            join {t3} c2 on c2.desc=left(c1.desc, -1)
+            join {t4} c3 on split_part(c3.desc, ',', 1) = regexp_replace(c2.desc, ' \w+$', '')
+
+            union
+
+             select distinct la_code code, null parent, null grandparent,
+             c.desc title, null title_parent, null title_grandparent
+            from {t1} v
+            join {t4} c on c.code=v.la_code
+            ;
+        ''',
+        'tables': ['v_premises_summary2', 'c_lsoa', 'c_msoa', 'c_la'],
+        'disabled': True,
+        'summary': '',
+    },
 # ==================================
 
 
