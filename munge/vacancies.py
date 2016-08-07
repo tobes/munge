@@ -176,6 +176,7 @@ sql = '''
         prop_occupied_date date,
         prop_ba_rates numeric,
         tenant text,
+        postcode text,
         last_updated timestamp
     );
 
