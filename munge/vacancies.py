@@ -170,6 +170,19 @@ DROP TABLE vacancy_info;
 #run_sql(sql)
 
 sql = '''
+    CREATE VIEW IF NOT EXISTS v_vacancy_stats AS
+    SELECT
+    la_code
+    count(uarn) premisis,
+    count(CASE WHEN real_data THEN 1 END) real,
+    count(CASE WHEN empty THEN 1 END) empty
+    FROM vacancy_info
+    GROUP BY la_code
+'''
+
+run_sql(sql)
+
+sql = '''
     CREATE TABLE IF NOT EXISTS vacancy_updates (
         la_code text NOT NULL,
         ba_ref text NOT NULL,
@@ -537,4 +550,4 @@ def info_table():
 #update_matches_wrong_la()
 
 
-info_table()
+#info_table()
