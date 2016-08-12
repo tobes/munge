@@ -175,9 +175,11 @@ sql = '''
     la_code,
     count(uarn) premisis_count,
     count(nullif(real_data, false)) real_count,
-    count(nullif(prop_empty, false)) empty_count
+    count(nullif(prop_empty, false)) empty_count,
+    100 * count(nullif(real_data, false)) / count(uarn) percent_empty
     FROM vacancy_info
     GROUP BY la_code
+    ORDER BY la_code
 '''
 
 run_sql(sql)
