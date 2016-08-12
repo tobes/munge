@@ -160,8 +160,12 @@ def import_raw_xlsx():
                 e.writerows(errors)
 
 sql = '''
-
 DROP TABLE vacancy_updates;
+'''
+#run_sql(sql)
+
+sql = '''
+DROP TABLE vacancy_info;
 '''
 #run_sql(sql)
 
@@ -179,6 +183,30 @@ sql = '''
         postcode text,
         last_updated timestamp
     );
+
+    CREATE TABLE IF NOT EXISTS vacancy_info (
+        la_code text NOT NULL,
+        uarn bigint,
+        prop_empty boolean,
+        real_data boolean,
+        last_updated timestamp
+    );
+
+do
+$$
+begin
+if not exists (
+    select indexname
+        from pg_indexes
+    where
+        tablename = 'vacancy_info'
+        and indexname = 'vacancy_info_uarn'
+)
+then
+    create index vacancy_info_uarn on vacancy_info (uarn);
+end if;
+end
+$$;
 
 do
 $$
@@ -443,8 +471,70 @@ AND vacancy_updates.la_code=subquery.la_code;
     """
     run_sql(sql)
 
+
+def info_table():
+
+    sql = '''
+    INSERT INTO vacancy_info (la_code, uarn)
+    SELECT la_code, uarn from vao_list;
+    '''
+
+    # run_sql(sql)
+
+    sql = '''
+    SELECT DISTINCT la_code FROM vacancy_updates
+    '''
+
+    results = run_sql(sql)
+
+    for row in results:
+        la_code = row[0]
+
+        print(la_code)
+        sql = '''
+        SELECT DISTINCT prop_empty
+        FROM vacancy_updates where la_code=:la_code
+        '''
+
+        data = run_sql(sql, la_code=la_code)
+        default_empty = None
+        for d in data:
+            if default_empty:
+                default_empty = None
+                break
+            else:
+                default_empty = not d[0]
+
+        sql = '''
+        UPDATE vacancy_info
+        SET
+        prop_empty = :default_empty,
+        real_data = false
+        WHERE la_code = :la_code
+        '''
+
+        run_sql(sql, la_code=la_code, default_empty=default_empty)
+
+        sql = '''
+        UPDATE vacancy_info vi
+        SET
+        prop_empty=v.prop_empty,
+        real_data = true
+        FROM (
+            SELECT uarn, prop_empty
+            FROM vacancy_updates
+            WHERE la_code = :la_code
+        ) AS v
+        WHERE vi.uarn = v.uarn
+        '''
+
+        run_sql(sql, la_code=la_code)
+        print('done')
 #import_raw_xlsx()
 #update_vacancies()
 #match_uarn()
 #update_matches()
 #update_matches_wrong_la()
+
+
+info_table()
