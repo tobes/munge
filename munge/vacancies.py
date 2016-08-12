@@ -170,13 +170,15 @@ DROP TABLE vacancy_info;
 #run_sql(sql)
 
 sql = '''
+    DROP VIEW v_vacancy_stats;
     CREATE OR REPLACE VIEW v_vacancy_stats AS
     SELECT
     la_code,
     count(uarn) premisis_count,
     count(nullif(real_data, false)) real_count,
+    100 * count(nullif(prop_empty, false)) / count(uarn) percent_empty,
     count(nullif(prop_empty, false)) empty_count,
-    100 * count(nullif(real_data, false)) / count(uarn) percent_empty
+    100 * count(nullif(real_data, false)) / count(uarn) percent_real
     FROM vacancy_info
     GROUP BY la_code
     ORDER BY la_code
