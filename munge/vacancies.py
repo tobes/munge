@@ -170,12 +170,12 @@ DROP TABLE vacancy_info;
 #run_sql(sql)
 
 sql = '''
-    CREATE VIEW IF NOT EXISTS v_vacancy_stats AS
+    CREATE OR REPLACE VIEW v_vacancy_stats AS
     SELECT
-    la_code
-    count(uarn) premisis,
-    count(CASE WHEN real_data THEN 1 END) real,
-    count(CASE WHEN empty THEN 1 END) empty
+    la_code,
+    count(uarn) premisis_count,
+    count(nullif(real_data, false)) real_count,
+    count(nullif(prop_empty, false)) empty_count
     FROM vacancy_info
     GROUP BY la_code
 '''
