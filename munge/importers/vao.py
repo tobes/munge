@@ -1362,7 +1362,7 @@ AND a.la_code = la.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          JOIN {t5} vac on vac.uarn = v.uarn
-         GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty, vac.type
+         GROUP BY v.la_code, c.lat, c.long, d.desc, vac.type
         ''',
         'tables': ['v_premises_summary2', 'la_centroids', 'c_la',
             's_premesis_rating', 'v_vacancy_info'],
