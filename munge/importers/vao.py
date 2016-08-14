@@ -1323,26 +1323,6 @@ AND a.la_code = la.la_code
         'summary': 'Premises map location',
     },
     {
-        'name': 'v_map_la',
-        'sql': '''
-         SELECT
-            sum(count) count,
-            la_code,
-            location,
-            sum(rateable_value) rateable_value,
-            sum(area) area,
-            sum(employees) employees,
-            sum(employee_cost) employee_cost,
-            sum(break_even) break_even,
-            type,
-            "desc"
-         FROM {t1} v
-         GROUP BY la_code, location, "desc", type
-        ''',
-        'tables': ['s_map_la'],
-        'summary': 'Premises map all by la',
-    },
-    {
         'name': 's_map_la',
         'sql': '''
          SELECT
@@ -1354,16 +1334,12 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             bs.type,
-            d.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
-
+            d.desc
          FROM {t1} v
          CROSS JOIN {t6} bs
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
-         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
-         JOIN {t5} vac on vac.uarn = v.uarn
+         LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
          WHERE
             CASE
                 WHEN vac.prop_empty = true THEN 1
