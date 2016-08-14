@@ -1322,6 +1322,25 @@ AND a.la_code = la.la_code
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
+
+    {
+        'name': 'v_vacancy_info',
+        'sql': '''
+         SELECT
+            uarn,
+            bs.type
+         FROM {t1} v
+         CROSS JOIN {t2} bs
+         WHERE
+            CASE
+                WHEN vac.prop_empty = true THEN 1
+                WHEN vac.prop_empty = false THEN 0
+                ELSE 2
+            END = ANY(bs.values)
+        ''',
+        'tables': ['vacancy_info', 'bool_split'],
+        'summary': 'vacancy type for uarn',
+    },
     {
         'name': 's_map_la',
         'sql': '''
@@ -1333,23 +1352,18 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            bs.type,
-            d.desc
+            vac.type,
+            d.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
-         CROSS JOIN {t6} bs
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
-         LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
-         WHERE
-            CASE
-                WHEN vac.prop_empty = true THEN 1
-                WHEN vac.prop_empty = false THEN 0
-                ELSE 2
-            END = ANY(bs.values)
-         GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty, bs.type
+         JOIN {t5} vac on vac.uarn = v.uarn
+         GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty, vac.type
         ''',
         'tables': ['v_premises_summary2', 'la_centroids', 'c_la',
-            's_premesis_rating', 'vacancy_info', 'bool_split'],
+            's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map all by la',
     },
     {
