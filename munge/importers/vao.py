@@ -1304,7 +1304,7 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count,
-            POINT(c.lat,c.long) as location,
+            POINT(p.lat,p.long) as location,
             sum(rateable_value) rateable_value,
             sum(area) area,
             sum(employees) employees,
@@ -1330,7 +1330,7 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count,
-            POINT(c.lat,c.long) as location,
+            POINT(p.lat,p.long) as location,
             sum(rateable_value) rateable_value,
             sum(area) area,
             sum(employees) employees,
@@ -1357,7 +1357,7 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count,
-            POINT(c.lat,c.long) as location,
+            POINT(p.lat,p.long) as location,
             sum(rateable_value) rateable_value,
             sum(area) area,
             sum(employees) employees,
