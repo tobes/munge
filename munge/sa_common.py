@@ -14,6 +14,7 @@ OID_TYPE = {
     1700: 'numeric',
     1114: 'timestamp',
     1009: 'text[]',
+    1005: 'smallint[]',
 }
 
 NUMERIC_TYPES = [
