@@ -1335,11 +1335,7 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             type,
-            "desc",
-            max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
-
+            "desc"
          FROM {t1} v
          GROUP BY la_code, location, "desc", type
         ''',
