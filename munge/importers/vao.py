@@ -1343,7 +1343,7 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
+         JOIN {t5} vac on vac.uarn = v.uarn
          WHERE
             CASE
                 WHEN vac.prop_empty = true THEN 1
