@@ -1350,7 +1350,7 @@ AND a.la_code = la.la_code
                 WHEN vac.prop_empty = false THEN 0
                 ELSE 2
             END = ANY(bs.values)
-         GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty
+         GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty, bs.type
         ''',
         'tables': ['v_premises_summary2', 'la_centroids', 'c_la',
             's_premesis_rating', 'vacancy_info', 'bool_split'],
