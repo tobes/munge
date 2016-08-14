@@ -1333,8 +1333,8 @@ AND a.la_code = la.la_code
          CROSS JOIN {t2} bs
          WHERE
             CASE
-                WHEN vac.prop_empty = true THEN 1
-                WHEN vac.prop_empty = false THEN 0
+                WHEN v.prop_empty = true THEN 1
+                WHEN v.prop_empty = false THEN 0
                 ELSE 2
             END = ANY(bs.values)
         ''',
