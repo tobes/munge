@@ -1323,6 +1323,30 @@ AND a.la_code = la.la_code
         'summary': 'Premises map location',
     },
     {
+        'name': 'v_map_la',
+        'sql': '''
+         SELECT
+            sum(count) count,
+            la_code,
+            location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
+            type,
+            desc,
+            max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
+
+         FROM {t1} v
+         GROUP BY la_code, location, desc, type
+        ''',
+        'tables': ['s_map_la'],
+        'summary': 'Premises map all by la',
+    },
+    {
         'name': 's_map_la',
         'sql': '''
          SELECT
