@@ -1303,22 +1303,78 @@ AND a.la_code = la.la_code
         'name': 's_map_premises',
         'sql': '''
          SELECT
-            POINT(p.lat,p.long) as location,
-            v.uarn, v.scat_group_code, v.scat_code,
-            1 as count,
-            rateable_value,
-            area,
-            employees,
-            employee_cost,
-            break_even,
-            prop_empty,
-            r.max
+            count(v.uarn) count,
+            POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
+            vac.type,
+            d.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
          FROM {t1} v
          JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY c.lat, c.long, d.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
+     #   'primary_key': 'location',
+        'summary': 'Premises map location',
+    },
+
+    {
+        'name': 's_map_premises_sc',
+        'sql': '''
+         SELECT
+            count(v.uarn) count,
+            POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
+            vac.type,
+            v.scat_code,
+            d.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
+         FROM {t1} v
+         JOIN {t2} p ON v.postcode = p.pc
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_code, c.lat, c.long, d.desc, vac.type
+        ''',
+        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
+     #   'primary_key': 'location',
+        'summary': 'Premises map location',
+    },
+
+    {
+        'name': 's_map_premises_sc',
+        'sql': '''
+         SELECT
+            count(v.uarn) count,
+            POINT(c.lat,c.long) as location,
+            sum(rateable_value) rateable_value,
+            sum(area) area,
+            sum(employees) employees,
+            sum(employee_cost) employee_cost,
+            sum(break_even) break_even,
+            vac.type,
+            v.scat_group_code,
+            d.desc, max(r.max) as max,
+            quantile(r.max, 0.5) as median,
+            min(r.max) as min
+         FROM {t1} v
+         JOIN {t2} p ON v.postcode = p.pc
+         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_group_code, c.lat, c.long, d.desc, vac.type
+        ''',
+        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
