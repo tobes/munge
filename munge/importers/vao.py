@@ -1338,12 +1338,11 @@ AND a.la_code = la.la_code
             quantile(r.max, 0.5) as median,
             min(r.max) as min
 
-         FROM {t1} v
+         FROM {t1} v, {t6} bs
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
-         JOIN {t6} bs
          WHERE
             CASE
                 WHEN vac.prop_empty = true THEN 1
