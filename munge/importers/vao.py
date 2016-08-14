@@ -1339,6 +1339,7 @@ AND a.la_code = la.la_code
             END = ANY(bs.values)
         ''',
         'tables': ['vacancy_info', 'bool_split'],
+        'as_view': True,
         'summary': 'vacancy type for uarn',
     },
     {
