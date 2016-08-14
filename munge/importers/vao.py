@@ -1333,18 +1333,27 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            bs.type,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
+
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
+         JOIN {t6} bs
+         WHERE
+            CASE
+                WHEN vac.prop_empty = true THEN 1
+                WHEN vac.prop_empty = false THEN 0
+                ELSE 2
+            END = ANY(bs.values)
          GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty
         ''',
-        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'la_centroids', 'c_la',
+            's_premesis_rating', 'vacancy_info', 'bool_split'],
         'summary': 'Premises map all by la',
     },
     {
