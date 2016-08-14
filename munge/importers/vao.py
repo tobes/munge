@@ -1379,7 +1379,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             v.scat_group_code,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1388,10 +1388,10 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, v.la_code, c.lat, c.long, d.desc, vac.prop_empty
+         JOIN {t5} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_group_code, v.la_code, c.lat, c.long, d.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map scat group by la',
     },
     {
@@ -1405,7 +1405,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             v.scat_code,
             d.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1414,10 +1414,10 @@ AND a.la_code = la.la_code
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
          LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t5} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, v.la_code, c.lat, c.long, d.desc, vac.prop_empty
+         JOIN {t5} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_code, v.la_code, c.lat, c.long, d.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'la_centroids', 'c_la', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map location scat code by la',
     },
     {
