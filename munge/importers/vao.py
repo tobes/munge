@@ -1360,6 +1360,7 @@ AND a.la_code = la.la_code
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
+         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          JOIN {t5} vac on vac.uarn = v.uarn
          GROUP BY v.la_code, c.lat, c.long, d.desc, vac.prop_empty, vac.type
         ''',
