@@ -1431,17 +1431,17 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.lsoa_code, c.lat, c.long, c.desc, vac.prop_empty
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.lsoa_code, c.lat, c.long, c.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map all by lsoa',
     },
     {
@@ -1455,7 +1455,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             v.scat_group_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1463,10 +1463,10 @@ AND a.la_code = la.la_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long, c.desc, vac.prop_empty
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long, c.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map scat group by lsoa',
     },
     {
@@ -1480,7 +1480,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             v.scat_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1488,10 +1488,10 @@ AND a.la_code = la.la_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long, c.desc, vac.prop_empty
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long, c.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'c_lsoa', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map location scat code by lsoa',
     },
     {
@@ -1505,17 +1505,17 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.msoa_code, c.lat, c.long, c.desc, vac.prop_empty
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.msoa_code, c.lat, c.long, c.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map all by msoa',
     },
     {
@@ -1529,7 +1529,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             v.scat_group_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1537,10 +1537,10 @@ AND a.la_code = la.la_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long, c.desc, vac.prop_empty
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long, c.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map scat group by msoa',
     },
     {
@@ -1554,7 +1554,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.prop_empty,
+            vac.type,
             v.scat_code,
             c.desc, max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1562,10 +1562,10 @@ AND a.la_code = la.la_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, v.msoa_code, c.lat, c.long, c.desc, vac.prop_empty
+         JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.scat_code, v.msoa_code, c.lat, c.long, c.desc, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'vacancy_updates'],
+        'tables': ['v_premises_summary2', 'c_msoa', 's_premesis_rating', 'v_vacancy_info'],
         'summary': 'Premises map location scat code by msoa',
     },
 
