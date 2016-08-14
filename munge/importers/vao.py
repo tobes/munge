@@ -1311,7 +1311,7 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
-            d.desc, max(r.max) as max,
+            max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
@@ -1338,7 +1338,7 @@ AND a.la_code = la.la_code
             sum(break_even) break_even,
             vac.type,
             v.scat_code,
-            d.desc, max(r.max) as max,
+            max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
@@ -1365,7 +1365,7 @@ AND a.la_code = la.la_code
             sum(break_even) break_even,
             vac.type,
             v.scat_group_code,
-            d.desc, max(r.max) as max,
+            max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
