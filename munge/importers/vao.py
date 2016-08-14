@@ -1318,7 +1318,7 @@ AND a.la_code = la.la_code
          JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY c.lat, c.long, d.desc, vac.type
+         GROUP BY p.lat, p.long, vac.type
         ''',
         'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
@@ -1345,7 +1345,7 @@ AND a.la_code = la.la_code
          JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, c.lat, c.long, d.desc, vac.type
+         GROUP BY v.scat_code, p.lat, p.long, vac.type
         ''',
         'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
@@ -1372,7 +1372,7 @@ AND a.la_code = la.la_code
          JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, c.lat, c.long, d.desc, vac.type
+         GROUP BY v.scat_group_code, p.lat, p.long, vac.type
         ''',
         'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
