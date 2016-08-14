@@ -1353,7 +1353,7 @@ AND a.la_code = la.la_code
     },
 
     {
-        'name': 's_map_premises_sc',
+        'name': 's_map_premises_sg',
         'sql': '''
          SELECT
             count(v.uarn) count,
