@@ -55,10 +55,6 @@ def get_sequence_names():
     return sa_common.get_sequence_names(engine)
 
 
-def table_list():
-    return sa_common.table_list(engine)
-
-
 def get_result_fields(*args, **kw):
     return sa_common.get_result_fields(engine, *args, **kw)
 
@@ -113,11 +109,11 @@ def drop_sql(table, force=False):
     return sql
 
 
-def drop_table_or_view(table, verbose=0):
+def drop_table_or_view(table, verbose=0, force=False):
     sql = None
     if verbose:
         print('Dropping %s' % table)
-    sql = drop_sql(table)
+    sql = drop_sql(table, force=force)
     if verbose < 1:
         print(sql)
     run_sql(sql)
@@ -537,8 +533,11 @@ def time_fn(fn, args=None, kw=None, verbose=0):
         print "%d:%02d:%02d" % (h, m, s)
 
 
-def build_views_and_summaries(items, all=False, verbose=0, force=False):
-    if items:
+def build_views_and_summaries(items, all=False, verbose=0, force=False, dependencies=True):
+    updates = []
+    if not dependencies:
+        updates = items
+    if items and dependencies:
         # FIXME would be nice to move this to top of page
         from dependencies import dependencies_manager
         updates = dependencies_manager.updates_for(items)
@@ -546,10 +545,14 @@ def build_views_and_summaries(items, all=False, verbose=0, force=False):
         updates = definitions.get_all_definition_names()
     for item in updates:
         info = definitions.get_definition(item)
-        if info.get('as_view'):
-            time_fn(_build_view, args=[info], verbose=verbose, kw={'force': force})
-        else:
-            time_fn(_build_summary, args=[info], verbose=verbose)
+        try:
+            if info.get('as_view'):
+                time_fn(_build_view, args=[info], verbose=verbose, kw={'force': force})
+            else:
+                time_fn(_build_summary, args=[info], verbose=verbose)
+        except:
+            print 'failed %s' % item
+            continue
 
 
 

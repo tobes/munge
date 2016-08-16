@@ -56,6 +56,17 @@ def defined_tables(include_created=True):
     return tables
 
 
+def defined_views():
+    if not initialized:
+        init()
+    views = []
+    for item in _CACHE.values():
+        for info in item['auto_sql']:
+            if info.get('as_view'):
+                views.append(info['name'])
+    return views
+
+
 def get_definition(name):
     if not initialized:
         init()

@@ -28,7 +28,21 @@ def build_views_summaries(args):
         all=args.all,
         verbose=args.verbose,
         force=args.force,
+        dependencies=not args.no_dependants,
     )
+
+
+def sql(args):
+    from definitions import get_definition
+    for item in args.items:
+        print '\n\nSQL for %s\n' % item
+        info = get_definition(item)
+        sql = info.get('sql')
+        tables = info.get('tables')
+        ts = {}
+        for index, table in enumerate(tables):
+            ts['t%s' % (index + 1)] = '"%s"' % table
+        print sql.format(**ts)
 
 
 def deps(args):
@@ -36,6 +50,32 @@ def deps(args):
     for item in args.items:
         print 'Dependencies for %s' % item
         print dependencies_manager.get_needed_updates(item)
+
+
+def clear_views(args):
+    for view in sa_util.view_list():
+        sa_util.drop_table_or_view(view, force=True)
+
+
+def recreate_views(args):
+    from dependencies import dependencies_manager
+    views = definitions.defined_views()
+    existing_views = sa_util.view_list()
+    updates = dependencies_manager.updates_for(views)
+    needed = []
+    for update in updates:
+        if update in views:
+            if update in existing_views:
+                continue
+            needed.append(update)
+    needed.reverse()
+    print needed
+    sa_util.build_views_and_summaries(
+        items=needed,
+        dependencies=False,
+        verbose=args.verbose,
+    )
+    sa_util.swap_tables(verbose=args.verbose)
 
 
 def clean_db(args):
@@ -109,6 +149,8 @@ def main():
         'web',
         'clean_db',
         'db_functions',
+        'clear_views',
+        'recreate_views',
     ]
 
     parser = argparse.ArgumentParser(
@@ -137,6 +179,7 @@ def main():
     for command in module_commands:
         module_parser = subparsers.add_parser(command)
         module_parser.add_argument('-f', '--force', action="store_true")
+        module_parser.add_argument('-d', '--no-dependants', action="store_true")
         module_parser.add_argument('-a', '--all', action="store_true")
         module_parser.add_argument('-t', '--test', action="store_true")
         module_parser.add_argument('-n', '--noupdate', action="store_true")
@@ -147,9 +190,14 @@ def main():
     dep_parser = subparsers.add_parser('deps')
     dep_parser.add_argument('items', nargs='*')
 
+    dep_parser = subparsers.add_parser('sql')
+    dep_parser.add_argument('items', nargs='*')
+
     args = parser.parse_args()
     if args.command == 'deps':
         deps(args)
+    if args.command == 'sql':
+        sql(args)
     if args.command == 'export_all':
         export_all(verbose=args.verbose)
     if args.command == 'export_all':
@@ -171,5 +219,9 @@ def main():
         webserver(args)
     elif args.command == 'clean_db':
         clean_db(args)
+    elif args.command == 'clear_views':
+        clear_views(args)
+    elif args.command == 'recreate_views':
+        recreate_views(args)
     elif args.command == 'db_functions':
         db_functions(verbose=args.verbose)

@@ -67,7 +67,10 @@ def table_list(engine):
 
 
 def view_list(engine):
-    sql = "SELECT c.relname FROM pg_class c WHERE c.relkind = 'v';"
+    sql = """
+        SELECT table_name FROM INFORMATION_SCHEMA.views
+        WHERE table_schema = ANY (current_schemas(false))
+    """
     result = engine.execute(sql)
     return [row[0] for row in result]
 
