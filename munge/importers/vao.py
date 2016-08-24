@@ -1106,6 +1106,7 @@ AND a.la_code = la.la_code
         'name': 'v_msoa_general_summary',
         'sql': '''
     SELECT msoa_code, s.scat_code, count, total_area,
+    percent_diff(vacant_count, count) empty_percent,
     estimated_employees, estimated_employee_earnings,
     total_rateable_value, m.median_total_rateable_value,
     percent_diff( m.median_total_rateable_value, total_rateable_value)
@@ -1133,6 +1134,7 @@ AND a.la_code = la.la_code
         'name': 'v_lsoa_general_summary',
         'sql': '''
     SELECT lsoa_code, s.scat_code, count, total_area,
+    percent_diff(vacant_count, count) empty_percent,
     estimated_employees, estimated_employee_earnings,
     total_rateable_value, m.median_total_rateable_value,
     percent_diff( m.median_total_rateable_value, total_rateable_value)
