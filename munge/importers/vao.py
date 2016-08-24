@@ -972,6 +972,7 @@ AND a.la_code = la.la_code
         'sql': '''
             SELECT p.lsoa_code, scat_code,
             count(p.uarn) count,
+            count(nullif(v.prop_empty = false, true)) vacant_count,
             wage_employee average_wage,
             sum(area) total_area,
             usr_median(area) median_area,
@@ -988,10 +989,11 @@ AND a.la_code = la.la_code
              sum(employees) * wage_employee as estimated_employee_earnings,
              sum(rateable_value) as total_rateable_value
             FROM {t1} p
+            JOIN {t2} v ON p.uarn = v.uarn
             GROUP BY p.lsoa_code, scat_code, wage_employee
 
         ''',
-        'tables': ['v_premises_summary2'],
+        'tables': ['v_premises_summary2', 'vacancy_info'],
         'summary': '',
         'test': True,
         'stage': 5,
@@ -1002,6 +1004,7 @@ AND a.la_code = la.la_code
         'sql': '''
             SELECT p.msoa_code, scat_code,
             count(p.uarn) count,
+            count(nullif(v.prop_empty = false, true)) vacant_count,
             wage_employee average_wage,
             sum(area) total_area,
             usr_median(area) median_area,
@@ -1018,10 +1021,11 @@ AND a.la_code = la.la_code
              sum(employees) * wage_employee as estimated_employee_earnings,
              sum(rateable_value) as total_rateable_value
             FROM {t1} p
+            JOIN {t2} v ON p.uarn = v.uarn
             GROUP BY p.msoa_code, scat_code, wage_employee
 
         ''',
-        'tables': ['v_premises_summary2'],
+        'tables': ['v_premises_summary2', 'vacancy_info'],
         'summary': '',
         'test': True,
         'stage': 5,
