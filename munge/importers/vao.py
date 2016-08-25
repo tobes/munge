@@ -968,6 +968,38 @@ AND a.la_code = la.la_code
     },
 
     {
+        'name': 's_la_general_summary_total',
+        'sql': '''
+            SELECT p.la_code, scat_group_code,
+            count(p.uarn) count,
+            count(nullif(v.prop_empty = false, true)) vacant_count,
+            wage_employee average_wage,
+            sum(area) total_area,
+            usr_median(area) median_area,
+            min(area) min_area,
+            max(area) max_area,
+            usr_median(rateable_value) median_rateable_value,
+            min(rateable_value) min_rateable_value,
+            max(rateable_value) max_rateable_value,
+            usr_median(safe_divide(rateable_value, area)) median_rate_per_area,
+            min(safe_divide(rateable_value, area)) min_rate_per_area,
+            max(safe_divide(rateable_value, area)) max_rate_per_area,
+            sum(break_even) total_break_even,
+            sum(employees) estimated_employees,
+             sum(employees) * wage_employee as estimated_employee_earnings,
+             sum(rateable_value) as total_rateable_value
+            FROM {t1} p
+            JOIN {t2} v ON p.uarn = v.uarn
+            GROUP BY p.la_code, scat_group_code, wage_employee
+
+        ''',
+        'tables': ['v_premises_summary2', 'vacancy_info'],
+        'summary': '',
+        'test': True,
+        'stage': 5,
+    },
+
+    {
         'name': 's_lsoa_general_summary',
         'sql': '''
             SELECT p.lsoa_code, scat_code,
