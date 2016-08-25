@@ -550,8 +550,9 @@ def build_views_and_summaries(items, all=False, verbose=0, force=False, dependen
                 time_fn(_build_view, args=[info], verbose=verbose, kw={'force': force})
             else:
                 time_fn(_build_summary, args=[info], verbose=verbose)
-        except:
+        except Exception as e:
             print 'failed %s' % item
+            print str(e)
             continue
 
 
