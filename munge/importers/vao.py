@@ -784,6 +784,8 @@ AUTO_SQL = [
             l.pc postcode,
             l.scat_code,
             l.la_code,
+            p.long,
+            p.lat,
             a.area,
             a.area_source_code,
             s.local_market,
@@ -1337,6 +1339,54 @@ AND a.la_code = la.la_code
             'c_scat', 'c_scat_group', 'c_la'],
         'as_view': True,
         'stage': 8,
+    },
+
+    {
+        'name': 'v_map_premises_names',
+        'sql': '''
+            SELECT v.uarn
+            FROM
+            (SELECT count(uarn) count,
+            lat, long
+            from {t1} GROUP BY lat, long) t
+            JOIN {t1} v
+            ON v.lat = t.lat AND v.long = t.long
+            AND t.count = 1
+        ''',
+        'tables': ['v_premises_summary2'],
+        'as_view': True,
+    },
+
+    {
+        'name': 'v_map_premises_names_sg',
+        'sql': '''
+            SELECT v.uarn, scat_group_code
+            FROM
+            (SELECT count(uarn) count,
+            lat, long, scat_group_code
+            from {t1} GROUP BY lat, long, scat_group_code) t
+            JOIN {t1} v
+            ON v.lat = t.lat AND v.long = t.long
+            AND t.count = 1
+        ''',
+        'tables': ['v_premises_summary2'],
+        'as_view': True,
+    },
+
+    {
+        'name': 'v_map_premises_names_sc',
+        'sql': '''
+            SELECT v.uarn, scat_code
+            FROM
+            (SELECT count(uarn) count,
+            lat, long, scat_code
+            from {t1} GROUP BY lat, long, scat_code) t
+            JOIN {t1} v
+            ON v.lat = t.lat AND v.long = t.long
+            AND t.count = 1
+        ''',
+        'tables': ['v_premises_summary2'],
+        'as_view': True,
     },
 
 
