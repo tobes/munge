@@ -1342,7 +1342,7 @@ AND a.la_code = la.la_code
     },
 
     {
-        'name': 'v_map_premises_names',
+        'name': 's_map_premises_names',
         'sql': '''
             SELECT v.uarn
             FROM
@@ -1354,11 +1354,11 @@ AND a.la_code = la.la_code
             AND t.count = 1
         ''',
         'tables': ['v_premises_summary2'],
-        'as_view': True,
+        'as_view': False,
     },
 
     {
-        'name': 'v_map_premises_names_sg',
+        'name': 's_map_premises_names_sg',
         'sql': '''
             SELECT v.uarn, v.scat_group_code
             FROM
@@ -1370,11 +1370,11 @@ AND a.la_code = la.la_code
             AND t.count = 1
         ''',
         'tables': ['v_premises_summary2'],
-        'as_view': True,
+        'as_view': False,
     },
 
     {
-        'name': 'v_map_premises_names_sc',
+        'name': 's_map_premises_names_sc',
         'sql': '''
             SELECT v.uarn, v.scat_code
             FROM
@@ -1386,7 +1386,7 @@ AND a.la_code = la.la_code
             AND t.count = 1
         ''',
         'tables': ['v_premises_summary2'],
-        'as_view': True,
+        'as_view': False,
     },
 
 
