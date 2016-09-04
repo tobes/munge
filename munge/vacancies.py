@@ -493,12 +493,6 @@ AND vacancy_updates.la_code=subquery.la_code;
 
 def info_table():
 
-    sql = '''
-    INSERT INTO vacancy_info (la_code, uarn)
-    SELECT la_code, uarn from vao_list;
-    '''
-
-    # run_sql(sql)
 
     sql = '''
     SELECT DISTINCT la_code FROM vacancy_updates
@@ -512,6 +506,13 @@ def info_table():
         print(la_code)
         sql = '''
         DELETE FROM vacancy_info
+        WHERE la_code=:la_code
+        '''
+        data = run_sql(sql, la_code=la_code)
+
+        sql = '''
+        INSERT INTO vacancy_info (la_code, uarn)
+        SELECT la_code, uarn from vao_list
         WHERE la_code=:la_code
         '''
         data = run_sql(sql, la_code=la_code)
@@ -570,4 +571,4 @@ def info_table():
 #update_matches_wrong_la()
 
 
-#info_table()
+info_table()
