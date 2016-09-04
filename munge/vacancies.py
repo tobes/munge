@@ -206,6 +206,9 @@ sql = '''
         uarn bigint,
         prop_empty boolean,
         real_data boolean,
+        prop_occupied_date date,
+        prop_empty_date date,
+        tenant text,
         last_updated timestamp
     );
 
@@ -509,6 +512,12 @@ def info_table():
 
         print(la_code)
         sql = '''
+        DELETE FROM vacancy_info
+        WHERE la_code=:la_code
+        '''
+        data = run_sql(sql, la_code=la_code)
+
+        sql = '''
         SELECT DISTINCT prop_empty
         FROM vacancy_updates where la_code=:la_code
         '''
@@ -536,9 +545,17 @@ def info_table():
         UPDATE vacancy_info vi
         SET
         prop_empty=v.prop_empty,
+        prop_occupied_date=v.prop_occupied_date,
+        prop_empty_date=v.prop_empty_date,
+        tenant=v.tenant,
         real_data = true
         FROM (
-            SELECT uarn, prop_empty
+            SELECT
+                uarn,
+                prop_empty,
+                prop_occupied_date,
+                prop_empty_date,
+                tenant
             FROM vacancy_updates
             WHERE la_code = :la_code
         ) AS v
