@@ -1412,7 +1412,8 @@ AND a.la_code = la.la_code
                 WHEN vn.uarn is not null and vac.tenant is not null
                     THEN vac.tenant
                 ELSE
-                    concat(v.street, ' ', v.postcode, ' [', count(v.uarn):text, ']')
+                    concat(INITCAP(v.street), ' ', v.postcode,
+                    ' [', count(v.uarn)::text, ']')
             END as desc,
             vac.type,
             max(r.max) as max,
@@ -1424,7 +1425,7 @@ AND a.la_code = la.la_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.lat, v.long, vac.type,
-            vn.uarn, v.fp_id, vac.tenant
+            vn.uarn, v.fp_id, vac.tenant, v.street, v.postcode
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
@@ -1443,10 +1444,11 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             CASE
-                WHEN vn.uarn is not null
-                    THEN coalesce(vac.tenant, v.fp_id)
+                WHEN vn.uarn is not null and vac.tenant is not null
+                    THEN vac.tenant
                 ELSE
-                    null
+                    concat(INITCAP(v.street), ' ', v.postcode,
+                    ' [', count(v.uarn)::text, ']')
             END as desc,
             vac.type,
             v.scat_code,
@@ -1460,7 +1462,7 @@ AND a.la_code = la.la_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_code, v.lat, v.long, vac.type,
-            vn.uarn, v.fp_id, vac.tenant
+            vn.uarn, v.fp_id, vac.tenant, v.street, v.postcode
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names_sc', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
@@ -1479,10 +1481,11 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             CASE
-                WHEN vn.uarn is not null
-                    THEN coalesce(vac.tenant, v.fp_id)
+                WHEN vn.uarn is not null and vac.tenant is not null
+                    THEN vac.tenant
                 ELSE
-                    null
+                    concat(INITCAP(v.street), ' ', v.postcode,
+                    ' [', count(v.uarn)::text, ']')
             END as desc,
             vac.type,
             v.scat_group_code,
@@ -1496,7 +1499,7 @@ AND a.la_code = la.la_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_group_code, v.lat, v.long, vac.type,
-            vn.uarn, v.fp_id, vac.tenant
+            vn.uarn, v.fp_id, vac.tenant, v.street, v.postcode
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names_sg', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
