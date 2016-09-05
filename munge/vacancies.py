@@ -493,9 +493,8 @@ AND vacancy_updates.la_code=subquery.la_code;
 
 def info_table():
 
-
     sql = '''
-    SELECT DISTINCT la_code FROM vacancy_updates
+    SELECT code FROM c_la
     '''
 
     results = run_sql(sql)
