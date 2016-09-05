@@ -1435,7 +1435,7 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count,
-            POINT(p.lat,p.long) as location,
+            POINT(v.lat,v.long) as location,
             sum(rateable_value) rateable_value,
             sum(area) area,
             sum(employees) employees,
@@ -1453,13 +1453,12 @@ AND a.la_code = la.la_code
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
-         JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t2} vn
              ON vn.lat = v.lat AND vn.long=v.long
              AND vn.scat_code = v.scat_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, p.lat, p.long, vac.type,
+         GROUP BY v.scat_code, v.lat, v.long, vac.type,
             vn.uarn, v.fp_id, vac.tenant
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names_sc', 's_premesis_rating', 'v_vacancy_info'],
@@ -1472,7 +1471,7 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count,
-            POINT(p.lat,p.long) as location,
+            POINT(v.lat,v.long) as location,
             sum(rateable_value) rateable_value,
             sum(area) area,
             sum(employees) employees,
@@ -1495,7 +1494,7 @@ AND a.la_code = la.la_code
              AND vn.scat_group_code = v.scat_group_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, p.lat, p.long, vac.type,
+         GROUP BY v.scat_group_code, v.lat, v.long, vac.type,
             vn.uarn, v.fp_id, vac.tenant
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names_sg', 's_premesis_rating', 'v_vacancy_info'],
