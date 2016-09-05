@@ -1405,7 +1405,7 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             CASE
-                WHEN vn.uarn is not null and vac.tenant
+                WHEN vn.uarn is not null and vac.tenant is not null
                     THEN vac.tenant
                 WHEN vn.uarn is not null and vac.tenant is null
                     THEN v.fp_id
@@ -1421,7 +1421,8 @@ AND a.la_code = la.la_code
              ON vn.lat = v.lat AND vn.long=v.long
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.lat, v.long, vac.type
+         GROUP BY v.lat, v.long, vac.type,
+            vn.uarn, v.fp_id, vac.tenant
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
@@ -1439,6 +1440,14 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
+            CASE
+                WHEN vn.uarn is not null and vac.tenant is not null
+                    THEN vac.tenant
+                WHEN vn.uarn is not null and vac.tenant is null
+                    THEN v.fp_id
+                ELSE
+                    null
+            END as desc,
             vac.type,
             v.scat_code,
             max(r.max) as max,
@@ -1446,11 +1455,15 @@ AND a.la_code = la.la_code
             min(r.max) as min
          FROM {t1} v
          JOIN {t2} p ON v.postcode = p.pc
+         LEFT OUTER JOIN {t2} vn
+             ON vn.lat = v.lat AND vn.long=v.long
+             AND vn.scat_code = v.scat_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_code, p.lat, p.long, vac.type
+         GROUP BY v.scat_code, p.lat, p.long, vac.type,
+            vn.uarn, v.fp_id, vac.tenant
         ''',
-        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
+        'tables': ['v_premises_summary2', 's_map_premises_names_sc', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
@@ -1466,18 +1479,29 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
+            CASE
+                WHEN vn.uarn is not null and vac.tenant is not null
+                    THEN vac.tenant
+                WHEN vn.uarn is not null and vac.tenant is null
+                    THEN v.fp_id
+                ELSE
+                    null
+            END as desc,
             vac.type,
             v.scat_group_code,
             max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
-         JOIN {t2} p ON v.postcode = p.pc
+         LEFT OUTER JOIN {t2} vn
+             ON vn.lat = v.lat AND vn.long = v.long
+             AND vn.scat_group_code = v.scat_group_code
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY v.scat_group_code, p.lat, p.long, vac.type
+         GROUP BY v.scat_group_code, p.lat, p.long, vac.type,
+            vn.uarn, v.fp_id, vac.tenant
         ''',
-        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
+        'tables': ['v_premises_summary2', 's_map_premises_names_sg', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
