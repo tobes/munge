@@ -782,6 +782,7 @@ AUTO_SQL = [
             l.uarn,
             l.rateable_value,
             l.pc postcode,
+            l.street,
             l.scat_code,
             l.la_code,
             l.fp_id,
@@ -1408,10 +1409,10 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             CASE
-                WHEN vn.uarn is not null
-                    THEN coalesce(vac.tenant, v.fp_id)
+                WHEN vn.uarn is not null and vac.tenant is not null
+                    THEN vac.tenant
                 ELSE
-                    null
+                    concat(v.street, ' ', v.postcode, ' [', count(v.uarn):text, ']')
             END as desc,
             vac.type,
             max(r.max) as max,
