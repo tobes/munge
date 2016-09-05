@@ -1419,7 +1419,6 @@ AND a.la_code = la.la_code
          FROM {t1} v
          LEFT OUTER JOIN {t2} vn
              ON vn.lat = v.lat AND vn.long=v.long
-         JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.lat, v.long, vac.type
