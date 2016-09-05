@@ -1367,6 +1367,7 @@ AND a.la_code = la.la_code
             from {t1} GROUP BY lat, long, scat_group_code) t
             JOIN {t1} v
             ON v.lat = t.lat AND v.long = t.long
+            AND v.scat_group_code = t.scat_group_code
             AND t.count = 1
         ''',
         'tables': ['v_premises_summary2'],
@@ -1383,6 +1384,7 @@ AND a.la_code = la.la_code
             from {t1} GROUP BY lat, long, scat_code) t
             JOIN {t1} v
             ON v.lat = t.lat AND v.long = t.long
+            AND v.scat_code = t.scat_code
             AND t.count = 1
         ''',
         'tables': ['v_premises_summary2'],
