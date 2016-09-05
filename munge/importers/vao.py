@@ -784,6 +784,7 @@ AUTO_SQL = [
             l.pc postcode,
             l.scat_code,
             l.la_code,
+            l.fp_id,
             p.long,
             p.lat,
             a.area,
@@ -1397,23 +1398,33 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             count(v.uarn) count,
-            POINT(p.lat,p.long) as location,
+            POINT(v.lat,v.long) as location,
             sum(rateable_value) rateable_value,
             sum(area) area,
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
+            CASE
+                WHEN vn.uarn is not null and vac.tenant
+                    THEN vac.tenant
+                WHEN vn.uarn is not null and vac.tenant is null
+                    THEN v.fp_id
+                ELSE
+                    null
+            END as desc,
             vac.type,
             max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
          FROM {t1} v
+         LEFT OUTER JOIN {t2} vn
+             ON vn.lat = v.lat AND vn.long=v.long
          JOIN {t2} p ON v.postcode = p.pc
          LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
-         GROUP BY p.lat, p.long, vac.type
+         GROUP BY v.lat, v.long, vac.type
         ''',
-        'tables': ['v_premises_summary2', 'postcode', 's_premesis_rating', 'v_vacancy_info'],
+        'tables': ['v_premises_summary2', 's_map_premises_names', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
         'summary': 'Premises map location',
     },
@@ -1477,6 +1488,7 @@ AND a.la_code = la.la_code
         'sql': '''
          SELECT
             uarn,
+            tenant,
             bs.type
          FROM {t1} v
          CROSS JOIN {t2} bs
