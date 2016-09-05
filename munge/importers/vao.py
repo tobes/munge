@@ -1344,7 +1344,7 @@ AND a.la_code = la.la_code
     {
         'name': 's_map_premises_names',
         'sql': '''
-            SELECT v.uarn
+            SELECT v.uarn, v.lat, v.long
             FROM
             (SELECT count(uarn) count,
             lat, long
@@ -1360,7 +1360,7 @@ AND a.la_code = la.la_code
     {
         'name': 's_map_premises_names_sg',
         'sql': '''
-            SELECT v.uarn, v.scat_group_code
+            SELECT v.uarn, v.lat, v.long, v.scat_group_code
             FROM
             (SELECT count(uarn) count,
             lat, long, scat_group_code
@@ -1376,7 +1376,7 @@ AND a.la_code = la.la_code
     {
         'name': 's_map_premises_names_sc',
         'sql': '''
-            SELECT v.uarn, v.scat_code
+            SELECT v.uarn, v.lat, v.long, v.scat_code
             FROM
             (SELECT count(uarn) count,
             lat, long, scat_code
