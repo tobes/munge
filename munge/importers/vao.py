@@ -805,15 +805,18 @@ AUTO_SQL = [
             END AS break_even,
             w.wage wage_employee,
             lsoa_code,
-            msoa_code
+            msoa_code,
+            vac.tenant,
+            vac.prop_empty empty
             FROM {t1} l
             LEFT JOIN {t2} a ON a.uarn=l.uarn
             LEFT JOIN {t3} s ON s.code=l.scat_code
             LEFT JOIN {t5} sg ON s.scat_group_code=sg.code
             LEFT JOIN {t6} w ON l.la_code = w.la_code
+            LEFT JOIN {t7} vac ON vac.uarn = l.uarn
             LEFT OUTER JOIN {t4} p ON p.pc = l.pc
         ''',
-        'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group', 'v_wages'],
+        'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group', 'v_wages', 'vacancy_info'],
         'as_view': True,
         'summary': '',
         'stage': 3,
