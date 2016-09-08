@@ -1410,7 +1410,7 @@ AND a.la_code = la.la_code
             sum(break_even) break_even,
             concat(INITCAP(v.street), ' ', v.postcode,
                    ' [', count(v.uarn)::text, ']') as desc,
-            vac2.type,
+            vac.type,
             max(r.max) as max,
             quantile(r.max, 0.5) as median,
             min(r.max) as min
