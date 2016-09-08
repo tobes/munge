@@ -1438,11 +1438,8 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            coalesce(
-                vac.tenant,
-                concat(INITCAP(v.street), ' ', v.postcode,
-                       ' [', count(v.uarn)::text, ']')
-            ) as desc,
+            concat(INITCAP(v.street), ' ', v.postcode,
+                   ' [', count(v.uarn)::text, ']') as desc,
             vac.type,
             v.scat_code,
             max(r.max) as max,
@@ -1453,7 +1450,7 @@ AND a.la_code = la.la_code
              ON vn.lat = v.lat AND vn.long=v.long
              AND vn.scat_code = v.scat_code
          LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = vn.uarn
+         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_code, v.lat, v.long, vac.type,
             vn.uarn, vac.tenant, v.street, v.postcode
         ''',
@@ -1473,11 +1470,8 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            coalesce(
-                vac.tenant,
-                concat(INITCAP(v.street), ' ', v.postcode,
-                       ' [', count(v.uarn)::text, ']')
-            ) as desc,
+            concat(INITCAP(v.street), ' ', v.postcode,
+                   ' [', count(v.uarn)::text, ']') as desc,
             vac.type,
             v.scat_group_code,
             max(r.max) as max,
@@ -1488,7 +1482,7 @@ AND a.la_code = la.la_code
              ON vn.lat = v.lat AND vn.long=v.long
              AND vn.scat_group_code = v.scat_group_code
          LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = vn.uarn
+         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_group_code, v.lat, v.long, vac.type,
             vn.uarn, vac.tenant, v.street, v.postcode
         ''',
