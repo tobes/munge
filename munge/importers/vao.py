@@ -1408,13 +1408,11 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            CASE
-                WHEN vn.uarn is not null and vac.tenant is not null
-                    THEN vac.tenant
-                ELSE
-                    concat(INITCAP(v.street), ' ', v.postcode,
-                    ' [', count(v.uarn)::text, ']')
-            END as desc,
+            coalesce(
+                vac.tenant,
+                concat(INITCAP(v.street), ' ', v.postcode,
+                       ' [', count(v.uarn)::text, ']')
+            ) as desc,
             vac.type,
             max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1422,8 +1420,8 @@ AND a.la_code = la.la_code
          FROM {t1} v
          LEFT OUTER JOIN {t2} vn
              ON vn.lat = v.lat AND vn.long=v.long
-         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
-         JOIN {t4} vac on vac.uarn = v.uarn
+         LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
+         LEFT OUTER JOIN {t4} vac on vac.uarn = vn.uarn
          GROUP BY v.lat, v.long, vac.type,
             vn.uarn, v.fp_id, vac.tenant, v.street, v.postcode
         ''',
