@@ -818,7 +818,7 @@ AUTO_SQL = [
             LEFT OUTER JOIN {t4} p ON p.pc = l.pc
         ''',
         'tables': ['vao_list', 's_vao_premises_area', 'c_scat', 'postcode', 'c_scat_group', 'v_wages', 'vacancy_info'],
-        'as_view': True,
+        'as_view': False,
         'summary': '',
         'stage': 3,
     },
