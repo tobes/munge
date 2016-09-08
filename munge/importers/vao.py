@@ -1408,11 +1408,8 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            coalesce(
-                vac.tenant,
-                concat(INITCAP(v.street), ' ', v.postcode,
-                       ' [', count(v.uarn)::text, ']')
-            ) as desc,
+            concat(INITCAP(v.street), ' ', v.postcode,
+                   ' [', count(v.uarn)::text, ']') as desc,
             vac2.type,
             max(r.max) as max,
             quantile(r.max, 0.5) as median,
@@ -1421,10 +1418,9 @@ AND a.la_code = la.la_code
          LEFT OUTER JOIN {t2} vn
              ON vn.lat = v.lat AND vn.long=v.long
          LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
-         LEFT OUTER JOIN {t4} vac on vac.uarn = vn.uarn
-         LEFT OUTER JOIN {t4} vac2 on vac2.uarn = v.uarn
-         GROUP BY v.lat, v.long, vac2.type,
-            vn.uarn, vac.tenant, v.street, v.postcode
+         LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
+         GROUP BY v.lat, v.long, vac.type,
+            vn.uarn, v.street, v.postcode
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
