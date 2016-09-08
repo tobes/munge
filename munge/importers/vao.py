@@ -1423,7 +1423,7 @@ AND a.la_code = la.la_code
          LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = vn.uarn
          GROUP BY v.lat, v.long, vac.type,
-            vn.uarn, v.fp_id, vac.tenant, v.street, v.postcode
+            vn.uarn, vac.tenant, v.street, v.postcode
         ''',
         'tables': ['v_premises_summary2', 's_map_premises_names', 's_premesis_rating', 'v_vacancy_info'],
      #   'primary_key': 'location',
