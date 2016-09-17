@@ -19,8 +19,8 @@ def get_files(directory, extension=None, full_path=True):
 
 
 def vao():
-    upload_path = os.path.join(config.DATA_PATH, 'upload', 'voa')
-    store_path = os.path.join(config.DATA_PATH, 'store', 'voa')
+    upload_path = os.path.join(config.DATA_PATH, 'upload', 'vao')
+    store_path = os.path.join(config.DATA_PATH, 'store', 'vao')
     try:
         os.makedirs(store_path)
     except OSError:
