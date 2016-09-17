@@ -8,7 +8,7 @@ import unicodecsv as csv
 
 from sa_util import run_sql
 
-DIR = '/home/toby/whythawk/munge/data/vacancy/'
+DIR = os.path.join(config.DATA_PATH, 'vacancy')
 
 la_codes = [x[0] for x in run_sql('select code from c_la')]
 
