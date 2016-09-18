@@ -1410,14 +1410,10 @@ AND a.la_code = la.la_code
             sum(break_even) break_even,
             concat(INITCAP(v.street), ' ', v.postcode,
                    ' [', count(v.uarn)::text, ']') as desc,
-            vac.type,
-            max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            vac.type
          FROM {t1} v
          LEFT OUTER JOIN {t2} vn
              ON vn.lat = v.lat AND vn.long=v.long
-         LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.lat, v.long, vac.type,
             vn.uarn, v.street, v.postcode
@@ -1441,15 +1437,11 @@ AND a.la_code = la.la_code
             concat(INITCAP(v.street), ' ', v.postcode,
                    ' [', count(v.uarn)::text, ']') as desc,
             vac.type,
-            v.scat_code,
-            max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            v.scat_code
          FROM {t1} v
          LEFT OUTER JOIN {t2} vn
              ON vn.lat = v.lat AND vn.long=v.long
              AND vn.scat_code = v.scat_code
-         LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_code, v.lat, v.long, vac.type,
             vn.uarn, vac.tenant, v.street, v.postcode
@@ -1473,15 +1465,11 @@ AND a.la_code = la.la_code
             concat(INITCAP(v.street), ' ', v.postcode,
                    ' [', count(v.uarn)::text, ']') as desc,
             vac.type,
-            v.scat_group_code,
-            max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            v.scat_group_code
          FROM {t1} v
          LEFT OUTER JOIN {t2} vn
              ON vn.lat = v.lat AND vn.long=v.long
              AND vn.scat_group_code = v.scat_group_code
-         LEFT OUTER JOIN {t3} r on r.uarn = vn.uarn
          LEFT OUTER JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_group_code, v.lat, v.long, vac.type,
             vn.uarn, vac.tenant, v.street, v.postcode
@@ -1522,14 +1510,10 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.type,
-            d.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            vac.type
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
-         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          JOIN {t5} vac on vac.uarn = v.uarn
          GROUP BY v.la_code, c.lat, c.long, d.desc, vac.type
         ''',
@@ -1549,14 +1533,10 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
-            v.scat_group_code,
-            d.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            v.scat_group_code
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
-         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          JOIN {t5} vac on vac.uarn = v.uarn
          GROUP BY v.scat_group_code, v.la_code, c.lat, c.long, d.desc, vac.type
         ''',
@@ -1575,14 +1555,10 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
-            v.scat_code,
-            d.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            v.scat_code
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
          JOIN {t3} d on c.la_code = d.code
-         LEFT OUTER JOIN {t4} r on r.uarn = v.uarn
          JOIN {t5} vac on vac.uarn = v.uarn
          GROUP BY v.scat_code, v.la_code, c.lat, c.long, d.desc, vac.type
         ''',
@@ -1600,13 +1576,9 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
-            vac.type,
-            c.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            vac.type
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
-         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.lsoa_code, c.lat, c.long, c.desc, vac.type
         ''',
@@ -1625,13 +1597,9 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
-            v.scat_group_code,
-            c.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            v.scat_group_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
-         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_group_code, v.lsoa_code, c.lat, c.long, c.desc, vac.type
         ''',
@@ -1650,13 +1618,9 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
-            v.scat_code,
-            c.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            v.scat_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
-         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_code, v.lsoa_code, c.lat, c.long, c.desc, vac.type
         ''',
@@ -1675,12 +1639,9 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
-            c.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            c.desc
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
-         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.msoa_code, c.lat, c.long, c.desc, vac.type
         ''',
@@ -1700,12 +1661,9 @@ AND a.la_code = la.la_code
             sum(break_even) break_even,
             vac.type,
             v.scat_group_code,
-            c.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            c.desc
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
-         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_group_code, v.msoa_code, c.lat, c.long, c.desc, vac.type
         ''',
@@ -1725,12 +1683,9 @@ AND a.la_code = la.la_code
             sum(break_even) break_even,
             vac.type,
             v.scat_code,
-            c.desc, max(r.max) as max,
-            quantile(r.max, 0.5) as median,
-            min(r.max) as min
+            c.desc
          FROM {t1} v
          JOIN {t2} c on c.code = v.msoa_code
-         LEFT OUTER JOIN {t3} r on r.uarn = v.uarn
          JOIN {t4} vac on vac.uarn = v.uarn
          GROUP BY v.scat_code, v.msoa_code, c.lat, c.long, c.desc, vac.type
         ''',
