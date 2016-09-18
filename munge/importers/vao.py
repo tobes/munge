@@ -1510,6 +1510,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
+            d.desc,
             vac.type
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
@@ -1533,6 +1534,7 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
+            d.desc,
             v.scat_group_code
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
@@ -1555,6 +1557,7 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
+            d.desc,
             v.scat_code
          FROM {t1} v
          JOIN {t2} c on c.la_code = v.la_code
@@ -1576,6 +1579,7 @@ AND a.la_code = la.la_code
             sum(employees) employees,
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
+            c.desc,
             vac.type
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
@@ -1597,6 +1601,7 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
+            c.desc,
             v.scat_group_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
@@ -1618,6 +1623,7 @@ AND a.la_code = la.la_code
             sum(employee_cost) employee_cost,
             sum(break_even) break_even,
             vac.type,
+            c.desc,
             v.scat_code
          FROM {t1} v
          JOIN {t2} c on c.code = v.lsoa_code
