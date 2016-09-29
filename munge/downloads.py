@@ -15,7 +15,6 @@ def run_sql(*args, **kw):
     return sa_common.run_sql(engine, *args, **kw)
 
 
-
 def make_zip(file_path, files):
     zf = zipfile.ZipFile(file_path, mode='w')
     for f in files:
@@ -44,16 +43,19 @@ data = [
         'file_name': 'premises.csv',
         'sql': 'select * from v_download_premises_data where la_code IN :la_codes',
     },
-    {
-        # market size
-        'file_name': 'market_size.csv',
-        'sql': 'select * from s_la_spending_by_ct where la_code IN :la_codes',
-    },
+#    {
+#        # market size
+#        'file_name': 'market_size.csv',
+#        'sql': 'select * from s_la_spending_by_ct where la_code IN :la_codes',
+#    },
 ]
 
 
 def zoopla_downloads():
-    sql = 'SELECT directory, la_codes FROM "group" WHERE directory != \'\''
+    sql = '''
+        SELECT id, la_codes FROM "group"
+        WHERE 'download' = ANY(permissions)
+    '''
 
     results = run_sql(sql)
     for result in results:
@@ -61,7 +63,7 @@ def zoopla_downloads():
 
 
 def vao_downloads(result):
-    directory = os.path.join(config.DOWNLOAD_DIR, result['directory'])
+    directory = os.path.join(config.DOWNLOAD_DIR, result['id'])
     try:
         os.makedirs(directory)
     except OSError:
@@ -84,6 +86,10 @@ def vao_downloads(result):
 
         files.append(path)
 
-    make_zip(os.path.join(directory, 'premises.zip'), files)
+    make_zip(os.path.join(TEMP_PATH, 'premises.zip'), files)
+    shutil.move(
+        os.path.join(TEMP_PATH, 'premises.zip'),
+        os.path.join(directory, 'premises.zip')
+    )
 
 zoopla_downloads()
