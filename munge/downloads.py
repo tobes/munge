@@ -63,7 +63,7 @@ def zoopla_downloads():
 
 
 def vao_downloads(result):
-    directory = os.path.join(config.DOWNLOAD_DIR, result['id'])
+    directory = os.path.join(config.DOWNLOAD_DIR, str(result['id']))
     try:
         os.makedirs(directory)
     except OSError:
