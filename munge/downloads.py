@@ -28,11 +28,11 @@ TEMP_PATH = '/tmp'
 
 data = [
 
-    {
-        # c_ct
-        'file_name': 'consumer_trend_codes.csv',
-        'sql': 'select * from c_ct',
-    },
+#    {
+#        # c_ct
+#        'file_name': 'consumer_trend_codes.csv',
+#        'sql': 'select * from c_ct',
+#    },
     {
         # scat_group_codes
         'file_name': 'scat_group_codes.csv',
