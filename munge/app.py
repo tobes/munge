@@ -470,7 +470,6 @@ def premises(uarn):
 
     tables = [
         'vao_list',
-        's_estimated_income',
         's_vao_premises_area',
         'v_premises_summary',
         'v_premises_summary2',
